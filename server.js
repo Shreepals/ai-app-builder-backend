@@ -10,9 +10,11 @@ app.use(express.json({ limit: "1mb" }));
 
 const port = Number(process.env.PORT || 10000);
 
-const client = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY
-});
+if (!client) {
+  return res.status(503).json({
+    error: "AI API key is not configured yet."
+  });
+}
 
 app.get("/", (_req, res) => {
   res.json({
