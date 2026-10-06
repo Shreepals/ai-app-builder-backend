@@ -60,7 +60,7 @@ App idea: ${idea}
 `;
 
     const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/interactions",
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`,
       {
         method: "POST",
         headers: {
@@ -68,8 +68,15 @@ App idea: ${idea}
           "x-goog-api-key": GEMINI_API_KEY
         },
         body: JSON.stringify({
-          model: GEMINI_MODEL,
-          input: prompt
+          contents: [
+            {
+              parts: [
+                {
+                  text: prompt
+                }
+              ]
+            }
+          ]
         })
       }
     );
@@ -79,17 +86,23 @@ App idea: ${idea}
     if (!response.ok) {
       return res.status(502).json({
         error: "Gemini API request failed.",
-        detail: data?.error?.message || "Unknown Gemini error"
+        detail:
+          data?.error?.message ||
+          JSON.stringify(data?.error || data)
       });
     }
 
     const text =
-      data?.output_text ||
-      data?.steps?.flatMap(step =>
-        step?.content?.filter(x => x?.type === "text")
-          .map(x => x.text) || []
-      ).join("\n") ||
-      "";
+      data?.candidates?.[0]?.content?.parts
+        ?.map(part => part?.text || "")
+        .join("") || "";
+
+    if (!text) {
+      return res.status(502).json({
+        error: "Gemini returned an empty response.",
+        detail: JSON.stringify(data)
+      });
+    }
 
     let result;
 
