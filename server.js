@@ -29,14 +29,13 @@ app.get("/health", (_req, res) => {
 
 app.post("/api/generate", async (req, res) => {
   try {
-    console.log("=================================");
-    console.log("AI GENERATE REQUEST RECEIVED");
-
     const idea = String(req.body?.idea || "").trim();
     const appName = String(
       req.body?.appName || "My AI App"
     ).trim();
 
+    console.log("=================================");
+    console.log("AI GENERATE REQUEST RECEIVED");
     console.log("App name:", appName);
     console.log("Idea received:", Boolean(idea));
     console.log("Gemini key configured:", Boolean(GEMINI_API_KEY));
@@ -49,25 +48,29 @@ app.post("/api/generate", async (req, res) => {
     }
 
     if (!GEMINI_API_KEY) {
-      console.error("GEMINI_API_KEY IS MISSING");
-
       return res.status(503).json({
         error: "Gemini API key is not configured yet."
       });
     }
 
     const prompt = `
-You are an AI engine for a no-code Android App Builder.
+You are the AI engine for a no-code Android App Builder.
 
 Convert the user's app idea into a practical Android app specification.
 
 Return ONLY valid JSON.
 
-JSON keys:
-appName, summary, pages, features, dataModels, nextSteps
+Use exactly these JSON keys:
+appName
+summary
+pages
+features
+dataModels
+nextSteps
 
-pages must be an array of objects with:
-name and purpose
+pages must be an array of objects containing:
+name
+purpose
 
 features, dataModels and nextSteps must be arrays of strings.
 
@@ -77,11 +80,9 @@ App idea: ${idea}
 `;
 
     const url =
-      `https://generativelanguage.googleapis.com/v1beta/models/` +
-      `${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
+      "https://generativelanguage.googleapis.com/v1beta/interactions";
 
-    console.log("Calling Gemini...");
-    console.log("Gemini URL:", url);
+    console.log("Calling Gemini Interactions API...");
 
     const response = await fetch(url, {
       method: "POST",
@@ -90,25 +91,18 @@ App idea: ${idea}
         "x-goog-api-key": GEMINI_API_KEY
       },
       body: JSON.stringify({
-        contents: [
-          {
-            parts: [
-              {
-                text: prompt
-              }
-            ]
-          }
-        ]
+        model: GEMINI_MODEL,
+        input: prompt,
+        generation_config: {
+          thinking_level: "low"
+        }
       })
     });
 
     const data = await response.json();
 
     console.log("Gemini HTTP status:", response.status);
-    console.log(
-      "Gemini response:",
-      JSON.stringify(data)
-    );
+    console.log("Gemini response:", JSON.stringify(data));
 
     if (!response.ok) {
       return res.status(502).json({
@@ -120,10 +114,7 @@ App idea: ${idea}
       });
     }
 
-    const text =
-      data?.candidates?.[0]?.content?.parts
-        ?.map((part) => part?.text || "")
-        .join("") || "";
+    const text = String(data?.output_text || "").trim();
 
     console.log("Gemini text received:", Boolean(text));
 
@@ -137,12 +128,15 @@ App idea: ${idea}
     let result;
 
     try {
-      result = JSON.parse(text.trim());
+      const cleaned = text
+        .replace(/^```json\s*/i, "")
+        .replace(/^```\s*/i, "")
+        .replace(/\s*```$/i, "")
+        .trim();
+
+      result = JSON.parse(cleaned);
     } catch (parseError) {
-      console.error(
-        "JSON PARSE ERROR:",
-        parseError.message
-      );
+      console.error("JSON PARSE ERROR:", parseError.message);
 
       result = {
         appName,
@@ -162,23 +156,17 @@ App idea: ${idea}
     });
 
   } catch (error) {
-    console.error("=================================");
     console.error("AI GENERATION ERROR");
     console.error("Message:", error?.message);
     console.error("Stack:", error?.stack);
-    console.error("=================================");
 
     return res.status(500).json({
       error: "AI generation failed.",
-      detail:
-        error?.message ||
-        "Unknown server error"
+      detail: error?.message || "Unknown server error"
     });
   }
 });
 
 app.listen(port, "0.0.0.0", () => {
-  console.log(
-    `Gemini backend running on port ${port}`
-  );
+  console.log(`Gemini backend running on port ${port}`);
 });
