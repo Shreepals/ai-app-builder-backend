@@ -114,7 +114,13 @@ App idea: ${idea}
       });
     }
 
-    const text = String(data?.output_text || "").trim();
+    const text = String(
+  data?.output_text ||
+  data?.output?.flatMap(item => item.content || [])
+    ?.map(item => item.text || "")
+    ?.join("") ||
+  ""
+).trim();
 
     console.log("Gemini text received:", Boolean(text));
 
