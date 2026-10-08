@@ -103,6 +103,16 @@ App idea: ${idea}
 
     console.log("Gemini HTTP status:", response.status);
     console.log("Gemini response:", JSON.stringify(data));
+    
+  const text = String(
+  data?.output_text ||
+  data?.steps?.find(step => step?.type === "model_output")
+    ?.content?.find(item => item?.type === "text")
+    ?.text ||
+  ""
+).trim();
+
+console.log("Gemini extracted text:", text);
 
     if (!response.ok) {
       return res.status(502).json({
@@ -113,12 +123,6 @@ App idea: ${idea}
           JSON.stringify(data?.error || data)
       });
     }
-
-let text = "";
-
-if (data?.output_text) {
-  text = String(data.output_text).trim();
-}
 
 if (!text && Array.isArray(data?.output)) {
   for (const item of data.output) {
