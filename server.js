@@ -122,7 +122,7 @@ App idea: ${idea}
   ""
 ).trim();
 
-    console.log("Gemini text received:", Boolean(text));
+console.log("Gemini extracted text:", text);;
 
     if (!text) {
       return res.status(502).json({
