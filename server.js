@@ -114,15 +114,27 @@ App idea: ${idea}
       });
     }
 
-    const text = String(
-  data?.output_text ||
-  data?.output?.flatMap(item => item.content || [])
-    ?.map(item => item.text || "")
-    ?.join("") ||
-  ""
-).trim();
+let text = "";
 
-console.log("Gemini extracted text:", text);;
+if (data?.output_text) {
+  text = String(data.output_text).trim();
+}
+
+if (!text && Array.isArray(data?.output)) {
+  for (const item of data.output) {
+    if (Array.isArray(item?.content)) {
+      for (const content of item.content) {
+        if (content?.text) {
+          text += String(content.text);
+        }
+      }
+    }
+  }
+}
+
+text = text.trim();
+
+console.log("Gemini extracted text:", text)
 
     if (!text) {
       return res.status(502).json({
