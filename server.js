@@ -104,7 +104,7 @@ App idea: ${idea}
     console.log("Gemini HTTP status:", response.status);
     console.log("Gemini response:", JSON.stringify(data));
     
-  const text = String(
+  let text = String(
   data?.output_text ||
   data?.steps?.find(step => step?.type === "model_output")
     ?.content?.find(item => item?.type === "text")
