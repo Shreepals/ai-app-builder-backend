@@ -45,28 +45,35 @@ app.post("/api/generate", async (req, res) => {
     }
 
     const prompt = `Create a practical Android app specification.
-Return only valid JSON with keys appName, summary, pages, features,
-dataModels, nextSteps.
-pages must contain objects with name and purpose.
+Return only valid JSON with these keys:
+appName, summary, pages, features, dataModels, nextSteps.
+pages must be an array of objects with name and purpose.
 features, dataModels and nextSteps must be arrays of strings.
 App name: ${appName}
 App idea: ${idea}`;
 
-    const response = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/interactions",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "x-goog-api-key": GEMINI_API_KEY
-        },
-        body: JSON.stringify({
-          model: GEMINI_MODEL,
-          input: prompt,
-          generation_config: { thinking_level: "low" }
-        })
-      }
-    );
+    const apiUrl =
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
+
+    const response = await fetch(apiUrl, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "x-goog-api-key": GEMINI_API_KEY
+      },
+      body: JSON.stringify({
+        contents: [
+          {
+            role: "user",
+            parts: [{ text: prompt }]
+          }
+        ],
+        generationConfig: {
+          responseMimeType: "application/json",
+          temperature: 0.2
+        }
+      })
+    });
 
     const data = await response.json();
 
@@ -77,28 +84,33 @@ App idea: ${idea}`;
       });
     }
 
-    const output = String(data?.output_text || "").trim();
+    const output = (data?.candidates?.[0]?.content?.parts || [])
+      .map(part => part.text || "")
+      .join("")
+      .trim();
 
     if (!output) {
       return res.status(502).json({
-        error: "Gemini returned an empty response."
+        error: "Gemini returned an empty response.",
+        detail: data?.promptFeedback?.blockReason ||
+          data?.candidates?.[0]?.finishReason ||
+          "The model returned no text. Please try again."
       });
     }
 
     let result;
+
     try {
-      result = JSON.parse(
-        output.replace(/^```json\s*/i, "").replace(/```\s*$/, "").trim()
-      );
+      const cleaned = output
+        .replace(/^```(?:json)?\s*/i, "")
+        .replace(/\s*```$/, "")
+        .trim();
+
+      result = JSON.parse(cleaned);
     } catch {
-      result = {
-        appName,
-        summary: output,
-        pages: [],
-        features: [],
-        dataModels: [],
-        nextSteps: []
-      };
+      return res.status(502).json({
+        error: "Gemini returned invalid JSON. Please try again."
+      });
     }
 
     return res.json({ ok: true, result });
@@ -124,19 +136,19 @@ app.post("/api/build", async (req, res) => {
       });
     }
 
-    const response = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`,
-      {
-        method: "POST",
-        headers: {
-          "Accept": "application/vnd.github+json",
-          "Authorization": `Bearer ${GH_ACTIONS_TOKEN}`,
-          "X-GitHub-Api-Version": "2022-11-28",
-          "Content-Type": "application/json"
-        },
-        body: JSON.stringify({ ref: "main" })
-      }
-    );
+    const url =
+      `https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`;
+
+    const response = await fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/vnd.github+json",
+        Authorization: `Bearer ${GH_ACTIONS_TOKEN}`,
+        "X-GitHub-Api-Version": "2022-11-28",
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({ ref: "main" })
+    });
 
     if (!response.ok) {
       const detail = await response.text();
@@ -148,7 +160,7 @@ app.post("/api/build", async (req, res) => {
 
     return res.status(202).json({
       ok: true,
-      message: "GitHub Actions build started. This does not yet provide a downloadable APK."
+      message: "GitHub Actions build started. Downloadable APK delivery is not yet implemented."
     });
   } catch (error) {
     return res.status(500).json({
