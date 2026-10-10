@@ -1,38 +1,55 @@
+
 name: Build Android APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
   build-apk:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout Repository
         uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
 
       - name: Setup Android SDK
         run: |
-          export ANDROID_HOME=/usr/local/lib/android/sdk
-          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
+          sdkmanager --install \
+            "platform-tools" \
+            "platforms;android-35" \
+            "build-tools;35.0.0"
 
-      - name: Accept Android licenses
-        run: |
-          yes | sdkmanager --licenses > /dev/null || true
+      - name: Accept Android Licenses
+        run: yes | sdkmanager --licenses || true
 
-      - name: Install Android SDK packages
+      - name: Check App HTML
         run: |
-          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          if [ ! -f index.html ]; then
+            echo "ERROR: index.html not found in repository root"
+            exit 1
+          fi
 
-      - name: Create Android project
+      - name: Create Android Project
         run: |
-          mkdir -p app/src/main/java/com/aibuilder/app
           mkdir -p app/src/main/assets
-          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/java/com/aiappbuilder/app
 
           cp index.html app/src/main/assets/index.html
 
@@ -69,11 +86,11 @@ jobs:
           }
 
           android {
-              namespace 'com.aibuilder.app'
+              namespace 'com.aiappbuilder.app'
               compileSdk 35
 
               defaultConfig {
-                  applicationId 'com.aibuilder.app'
+                  applicationId 'com.aiappbuilder.app'
                   minSdk 23
                   targetSdk 35
                   versionCode 1
@@ -82,79 +99,76 @@ jobs:
           }
           EOF
 
-          cat > app/src/main/res/values/styles.xml <<'EOF'
-          <resources>
-              <style name="AppTheme"
-                  parent="android:style/Theme.Material.Light.NoActionBar">
-                  <item name="android:fontFamily">sans</item>
-                  <item name="android:colorAccent">#6750A4</item>
-              </style>
-          </resources>
-          EOF
-
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
-              <uses-permission android:name="android.permission.INTERNET"/>
+              <uses-permission android:name="android.permission.INTERNET" />
 
               <application
-                  android:theme="@style/AppTheme"
-                  android:label="AI App Builder">
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
+                  android:label="AI App Builder"
+                  android:usesCleartextTraffic="false">
 
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
 
                       <intent-filter>
-                          <action android:name="android.intent.action.MAIN"/>
-                          <category android:name="android.intent.category.LAUNCHER"/>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
 
                   </activity>
-
               </application>
           </manifest>
           EOF
 
-          cat > app/src/main/java/com/aibuilder/app/MainActivity.java <<'EOF'
-          package com.aibuilder.app;
+          cat > app/src/main/java/com/aiappbuilder/app/MainActivity.java <<'EOF'
+          package com.aiappbuilder.app;
 
           import android.app.Activity;
           import android.os.Bundle;
-          import android.webkit.WebSettings;
           import android.webkit.WebView;
+          import android.webkit.WebSettings;
+          import android.webkit.WebViewClient;
 
           public class MainActivity extends Activity {
+              private WebView webView;
 
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
 
-                  WebView webView = new WebView(this);
+                  webView = new WebView(this);
+                  setContentView(webView);
 
                   WebSettings settings = webView.getSettings();
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
 
+                  webView.setWebViewClient(new WebViewClient());
                   webView.loadUrl("file:///android_asset/index.html");
+              }
 
-                  setContentView(webView);
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
               }
           }
           EOF
 
-      - name: Install Gradle
-        run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.9-bin.zip
-          unzip -q gradle-8.9-bin.zip
-          echo "$PWD/gradle-8.9/bin" >> $GITHUB_PATH
-
-      - name: Build APK
-        run: |
-          gradle assembleDebug --no-daemon
+      - name: Build Debug APK
+        run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: AI-App-Builder-APK
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
