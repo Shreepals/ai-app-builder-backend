@@ -3,63 +3,94 @@ name: Build Android APK
 
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
+    inputs:
+      app_name:
+        description: "App name"
+        required: true
+        type: string
+        default: "My App"
+      idea:
+        description: "What should the app do?"
+        required: true
+        type: string
+        default: "A useful mobile app with a clean dashboard"
+      theme:
+        description: "App theme"
+        required: true
+        type: choice
+        options:
+          - purple
+          - blue
+          - green
+          - dark
+        default: purple
 
 permissions:
   contents: read
 
 jobs:
-  build-apk:
+  build:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Java
-        uses: actions/setup-java@v5
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
           distribution: temurin
           java-version: "17"
 
-      
-      - name: Setup Android SDK
+      - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-        with:
-          packages: platform-tools
-          accept-android-sdk-licenses: false
 
-      - name: Install Android SDK Packages
+      - name: Generate app with Gemini AI
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          APP_NAME: ${{ inputs.app_name }}
+          APP_IDEA: ${{ inputs.idea }}
+          APP_THEME: ${{ inputs.theme }}
         run: |
-          sdkmanager --install \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
+          set -e
 
-      - name: Accept Android Licenses
-        run: yes | sdkmanager --licenses
-
-      - name: Check HTML File
-        run: |
-          if [ ! -f index.html ]; then
-            echo "ERROR: index.html not found in repository root."
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "GEMINI_API_KEY secret is missing."
             exit 1
           fi
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.9"
-
-      - name: Create Android Project
-        shell: bash
-        run: |
           mkdir -p app/src/main/assets
-          mkdir -p app/src/main/java/com/aiappbuilder/app
 
-          cp index.html app/src/main/assets/index.html
+          jq -n \
+            --arg prompt "Create a complete, attractive, mobile-first HTML app. App name: $APP_NAME. App idea and required features: $APP_IDEA. Theme: $APP_THEME. Include all CSS and JavaScript inside one standalone HTML file. Make buttons and main features work. Do not use external libraries or remote assets. Return ONLY complete HTML, without Markdown fences or explanations." \
+            '{contents:[{parts:[{text:$prompt}]}],generationConfig:{temperature:0.2}}' \
+            > request.json
+
+          curl -fsS \
+            -X POST \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}" \
+            -H "Content-Type: application/json" \
+            --data @request.json \
+            -o response.json
+
+          jq -er \
+            '[.candidates[0].content.parts[].text] | join("\n")' \
+            response.json > app/src/main/assets/index.html
+
+          sed -i '1{/^```html$/d;}' app/src/main/assets/index.html
+          sed -i '${/^```$/d;}' app/src/main/assets/index.html
+
+          if ! grep -Eiq '<html|<!doctype html' app/src/main/assets/index.html; then
+            echo "Gemini did not return valid HTML."
+            cat response.json
+            exit 1
+          fi
+
+          echo "AI-generated app HTML created."
+
+      - name: Create Android project
+        run: |
+          mkdir -p app/src/main/java/com/aibuilder/app
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -69,7 +100,6 @@ jobs:
                   gradlePluginPortal()
               }
           }
-
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
               repositories {
@@ -77,8 +107,7 @@ jobs:
                   mavenCentral()
               }
           }
-
-          rootProject.name = "AIAppBuilder"
+          rootProject.name = "AIApp"
           include(":app")
           EOF
 
@@ -94,13 +123,13 @@ jobs:
           }
 
           android {
-              namespace 'com.aiappbuilder.app'
+              namespace 'com.aibuilder.app'
               compileSdk 35
 
               defaultConfig {
-                  applicationId 'com.aiappbuilder.app'
+                  applicationId 'com.aibuilder.app'
                   minSdk 23
-                  targetSdk 35
+                  targetSdk 28
                   versionCode 1
                   versionName '1.0'
               }
@@ -109,74 +138,51 @@ jobs:
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET" />
-
               <application
-                  android:label="AI App Builder"
                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:usesCleartextTraffic="false">
-
+                  android:label="AI App"
+                  android:usesCleartextTraffic="true">
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
-
                       <intent-filter>
                           <action android:name="android.intent.action.MAIN" />
                           <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
-
                   </activity>
               </application>
           </manifest>
           EOF
 
-          cat > app/src/main/java/com/aiappbuilder/app/MainActivity.java <<'EOF'
-          package com.aiappbuilder.app;
+          cat > app/src/main/java/com/aibuilder/app/MainActivity.java <<'EOF'
+          package com.aibuilder.app;
 
           import android.app.Activity;
           import android.os.Bundle;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
-          import android.webkit.WebSettings;
 
           public class MainActivity extends Activity {
-              private WebView webView;
-
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
-
-                  webView = new WebView(this);
-                  setContentView(webView);
-
-                  WebSettings settings = webView.getSettings();
-                  settings.setJavaScriptEnabled(true);
-                  settings.setDomStorageEnabled(true);
-
+                  WebView webView = new WebView(this);
                   webView.setWebViewClient(new WebViewClient());
-                  webView.loadUrl(
-                      "file:///android_asset/index.html"
-                  );
-              }
-
-              @Override
-              public void onBackPressed() {
-                  if (webView != null && webView.canGoBack()) {
-                      webView.goBack();
-                  } else {
-                      super.onBackPressed();
-                  }
+                  webView.getSettings().setJavaScriptEnabled(true);
+                  webView.getSettings().setDomStorageEnabled(true);
+                  setContentView(webView);
+                  webView.loadUrl("file:///android_asset/index.html");
               }
           }
           EOF
 
-      - name: Build Debug APK
-        run: gradle --no-daemon --stacktrace assembleDebug
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
 
-      - name: Verify APK
-        run: |
-          test -f app/build/outputs/apk/debug/app-debug.apk
-          ls -lh app/build/outputs/apk/debug/app-debug.apk
+      - name: Build APK
+        run: gradle --no-daemon assembleDebug
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -184,4 +190,3 @@ jobs:
           name: AI-App-Builder-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
-          retention-days: 7
