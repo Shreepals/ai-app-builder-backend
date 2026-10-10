@@ -19,17 +19,15 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Setup Java
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@v5
         with:
           distribution: temurin
           java-version: "17"
 
-      - name: Setup Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: "8.9"
-
       - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android SDK Packages
         run: |
           sdkmanager --install \
             "platform-tools" \
@@ -37,16 +35,22 @@ jobs:
             "build-tools;35.0.0"
 
       - name: Accept Android Licenses
-        run: yes | sdkmanager --licenses || true
+        run: yes | sdkmanager --licenses
 
-      - name: Check App HTML
+      - name: Check HTML File
         run: |
           if [ ! -f index.html ]; then
-            echo "ERROR: index.html not found in repository root"
+            echo "ERROR: index.html not found in repository root."
             exit 1
           fi
 
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+        with:
+          gradle-version: "8.9"
+
       - name: Create Android Project
+        shell: bash
         run: |
           mkdir -p app/src/main/assets
           mkdir -p app/src/main/java/com/aiappbuilder/app
@@ -101,12 +105,11 @@ jobs:
 
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
               <uses-permission android:name="android.permission.INTERNET" />
 
               <application
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
                   android:label="AI App Builder"
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
                   android:usesCleartextTraffic="false">
 
                   <activity
@@ -129,8 +132,8 @@ jobs:
           import android.app.Activity;
           import android.os.Bundle;
           import android.webkit.WebView;
-          import android.webkit.WebSettings;
           import android.webkit.WebViewClient;
+          import android.webkit.WebSettings;
 
           public class MainActivity extends Activity {
               private WebView webView;
@@ -147,7 +150,9 @@ jobs:
                   settings.setDomStorageEnabled(true);
 
                   webView.setWebViewClient(new WebViewClient());
-                  webView.loadUrl("file:///android_asset/index.html");
+                  webView.loadUrl(
+                      "file:///android_asset/index.html"
+                  );
               }
 
               @Override
@@ -162,7 +167,12 @@ jobs:
           EOF
 
       - name: Build Debug APK
-        run: gradle --no-daemon assembleDebug
+        run: gradle --no-daemon --stacktrace assembleDebug
+
+      - name: Verify APK
+        run: |
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -171,4 +181,3 @@ jobs:
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
           retention-days: 7
-
