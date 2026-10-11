@@ -23,18 +23,21 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-
+          
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+       uses: android-actions/setup-android@v3
+       with:
+       packages: platform-tools
 
-      - name: Install Android SDK Packages
-        shell: bash
-        run: |
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
-          "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
-            "platform-tools" \
-            "platforms;android-35" \
-            "build-tools;35.0.0"
+     - name: Install Android SDK Packages
+       shell: bash
+       run: |
+    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
+    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
+      "platform-tools" \
+      "platforms;android-35" \
+      "build-tools;35.0.0"
+
 
       - name: Check Android Project
         run: |
