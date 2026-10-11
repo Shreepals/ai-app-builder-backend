@@ -24,22 +24,17 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
-        with:
-          packages: |
-            platform-tools
-            platforms;android-35
-            build-tools;35.0.0
+      - name: Install Android SDK
+        run: |
+          echo "ANDROID_HOME=$ANDROID_HOME"
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Accept SDK licenses
-        run: yes | sdkmanager --licenses || true
-
-      - name: Check Android project
+      - name: Check Project
         run: |
           ls -la
           if [ ! -f gradlew ]; then
-            echo "ERROR: gradlew file not found in repository root"
+            echo "ERROR: gradlew not found in repository root"
             exit 1
           fi
           chmod +x gradlew
