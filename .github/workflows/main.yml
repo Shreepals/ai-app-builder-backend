@@ -1,10 +1,44 @@
 name: Build Android APK
 
-on: [workflow_dispatch]
+on: [workflow_dispatch, push]
+
+permissions:
+contents: read
 
 jobs:
-  test:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Check workflow
-        run: echo "Workflow is working"
+build-apk:
+runs-on: ubuntu-latest
+steps:
+- name: Checkout Repository
+uses: actions/checkout@v4
+
+```
+  - name: Set up Java
+    uses: actions/setup-java@v4
+    with:
+      distribution: temurin
+      java-version: '17'
+
+  - name: Set up Android SDK
+    uses: android-actions/setup-android@v3
+    with:
+      packages: |
+        platform-tools
+        platforms;android-35
+        build-tools;35.0.0
+
+  - name: Set up Gradle
+    uses: gradle/actions/setup-gradle@v4
+    with:
+      gradle-version: '8.9'
+
+  - name: Build APK
+    run: gradle assembleDebug --stacktrace
+
+  - name: Upload APK
+    uses: actions/upload-artifact@v4
+    with:
+      name: AI-App-Builder-APK
+      path: app/build/outputs/apk/debug/*.apk
+      if-no-files-found: error
+```
