@@ -1,6 +1,6 @@
 name: Build Android APK
 
-on:
+'on':
 workflow_dispatch:
 push:
 branches:
@@ -12,28 +12,29 @@ contents: read
 jobs:
 build-apk:
 runs-on: ubuntu-latest
+steps:
+- name: Checkout Repository
+uses: actions/checkout@v5
 
 ```
-steps:
-  - name: Checkout Repository
-    uses: actions/checkout@v5
-
   - name: Set up Java
     uses: actions/setup-java@v5
     with:
       distribution: temurin
-      java-version: "17"
+      java-version: '17'
 
   - name: Set up Android SDK
     uses: android-actions/setup-android@v3
-
-  - name: Install Android SDK packages
-    run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+    with:
+      packages: |
+        platform-tools
+        platforms;android-35
+        build-tools;35.0.0
 
   - name: Set up Gradle
     uses: gradle/actions/setup-gradle@v4
     with:
-      gradle-version: "8.9"
+      gradle-version: '8.9'
 
   - name: Build APK
     run: gradle assembleDebug --stacktrace
@@ -44,3 +45,4 @@ steps:
       name: AI-App-Builder-APK
       path: app/build/outputs/apk/debug/*.apk
       if-no-files-found: error
+```
