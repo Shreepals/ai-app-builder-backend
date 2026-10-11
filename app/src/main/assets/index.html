@@ -1,0 +1,133 @@
+
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>AI App Builder</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: Arial, sans-serif;
+      color: #fff;
+      background: linear-gradient(145deg, #10152f, #243c72);
+      min-height: 100vh;
+    }
+    .card {
+      max-width: 520px;
+      margin: 20px auto;
+      padding: 22px;
+      background: #ffffff12;
+      border: 1px solid #ffffff25;
+      border-radius: 20px;
+    }
+    h1 { font-size: 27px; margin-bottom: 8px; }
+    p { color: #d7def5; line-height: 1.5; }
+    label { display: block; margin-top: 18px; margin-bottom: 8px; }
+    input, textarea, select, button {
+      width: 100%;
+      padding: 13px;
+      border-radius: 10px;
+      font-size: 16px;
+    }
+    input, textarea, select {
+      color: #fff;
+      background: #111a35;
+      border: 1px solid #6576a7;
+    }
+    textarea { min-height: 120px; resize: vertical; }
+    button {
+      margin-top: 18px;
+      border: 0;
+      background: #7c5cff;
+      color: white;
+      font-weight: bold;
+    }
+    button:disabled { opacity: .6; }
+    #status { margin-top: 16px; }
+    pre {
+      white-space: pre-wrap;
+      overflow-wrap: anywhere;
+      background: #0b1024;
+      padding: 14px;
+      border-radius: 10px;
+      color: #d9e5ff;
+    }
+    .note { font-size: 13px; }
+  </style>
+</head>
+<body>
+  <div class="card">
+    <h1>🚀 AI App Builder</h1>
+    <p>अपना ऐप आइडिया लिखें। AI आपके ऐप का शुरुआती प्लान तैयार करेगा।</p>
+
+    <label for="appName">ऐप का नाम</label>
+    <input id="appName" placeholder="जैसे Kisan Sahayata">
+
+    <label for="theme">डिजाइन चुनें</label>
+    <select id="theme">
+      <option>Modern</option>
+      <option>Professional</option>
+      <option>Simple</option>
+    </select>
+
+    <label for="idea">आप कैसा ऐप बनाना चाहते हैं?</label>
+    <textarea id="idea" placeholder="ऐप में कौन-कौन से फीचर चाहिए, यहाँ लिखें..."></textarea>
+
+    <button id="generate" onclick="generateApp()">✨ AI से ऐप प्लान बनाएँ</button>
+    <div id="status" role="status"></div>
+    <pre id="result" hidden></pre>
+    <p class="note">अभी यह ऐप का प्लान बनाता है। APK डाउनलोड करने के लिए Android बिल्ड सिस्टम जोड़ना बाकी है।</p>
+  </div>
+
+  <script>
+    const API = "https://ai-app-builder-backend-1.onrender.com";
+
+    async function generateApp() {
+      const appName = document.getElementById("appName").value.trim();
+      const idea = document.getElementById("idea").value.trim();
+      const button = document.getElementById("generate");
+      const status = document.getElementById("status");
+      const result = document.getElementById("result");
+
+      if (!appName || !idea) {
+        status.textContent = "कृपया ऐप का नाम और आइडिया दोनों लिखें।";
+        return;
+      }
+
+      button.disabled = true;
+      status.textContent = "AI से संपर्क हो रहा है। पहली बार थोड़ा समय लग सकता है...";
+      result.hidden = true;
+
+      try {
+        const response = await fetch(API + "/api/generate", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            appName: appName,
+            idea: idea,
+            theme: document.getElementById("theme").value
+          })
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.error || data.message || "सर्वर से अनुरोध पूरा नहीं हुआ।");
+        }
+
+        result.textContent = JSON.stringify(data, null, 2);
+        result.hidden = false;
+        status.textContent = "✅ ऐप का शुरुआती प्लान तैयार है।";
+      } catch (error) {
+        status.textContent = "❌ " + error.message +
+          " अगर समस्या बनी रहे, तो बैकएंड या कनेक्शन जाँचना होगा।";
+      } finally {
+        button.disabled = false;
+      }
+    }
+  </script>
+</body>
+  </html>
