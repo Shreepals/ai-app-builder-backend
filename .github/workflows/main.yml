@@ -37,7 +37,7 @@ jobs:
             echo "ERROR: sdkmanager not found"
             exit 1
           fi
-          yes | "$SDKMANAGER" --licenses
+          "$SDKMANAGER" --licenses < /dev/null
           "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Check Android Project
