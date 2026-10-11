@@ -1,8 +1,6 @@
 name: Build Android APK
-
 'on':
 workflow_dispatch:
-
 jobs:
 build-apk:
 runs-on: ubuntu-latest
@@ -14,8 +12,7 @@ distribution: temurin
 java-version: '17'
 - uses: android-actions/setup-android@v3
 - name: Install Android SDK
-run: |
-sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+run: sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 - uses: gradle/actions/setup-gradle@v4
 with:
 gradle-version: '8.9'
@@ -25,4 +22,3 @@ run: gradle assembleDebug --stacktrace
 with:
 name: AI-App-Builder-APK
 path: app/build/outputs/apk/debug/*.apk
-
