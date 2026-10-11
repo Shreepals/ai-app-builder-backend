@@ -44,7 +44,7 @@ jobs:
 
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
-
+        
       - name: Generate app with Gemini AI
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
