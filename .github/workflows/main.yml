@@ -23,21 +23,22 @@ jobs:
         with:
           distribution: temurin
           java-version: '17'
-          
+
       - name: Set up Android SDK
-       uses: android-actions/setup-android@v3
-       with:
-       packages: platform-tools
+        uses: android-actions/setup-android@v3
+        with:
+          packages: platform-tools
 
-     - name: Install Android SDK Packages
-       shell: bash
-       run: |
-    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" --licenses
-    "$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager" \
-      "platform-tools" \
-      "platforms;android-35" \
-      "build-tools;35.0.0"
-
+      - name: Install Android SDK Packages
+        shell: bash
+        run: |
+          SDKMANAGER="$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)"
+          if [ -z "$SDKMANAGER" ]; then
+            echo "ERROR: sdkmanager not found"
+            exit 1
+          fi
+          yes | "$SDKMANAGER" --licenses
+          "$SDKMANAGER" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Check Android Project
         run: |
