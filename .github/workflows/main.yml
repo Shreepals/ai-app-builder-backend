@@ -12,7 +12,6 @@ steps:
 - name: Checkout Repository
 uses: actions/checkout@v4
 
-```
   - name: Set up Java
     uses: actions/setup-java@v4
     with:
@@ -41,4 +40,4 @@ uses: actions/checkout@v4
       name: AI-App-Builder-APK
       path: app/build/outputs/apk/debug/*.apk
       if-no-files-found: error
-```
+
