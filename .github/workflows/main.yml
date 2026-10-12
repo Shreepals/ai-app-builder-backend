@@ -1,4 +1,5 @@
 name: Build Android APK
+
 on:
 workflow_dispatch:
 push:
@@ -11,12 +12,11 @@ contents: read
 jobs:
 build-apk:
 runs-on: ubuntu-latest
-
-
 steps:
-  - name: Checkout
-    uses: actions/checkout@v4
+- name: Checkout
+uses: actions/checkout@v4
 
+```
   - name: Setup Java
     uses: actions/setup-java@v4
     with:
@@ -38,7 +38,6 @@ steps:
       mkdir -p app/src/main/java/com/aibuilder/app
       mkdir -p app/src/main/assets
       mkdir -p app/src/main/res/values
-
       cp index.html app/src/main/assets/index.html
 
       cat > settings.gradle <<'EOF'
@@ -49,7 +48,6 @@ steps:
               gradlePluginPortal()
           }
       }
-
       dependencyResolutionManagement {
           repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
           repositories {
@@ -57,7 +55,6 @@ steps:
               mavenCentral()
           }
       }
-
       rootProject.name = "AIAppBuilder"
       include(":app")
       EOF
@@ -72,11 +69,9 @@ steps:
       plugins {
           id 'com.android.application'
       }
-
       android {
           namespace 'com.aibuilder.app'
           compileSdk 35
-
           defaultConfig {
               applicationId 'com.aibuilder.app'
               minSdk 23
@@ -89,8 +84,7 @@ steps:
 
       cat > app/src/main/res/values/styles.xml <<'EOF'
       <resources>
-          <style name="AppTheme"
-              parent="@android:style/Theme.Material.Light.NoActionBar">
+          <style name="AppTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
               <item name="android:fontFamily">sans</item>
               <item name="android:colorAccent">#6750A4</item>
           </style>
@@ -99,22 +93,13 @@ steps:
 
       cat > app/src/main/AndroidManifest.xml <<'EOF'
       <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-
           <uses-permission android:name="android.permission.INTERNET"/>
-
-          <application
-              android:theme="@style/AppTheme"
-              android:label="AI App Builder">
-
-              <activity
-                  android:name=".MainActivity"
-                  android:exported="true">
-
+          <application android:theme="@style/AppTheme" android:label="AI App Builder">
+              <activity android:name=".MainActivity" android:exported="true">
                   <intent-filter>
                       <action android:name="android.intent.action.MAIN"/>
                       <category android:name="android.intent.category.LAUNCHER"/>
                   </intent-filter>
-
               </activity>
           </application>
       </manifest>
@@ -122,7 +107,6 @@ steps:
 
       cat > app/src/main/java/com/aibuilder/app/MainActivity.java <<'EOF'
       package com.aibuilder.app;
-
       import android.app.Activity;
       import android.os.Bundle;
       import android.webkit.WebSettings;
@@ -132,12 +116,10 @@ steps:
           @Override
           protected void onCreate(Bundle savedInstanceState) {
               super.onCreate(savedInstanceState);
-
               WebView webView = new WebView(this);
               WebSettings settings = webView.getSettings();
               settings.setJavaScriptEnabled(true);
               settings.setDomStorageEnabled(true);
-
               webView.loadUrl("file:///android_asset/index.html");
               setContentView(webView);
           }
@@ -157,4 +139,4 @@ steps:
     with:
       name: AI-App-Builder-APK
       path: app/build/outputs/apk/debug/app-debug.apk
-
+```
