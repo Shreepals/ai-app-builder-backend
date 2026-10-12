@@ -1,14 +1,10 @@
-name: Test APK
+name: Test
 
-on:
-workflow_dispatch:
+on: workflow_dispatch
 
 jobs:
 test:
 runs-on: ubuntu-latest
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-  - name: Check files
-    run: ls -la
-```
+steps:
+- uses: actions/checkout@v4
+- run: echo "GitHub Actions working"
