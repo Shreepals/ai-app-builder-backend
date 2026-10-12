@@ -18,22 +18,17 @@ steps:
   - name: Checkout
     uses: actions/checkout@v4
 
-  - name: Check HTML file
-    run: test -f index.html
-
   - name: Setup Java
     uses: actions/setup-java@v4
     with:
       distribution: temurin
       java-version: '17'
 
-  - name: Setup Gradle
-    uses: gradle/actions/setup-gradle@v4
-    with:
-      gradle-version: '8.9'
-
   - name: Setup Android SDK
     uses: android-actions/setup-android@v3
+
+  - name: Accept Android licenses
+    run: yes | sdkmanager --licenses
 
   - name: Install Android SDK packages
     run: |
@@ -55,6 +50,7 @@ steps:
               gradlePluginPortal()
           }
       }
+
       dependencyResolutionManagement {
           repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
           repositories {
@@ -62,6 +58,7 @@ steps:
               mavenCentral()
           }
       }
+
       rootProject.name = "AIAppBuilder"
       include(":app")
       EOF
@@ -76,9 +73,11 @@ steps:
       plugins {
           id 'com.android.application'
       }
+
       android {
           namespace 'com.aibuilder.app'
           compileSdk 35
+
           defaultConfig {
               applicationId 'com.aibuilder.app'
               minSdk 23
@@ -91,7 +90,8 @@ steps:
 
       cat > app/src/main/res/values/styles.xml <<'EOF'
       <resources>
-          <style name="AppTheme" parent="@android:style/Theme.Material.Light.NoActionBar">
+          <style name="AppTheme"
+              parent="@android:style/Theme.Material.Light.NoActionBar">
               <item name="android:fontFamily">sans</item>
               <item name="android:colorAccent">#6750A4</item>
           </style>
@@ -100,17 +100,22 @@ steps:
 
       cat > app/src/main/AndroidManifest.xml <<'EOF'
       <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+
           <uses-permission android:name="android.permission.INTERNET"/>
+
           <application
               android:theme="@style/AppTheme"
               android:label="AI App Builder">
+
               <activity
                   android:name=".MainActivity"
                   android:exported="true">
+
                   <intent-filter>
                       <action android:name="android.intent.action.MAIN"/>
                       <category android:name="android.intent.category.LAUNCHER"/>
                   </intent-filter>
+
               </activity>
           </application>
       </manifest>
@@ -121,22 +126,29 @@ steps:
 
       import android.app.Activity;
       import android.os.Bundle;
-      import android.webkit.WebView;
       import android.webkit.WebSettings;
+      import android.webkit.WebView;
 
       public class MainActivity extends Activity {
           @Override
           protected void onCreate(Bundle savedInstanceState) {
               super.onCreate(savedInstanceState);
+
               WebView webView = new WebView(this);
               WebSettings settings = webView.getSettings();
               settings.setJavaScriptEnabled(true);
               settings.setDomStorageEnabled(true);
+
               webView.loadUrl("file:///android_asset/index.html");
               setContentView(webView);
           }
       }
       EOF
+
+  - name: Install Gradle
+    uses: gradle/actions/setup-gradle@v4
+    with:
+      gradle-version: '8.9'
 
   - name: Build APK
     run: gradle assembleDebug --no-daemon
