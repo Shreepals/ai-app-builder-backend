@@ -1,19 +1,19 @@
 name: Build Android APK
 
 on:
-workflow_dispatch:
-push:
-branches:
-- main
+  workflow_dispatch:
+  push:
+    branches:
+      - main
 
 permissions:
-contents: read
+  contents: read
 
 jobs:
-build-apk:
-runs-on: ubuntu-latest
+  build-apk:
+    runs-on: ubuntu-latest
 
-steps:
+    steps:
   - name: Checkout repository
     uses: actions/checkout@v4
 
