@@ -52,8 +52,7 @@ features, dataModels and nextSteps must be arrays of strings.
 App name: ${appName}
 App idea: ${idea}`;
 
-    const apiUrl =
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
+    const apiUrl =  `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
 
     const response = await fetch(apiUrl, {
       method: "POST",
