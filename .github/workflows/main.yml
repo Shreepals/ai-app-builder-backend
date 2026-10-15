@@ -1,35 +1,50 @@
-7name: Build Android APK
+name: Build Android APK
 
 on:
   workflow_dispatch:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: read
 
 jobs:
   build-apk:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Android SDK
-        run: |
-          export ANDROID_HOME=/usr/local/lib/android/sdk
-          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
-      - name: Accept Android licenses
-        run: |
-          yes | sdkmanager --licenses > /dev/null || true
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      
+  
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+        with:
+          packages: ''
+
       - name: Install Android SDK packages
         run: |
+          yes | sdkmanager --licenses
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+      
+
+      
+      - name: Install Android SDK packages
+        run: |
+          sdkmanager --install "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
       - name: Create Android project
         run: |
-          mkdir -p app/src/main/java/com/aibuilder/app
           mkdir -p app/src/main/assets
-          mkdir -p app/src/main/res/values
+          mkdir -p app/src/main/java/com/example/myapp
           cp index.html app/src/main/assets/index.html
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -46,7 +61,7 @@ jobs:
                   mavenCentral()
               }
           }
-          rootProject.name = "AIAppBuilder"
+          rootProject.name = "MyApp"
           include(":app")
           EOF
           cat > build.gradle <<'EOF'
@@ -59,10 +74,10 @@ jobs:
               id 'com.android.application'
           }
           android {
-              namespace 'com.aibuilder.app'
+              namespace 'com.example.myapp'
               compileSdk 35
               defaultConfig {
-                  applicationId 'com.aibuilder.app'
+                  applicationId 'com.example.myapp'
                   minSdk 23
                   targetSdk 35
                   versionCode 1
@@ -70,61 +85,42 @@ jobs:
               }
           }
           EOF
-          cat > app/src/main/res/values/styles.xml <<'EOF'
-          <resources>
-              <style name="AppTheme"
-                  parent="android:style/Theme.Material.Light.NoActionBar">
-                  <item name="android:fontFamily">sans</item>
-                  <item name="android:colorAccent">#6750A4</item>
-              </style>
-          </resources>
-          EOF
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET"/>
-              <application
-                  android:theme="@style/AppTheme"
-                  android:label="AI App Builder">
-                  <activity
-                      android:name=".MainActivity"
-                      android:exported="true">
+              <application android:theme="@android:style/Theme.Material.Light.NoActionBar" android:label="My App" android:usesCleartextTraffic="true">
+                  <activity android:name=".MainActivity" android:exported="true">
                       <intent-filter>
-                          <action android:name="android.intent.action.MAIN"/>
-                          <category android:name="android.intent.category.LAUNCHER"/>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
                   </activity>
               </application>
           </manifest>
           EOF
-          cat > app/src/main/java/com/aibuilder/app/MainActivity.java <<'EOF'
-          package com.aibuilder.app;
+          cat > app/src/main/java/com/example/myapp/MainActivity.java <<'EOF'
+          package com.example.myapp;
           import android.app.Activity;
           import android.os.Bundle;
-          import android.webkit.WebSettings;
           import android.webkit.WebView;
+          import android.webkit.WebViewClient;
           public class MainActivity extends Activity {
-              @Override
-              protected void onCreate(Bundle savedInstanceState) {
+              @Override public void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
-                  WebView webView = new WebView(this);
-                  WebSettings settings = webView.getSettings();
-                  settings.setJavaScriptEnabled(true);
-                  settings.setDomStorageEnabled(true);
-                  webView.loadUrl("file:///android_asset/index.html");
-                  setContentView(webView);
+                  WebView web = new WebView(this);
+                  web.getSettings().setJavaScriptEnabled(true);
+                  web.setWebViewClient(new WebViewClient());
+                  setContentView(web);
+                  web.loadUrl("file:///android_asset/index.html");
               }
           }
           EOF
-      - name: Install Gradle
-        run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.9-bin.zip
-          unzip -q gradle-8.9-bin.zip
-          echo "$PWD/gradle-8.9/bin" >> $GITHUB_PATH
-      - name: Build APK
-        run: |
-          gradle assembleDebug --no-daemon
+          echo "org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8" > gradle.properties
+          wget -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -O /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+          /tmp/gradle-8.9/bin/gradle assembleDebug --no-daemon
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
-          name: My APP APK
+          name: MyApp-APK
           path: app/build/outputs/apk/debug/app-debug.apk
