@@ -1,4 +1,4 @@
-
+mo
 <!DOCTYPE html>
 <html lang="hi">
 <head>
@@ -100,7 +100,9 @@
       button.disabled = true;
       status.textContent = "AI से संपर्क हो रहा है। पहली बार थोड़ा समय लग सकता है...";
       result.hidden = true;
-
+      
+      status.textContent = "Backend से कनेक्ट हो रहा है...";
+      
       try {
         const response = await fetch(API + "/api/generate", {
           method: "POST",
