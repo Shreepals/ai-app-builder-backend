@@ -15,6 +15,22 @@ const GH_ACTIONS_TOKEN = process.env.GH_ACTIONS_TOKEN || "";
 const OWNER = "Shreepals";
 const REPO = "ai-app-builder-backend";
 const WORKFLOW = "main.yml";
+const API_BASE = "https://api.github.com";
+const BACKEND_URL = "https://ai-app-builder-backend-1.onrender.com";
+
+let lastBuildRequestedAt = 0;
+
+async function github(path, options = {}) {
+  return fetch(`${API_BASE}${path}`, {
+    ...options,
+    headers: {
+      Accept: "application/vnd.github+json",
+      Authorization: `Bearer ${GH_ACTIONS_TOKEN}`,
+      "X-GitHub-Api-Version": "2022-11-28",
+      ...(options.headers || {})
+    }
+  });
+}
 
 app.get("/", (_req, res) => {
   res.json({ ok: true, service: "AI App Builder Gemini Backend" });
@@ -52,28 +68,25 @@ features, dataModels and nextSteps must be arrays of strings.
 App name: ${appName}
 App idea: ${idea}`;
 
-    const apiUrl =  
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`;
-
-    const response = await fetch(apiUrl, {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "x-goog-api-key": GEMINI_API_KEY
-      },
-      body: JSON.stringify({
-        contents: [
-          {
-            role: "user",
-            parts: [{ text: prompt }]
+    const response = await fetch(
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`,
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "x-goog-api-key": GEMINI_API_KEY
+        },
+        body: JSON.stringify({
+          contents: [
+            { role: "user", parts: [{ text: prompt }] }
+          ],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.2
           }
-        ],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.2
-        }
-      })
-    });
+        })
+      }
+    );
 
     const data = await response.json();
 
@@ -91,22 +104,17 @@ App idea: ${idea}`;
 
     if (!output) {
       return res.status(502).json({
-        error: "Gemini returned an empty response.",
-        detail: data?.promptFeedback?.blockReason ||
-          data?.candidates?.[0]?.finishReason ||
-          "The model returned no text. Please try again."
+        error: "Gemini returned an empty response."
       });
     }
 
     let result;
-
     try {
-      const cleaned = output
-        .replace(/^```(?:json)?\s*/i, "")
-        .replace(/\s*```$/, "")
-        .trim();
-
-      result = JSON.parse(cleaned);
+      result = JSON.parse(
+        output.replace(/^```(?:json)?\s*/i, "")
+          .replace(/\s*```$/, "")
+          .trim()
+      );
     } catch {
       return res.status(502).json({
         error: "Gemini returned invalid JSON. Please try again."
@@ -136,30 +144,27 @@ app.post("/api/build", async (req, res) => {
       });
     }
 
-    const url = `https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`;
-
-    const response = await fetch(url, {
-      method: "POST",
-      headers: {
-        Accept: "application/vnd.github+json",
-        Authorization: `Bearer ${GH_ACTIONS_TOKEN}`,
-        "X-GitHub-Api-Version": "2022-11-28",
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({ ref: "main" })
-    });
+    const response = await github(
+      `/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`,
+      {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ ref: "main" })
+      }
+    );
 
     if (!response.ok) {
-      const detail = await response.text();
       return res.status(502).json({
         error: "Could not start GitHub Actions build.",
-        detail
+        detail: await response.text()
       });
     }
 
+    lastBuildRequestedAt = Date.now() - 30000;
+
     return res.status(202).json({
       ok: true,
-      message: "GitHub Actions build started. Downloadable APK delivery is not yet implemented."
+      message: "APK build started. Please wait for the build to finish."
     });
   } catch (error) {
     return res.status(500).json({
@@ -169,7 +174,157 @@ app.post("/api/build", async (req, res) => {
   }
 });
 
+app.get("/api/build-status", async (_req, res) => {
+  try {
+    if (!GH_ACTIONS_TOKEN) {
+      return res.status(503).json({
+        error: "GitHub Actions token is not configured in Render."
+      });
+    }
+
+    const response = await github(
+      `/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/runs?per_page=10`
+    );
+
+    if (!response.ok) {
+      return res.status(502).json({
+        error: "Could not check build status.",
+        detail: await response.text()
+      });
+    }
+
+    const data = await response.json();
+    const runs = data.workflow_runs || [];
+
+    const run = runs.find(item =>
+      lastBuildRequestedAt
+        ? new Date(item.created_at).getTime() >= lastBuildRequestedAt
+        : true
+    );
+
+    if (!run) {
+      return res.json({
+        ok: true,
+        status: "not_found",
+        message: "Build not found yet. Please wait and try again."
+      });
+    }
+
+    const result = {
+      ok: true,
+      status: run.status,
+      conclusion: run.conclusion,
+      runUrl: run.html_url,
+      downloadUrl: null,
+      message: "Build is still running."
+    };
+
+    if (run.status !== "completed") {
+      return res.json(result);
+    }
+
+    if (run.conclusion !== "success") {
+      result.message = "Build failed. Open the GitHub Actions run to check the error.";
+      return res.json(result);
+    }
+
+    const artifactResponse = await github(
+      `/repos/${OWNER}/${REPO}/actions/runs/${run.id}/artifacts?per_page=100`
+    );
+
+    if (!artifactResponse.ok) {
+      return res.status(502).json({
+        error: "Build succeeded, but artifacts could not be checked.",
+        detail: await artifactResponse.text()
+      });
+    }
+
+    const artifactData = await artifactResponse.json();
+    const artifact = (artifactData.artifacts || []).find(item =>
+      item.name === "AI-App-Builder-APK" && !item.expired
+    );
+
+    if (!artifact) {
+      result.message = "Build finished, but the APK artifact was not found.";
+      return res.json(result);
+    }
+
+    result.downloadUrl =
+      `${BACKEND_URL}/api/apk-download?run_id=${run.id}`;
+    result.message = "APK is ready to download.";
+
+    return res.json(result);
+  } catch (error) {
+    return res.status(500).json({
+      error: "Could not check build status.",
+      detail: error?.message || "Unknown server error"
+    });
+  }
+});
+
+app.get("/api/apk-download", async (req, res) => {
+  try {
+    if (!GH_ACTIONS_TOKEN) {
+      return res.status(503).json({
+        error: "GitHub Actions token is not configured in Render."
+      });
+    }
+
+    const runId = String(req.query.run_id || "");
+
+    if (!/^\d+$/.test(runId)) {
+      return res.status(400).json({ error: "Invalid build run ID." });
+    }
+
+    const artifactResponse = await github(
+      `/repos/${OWNER}/${REPO}/actions/runs/${runId}/artifacts?per_page=100`
+    );
+
+    if (!artifactResponse.ok) {
+      return res.status(502).json({
+        error: "Could not find the APK artifact.",
+        detail: await artifactResponse.text()
+      });
+    }
+
+    const data = await artifactResponse.json();
+    const artifact = (data.artifacts || []).find(item =>
+      item.name === "AI-App-Builder-APK" && !item.expired
+    );
+
+    if (!artifact) {
+      return res.status(404).json({
+        error: "APK artifact not found or expired."
+      });
+    }
+
+    const zipResponse = await github(
+      `/repos/${OWNER}/${REPO}/actions/artifacts/${artifact.id}/zip`
+    );
+
+    if (!zipResponse.ok) {
+      return res.status(502).json({
+        error: "APK download failed.",
+        detail: await zipResponse.text()
+      });
+    }
+
+    const zip = Buffer.from(await zipResponse.arrayBuffer());
+
+    res.setHeader("Content-Type", "application/zip");
+    res.setHeader(
+      "Content-Disposition",
+      'attachment; filename="AI-App-Builder-APK.zip"'
+    );
+    return res.send(zip);
+  } catch (error) {
+    return res.status(500).json({
+      error: "APK download failed.",
+      detail: error?.message || "Unknown server error"
+    });
+  }
+});
+
 app.listen(port, "0.0.0.0", () => {
   console.log("Gemini backend running on port " + port);
 });
-  
