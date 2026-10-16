@@ -1,58 +1,189 @@
-<!DOCTYPE html>
-<html lang="hi"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>AI App Builder</title>
-<style>
-*{box-sizing:border-box}body{margin:0;font-family:Arial,sans-serif;background:#f4f7fb;color:#172033}header{background:linear-gradient(135deg,#5b4bff,#8b5cf6);color:#fff;padding:18px 16px}header h1{margin:0;font-size:22px}header p{margin:5px 0 0;opacity:.9;font-size:13px}.container{max-width:900px;margin:auto;padding:16px}.card{background:#fff;border-radius:18px;padding:18px;margin:14px 0;box-shadow:0 5px 22px #15254a12}label{font-weight:bold;display:block;margin-bottom:8px}textarea,input,select{width:100%;border:1px solid #dce2ee;border-radius:12px;padding:13px;font-size:15px}textarea{min-height:120px}.row{display:grid;grid-template-columns:1fr 1fr;gap:12px}button{border:0;border-radius:12px;padding:13px 17px;font-weight:bold;font-size:15px;cursor:pointer}.primary{background:#5b4bff;color:white}.secondary{background:#eef0ff;color:#4b3de0}.status{padding:12px;border-radius:12px;background:#f0fdf4;color:#166534;display:none;margin-top:12px}.preview{border:8px solid #171b26;border-radius:25px;max-width:310px;margin:15px auto;background:#fff;min-height:300px;overflow:hidden}.previewHead{background:#5b4bff;color:#fff;padding:16px;font-weight:bold}.previewBody{padding:18px}.progress{height:10px;background:#e8ebf3;border-radius:10px;overflow:hidden}.bar{height:100%;width:0;background:#5b4bff;transition:width .4s}.download{display:none;margin-top:12px;text-decoration:none;text-align:center;padding:13px;border-radius:12px}.muted{color:#687386;font-size:13px}@media(max-width:650px){.row{grid-template-columns:1fr}}
-</style></head>
-<body><header><h1>🤖 AI App Builder</h1><p>बिना coding के अपना Android App तैयार करें</p></header><div class="container">
-<section class="card"><h2>✨ अपना App बनाइए</h2><label>App idea</label><textarea id="idea" placeholder="किसानों के लिए मंडी भाव और मौसम वाला app बनाओ..."></textarea><div class="row" style="margin-top:12px"><div><label>App का नाम</label><input id="appName" placeholder="Kisan Sahayata"></div><div><label>Theme</label><select id="theme"><option>Modern</option><option>Professional</option><option>Simple</option></select></div></div><button class="primary" style="width:100%;margin-top:14px" onclick="generate()">✨ AI से App Generate करें</button><div id="status" class="status"></div></section>
-<section class="card" id="builder" style="display:none"><h2>📱 Live App Preview</h2><div class="preview"><div class="previewHead" id="pname">My App</div><div class="previewBody"><h2 id="ptitle">आपका App तैयार है 🎉</h2><p id="pdesc" class="muted"></p></div></div></section>
-<section class="card"><h2>📦 Android APK Build</h2><p class="muted">AI structure तैयार होने के बाद real Android build service से APK बनेगा।</p><div class="progress"><div class="bar" id="bar"></div></div><p id="buildText" class="muted">Ready to build</p><button class="primary" onclick="buildAPK()">📱 Build APK</button><a id="downloadAPK" class="secondary download">⬇️ APK Download करें</a></section>
-</div>
-<script>
-const API='https://ai-app-builder-backend-1.onrender.com';
-async function generate(){const idea=document.getElementById('idea').value.trim(),name=document.getElementById('appName').value.trim()||'My AI App',s=document.getElementById('status');if(!idea){alert('पहले App idea लिखिए।');return}s.style.display='block';s.textContent='⏳ AI app structure बना रहा है...';try{const r=await fetch(API+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({appName:name,idea})}),d=await r.json();if(!r.ok)throw Error((d.error||'Backend error')+(d.detail?' — '+d.detail:''));const x=d.result||{};document.getElementById('pname').textContent=x.appName||name;document.getElementById('ptitle').textContent=(x.appName||name)+' तैयार है 🎉';document.getElementById('pdesc').textContent=x.summary||idea;document.getElementById('builder').style.display='block';s.textContent='✅ AI ने आपके App का structure तैयार कर दिया है।'}catch(e){s.textContent='❌ '+e.message}}
 
-async function buildAPK() {
+<!DOCTYPE html>
+<html lang="hi">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>AI App Builder</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f3f5fb;color:#172033}
+header{background:linear-gradient(135deg,#4533a8,#6e55e8);color:white;padding:24px 16px}
+header h1{margin:0 0 8px}
+main{max-width:850px;margin:18px auto;padding:0 12px 32px}
+.card{background:white;border-radius:16px;padding:18px;margin-bottom:14px;box-shadow:0 5px 22px #17203312}
+label{display:block;font-weight:bold;margin:12px 0 6px}
+input,textarea,select{width:100%;padding:12px;border:1px solid #ccd2e2;border-radius:10px;font:inherit}
+textarea{min-height:120px}
+button{border:0;border-radius:10px;padding:12px 15px;font-weight:bold;font-size:15px;cursor:pointer}
+button:disabled{opacity:.6}
+.primary{background:#5541c8;color:white}
+.secondary{background:#e9e6ff;color:#35248e}
+.buttons{display:flex;flex-wrap:wrap;gap:10px;margin-top:14px}
+#status{padding:12px;border-radius:10px;background:#f1f3f9;margin-top:12px;line-height:1.6;overflow-wrap:anywhere}
+#preview{padding:12px;overflow-wrap:anywhere}
+a{color:#35248e;font-weight:bold}
+</style>
+</head>
+<body>
+<header>
+<h1>🤖 AI App Builder</h1>
+<p>अपना ऐप आइडिया लिखें, AI से प्लान बनाएँ और APK बिल्ड करें।</p>
+</header>
+<main>
+<section class="card">
+<h2>1. अपना ऐप बनाएँ</h2>
+<label for="appName">ऐप का नाम</label>
+<input id="appName" maxlength="60" placeholder="जैसे: किसान सहायता">
+
+<label for="idea">ऐप का आइडिया</label>
+<textarea id="idea" maxlength="5000" placeholder="आप किस तरह का ऐप चाहते हैं?"></textarea>
+
+<label for="theme">डिज़ाइन</label>
+<select id="theme">
+<option value="purple">बैंगनी</option>
+<option value="blue">नीला</option>
+<option value="green">हरा</option>
+<option value="dark">डार्क</option>
+</select>
+
+<div class="buttons">
+<button class="primary" id="generateBtn">✨ AI से ऐप प्लान बनाएँ</button>
+<button class="secondary" id="buildBtn">📦 APK बनाएँ</button>
+</div>
+<div id="status" role="status">तैयार है। ऐप का नाम और आइडिया लिखें।</div>
+</section>
+
+<section class="card">
+<h2>2. AI का परिणाम</h2>
+<div id="preview">AI प्लान यहाँ दिखाई देगा।</div>
+</section>
+</main>
+
+<script>
+const API = "https://ai-app-builder-backend-1.onrender.com";
+const $ = id => document.getElementById(id);
+
+function getForm(){
+  return {
+    appName:$("appName").value.trim() || "My AI App",
+    idea:$("idea").value.trim(),
+    theme:$("theme").value
+  };
+}
+
+function showStatus(message){
+  $("status").textContent = message;
+}
+
+async function requestJSON(url, options){
+  const response = await fetch(url, options);
+  const data = await response.json().catch(() => ({}));
+
+  if(!response.ok){
+    throw new Error(data.detail || data.error || "सर्वर से जवाब नहीं मिला।");
+  }
+  return data;
+}
+
+function renderPlan(result){
+  const preview = $("preview");
+  preview.replaceChildren();
+
+  const heading = document.createElement("h3");
+  heading.textContent = result.appName || getForm().appName;
+  preview.appendChild(heading);
+
+  const summary = document.createElement("p");
+  summary.textContent = result.summary || "AI ने प्लान बनाया।";
+  preview.appendChild(summary);
+
+  const sections = [
+    ["पेज", result.pages],
+    ["मुख्य सुविधाएँ", result.features],
+    ["डेटा मॉडल", result.dataModels],
+    ["अगले कदम", result.nextSteps]
+  ];
+
+  for(const [title, items] of sections){
+    if(!Array.isArray(items) || !items.length) continue;
+
+    const h = document.createElement("h3");
+    h.textContent = title;
+    preview.appendChild(h);
+
+    const ul = document.createElement("ul");
+    for(const item of items){
+      const li = document.createElement("li");
+      li.textContent = typeof item === "object"
+        ? `${item.name || ""} ${item.purpose || ""}`
+        : String(item);
+      ul.appendChild(li);
+    }
+    preview.appendChild(ul);
+  }
+}
+
+async function generate(){
   const form = getForm();
-  if (!form.idea) {
-    showStatus("पहले अपने ऐप का आइडिया लिखें।");
+  if(!form.idea){
+    showStatus("पहले ऐप का आइडिया लिखें।");
+    return;
+  }
+
+  $("generateBtn").disabled = true;
+  showStatus("⏳ AI से प्लान माँगा जा रहा है...");
+
+  try{
+    const data = await requestJSON(`${API}/api/generate`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(form)
+    });
+
+    if(!data.result){
+      throw new Error("AI प्लान नहीं मिला।");
+    }
+
+    renderPlan(data.result);
+    showStatus("✅ AI प्लान बन गया।");
+  }catch(error){
+    showStatus("❌ AI प्लान नहीं बन पाया: " + error.message);
+  }finally{
+    $("generateBtn").disabled = false;
+  }
+}
+
+async function buildAPK(){
+  const form = getForm();
+
+  if(!form.idea){
+    showStatus("पहले ऐप का आइडिया लिखें।");
     return;
   }
 
   $("buildBtn").disabled = true;
-  showStatus("⏳ APK बिल्ड शुरू हो रहा है...");
 
-  try {
-    const response = await fetch(`${API}/api/build`, {
-      method: "POST",
-      headers: {"Content-Type": "application/json"},
-      body: JSON.stringify(form)
+  try{
+    showStatus("⏳ GitHub पर APK बिल्ड शुरू हो रहा है...");
+
+    await requestJSON(`${API}/api/build`, {
+      method:"POST",
+      headers:{"Content-Type":"application/json"},
+      body:JSON.stringify(form)
     });
 
-    const data = await response.json();
-
-    if (!response.ok) {
-      throw new Error(data.error || data.detail || "बिल्ड शुरू नहीं हुआ।");
-    }
-
-    showStatus("⏳ APK बन रही है। कृपया इंतज़ार करें...");
-
-    for (let i = 0; i < 120; i++) {
+    for(let i=0; i<120; i++){
       await new Promise(resolve => setTimeout(resolve, 5000));
 
-      const statusResponse = await fetch(`${API}/api/build-status`);
-      const statusData = await statusResponse.json();
+      const status = await requestJSON(`${API}/api/build-status`);
 
-      if (!statusResponse.ok) {
-        throw new Error(statusData.error || statusData.detail || "स्थिति नहीं मिली।");
-      }
-
-      if (statusData.status === "completed") {
-        if (statusData.conclusion === "success" && statusData.downloadUrl) {
-          showStatus("✅ APK तैयार है! नीचे डाउनलोड लिंक दबाएँ:");
+      if(status.status === "completed"){
+        if(status.conclusion === "success" && status.downloadUrl){
+          showStatus("✅ APK तैयार है!");
 
           const link = document.createElement("a");
-          link.href = statusData.downloadUrl;
+          link.href = status.downloadUrl;
           link.textContent = "⬇️ APK डाउनलोड करें (ZIP)";
           link.target = "_blank";
           link.rel = "noopener noreferrer";
@@ -61,17 +192,22 @@ async function buildAPK() {
           return;
         }
 
-        throw new Error("APK बिल्ड असफल हुआ। GitHub Actions में बिल्ड देखें।");
+        throw new Error("APK बिल्ड असफल हुआ। GitHub Actions देखें।");
       }
 
-      showStatus("⏳ APK बन रही है... " + ((i + 1) * 5) + " सेकंड");
+      showStatus("⏳ APK बन रही है... " + ((i+1)*5) + " सेकंड");
     }
 
-    showStatus("बिल्ड में अधिक समय लग रहा है। GitHub Actions में स्थिति देखें।");
-
-  } catch (err) {
-    showStatus("❌ " + err.message);
-  } finally {
+    showStatus("बिल्ड में समय लग रहा है। GitHub Actions में स्थिति देखें।");
+  }catch(error){
+    showStatus("❌ APK बिल्ड की समस्या: " + error.message);
+  }finally{
     $("buildBtn").disabled = false;
   }
 }
+
+$("generateBtn").addEventListener("click", generate);
+$("buildBtn").addEventListener("click", buildAPK);
+</script>
+</body>
+</html>
