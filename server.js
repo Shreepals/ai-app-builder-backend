@@ -241,7 +241,7 @@ app.get("/api/build-status", async (_req, res) => {
 
     const artifactData = await artifactResponse.json();
     const artifact = (artifactData.artifacts || []).find(item =>
-      item.name === "AI-App-Builder-APK" && !item.expired
+      item.name === "myaap-apk" && !item.expired
     );
 
     if (!artifact) {
