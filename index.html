@@ -11,5 +11,67 @@
 <script>
 const API='https://ai-app-builder-backend-1.onrender.com';
 async function generate(){const idea=document.getElementById('idea').value.trim(),name=document.getElementById('appName').value.trim()||'My AI App',s=document.getElementById('status');if(!idea){alert('पहले App idea लिखिए।');return}s.style.display='block';s.textContent='⏳ AI app structure बना रहा है...';try{const r=await fetch(API+'/api/generate',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({appName:name,idea})}),d=await r.json();if(!r.ok)throw Error((d.error||'Backend error')+(d.detail?' — '+d.detail:''));const x=d.result||{};document.getElementById('pname').textContent=x.appName||name;document.getElementById('ptitle').textContent=(x.appName||name)+' तैयार है 🎉';document.getElementById('pdesc').textContent=x.summary||idea;document.getElementById('builder').style.display='block';s.textContent='✅ AI ने आपके App का structure तैयार कर दिया है।'}catch(e){s.textContent='❌ '+e.message}}
-async function buildAPK(){const idea=document.getElementById('idea').value.trim(),name=document.getElementById('appName').value.trim()||'My AI App',bar=document.getElementById('bar'),t=document.getElementById('buildText'),a=document.getElementById('downloadAPK');if(!idea){alert('पहले App Generate करें।');return}a.style.display='none';bar.style.width='10%';t.textContent='⏳ APK build शुरू हो रहा है...';try{const r=await fetch(API+'/api/build',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({appName:name,idea,theme:document.getElementById('theme').value})}),d=await r.json();if(!r.ok)throw Error((d.error||'Build error')+(d.detail?' — '+d.detail:''));bar.style.width='100%';t.textContent='✅ APK तैयार है।';if(d.downloadUrl){a.href=d.downloadUrl;a.style.display='block'}}catch(e){bar.style.width='0%';t.textContent='❌ '+e.message}}
-</script></body></html>
+
+async function buildAPK() {
+  const form = getForm();
+  if (!form.idea) {
+    showStatus("पहले अपने ऐप का आइडिया लिखें।");
+    return;
+  }
+
+  $("buildBtn").disabled = true;
+  showStatus("⏳ APK बिल्ड शुरू हो रहा है...");
+
+  try {
+    const response = await fetch(`${API}/api/build`, {
+      method: "POST",
+      headers: {"Content-Type": "application/json"},
+      body: JSON.stringify(form)
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || data.detail || "बिल्ड शुरू नहीं हुआ।");
+    }
+
+    showStatus("⏳ APK बन रही है। कृपया इंतज़ार करें...");
+
+    for (let i = 0; i < 120; i++) {
+      await new Promise(resolve => setTimeout(resolve, 5000));
+
+      const statusResponse = await fetch(`${API}/api/build-status`);
+      const statusData = await statusResponse.json();
+
+      if (!statusResponse.ok) {
+        throw new Error(statusData.error || statusData.detail || "स्थिति नहीं मिली।");
+      }
+
+      if (statusData.status === "completed") {
+        if (statusData.conclusion === "success" && statusData.downloadUrl) {
+          showStatus("✅ APK तैयार है! नीचे डाउनलोड लिंक दबाएँ:");
+
+          const link = document.createElement("a");
+          link.href = statusData.downloadUrl;
+          link.textContent = "⬇️ APK डाउनलोड करें (ZIP)";
+          link.target = "_blank";
+          link.rel = "noopener noreferrer";
+          $("status").appendChild(document.createElement("br"));
+          $("status").appendChild(link);
+          return;
+        }
+
+        throw new Error("APK बिल्ड असफल हुआ। GitHub Actions में बिल्ड देखें।");
+      }
+
+      showStatus("⏳ APK बन रही है... " + ((i + 1) * 5) + " सेकंड");
+    }
+
+    showStatus("बिल्ड में अधिक समय लग रहा है। GitHub Actions में स्थिति देखें।");
+
+  } catch (err) {
+    showStatus("❌ " + err.message);
+  } finally {
+    $("buildBtn").disabled = false;
+  }
+}
