@@ -289,7 +289,7 @@ app.get("/api/apk-download", async (req, res) => {
 
     const data = await artifactResponse.json();
     const artifact = (data.artifacts || []).find(item =>
-      item.name === "AI-App-Builder-APK" && !item.expired
+      item.name === "myaap-apk" && !item.expired
     );
 
     if (!artifact) {
