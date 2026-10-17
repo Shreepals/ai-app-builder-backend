@@ -239,10 +239,10 @@ app.get("/api/build-status", async (_req, res) => {
       });
     }
 
-    const artifactData = await artifactResponse.json();
-    const artifact = (artifactData.artifacts || []).find(item =>
-     item.name === "Myapp-APK" && !item.expired
-      );
+    const data = await artifactResponse.json();
+    const artifact = (data.artifacts || []).find(item =>
+    item.name === "Myapp-APK" && !item.expired
+     );
 
 
     if (!artifact) {
