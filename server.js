@@ -288,7 +288,6 @@ app.get("/api/apk-download", async (req, res) => {
       });
     }
 
-    const data = await artifactResponse.json();
 
       console.log("RUN ID:", runId);
       console.log(
