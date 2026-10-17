@@ -289,9 +289,22 @@ app.get("/api/apk-download", async (req, res) => {
     }
 
     const data = await artifactResponse.json();
-    const artifact = (data.artifacts || []).find(item =>
-      item.name === "myaap-apk" && !item.expired
-    );
+
+      console.log("RUN ID:", runId);
+      console.log(
+     "GITHUB ARTIFACTS:",
+      JSON.stringify(
+      (data.artifacts || []).map(a => ({
+      id: a.id,
+      name: a.name,
+      expired: a.expired
+       }))
+      )
+     );
+
+const artifact = (data.artifacts || []).find(item =>
+  item.name === "Myapp-APK" && !item.expired
+);
 
     if (!artifact) {
       return res.status(404).json({
