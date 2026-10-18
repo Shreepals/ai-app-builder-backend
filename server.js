@@ -182,10 +182,12 @@ app.post("/api/build", async (req, res) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-          ref: "main"
-        })
-      }
-    );
+      ref: "main",
+      inputs: {
+    idea: idea,
+    app_name: appName
+  }
+})
 
     if (!response.ok) {
       return res.status(502).json({
