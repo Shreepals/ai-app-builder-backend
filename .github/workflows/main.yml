@@ -1,36 +1,125 @@
+
+
+
 name: Build Android APK
 
 on:
   workflow_dispatch:
+    inputs:
+      idea:
+        description: "App idea"
+        required: true
+        type: string
+      app_name:
+        description: "App name"
+        required: false
+        default: "My AI App"
+        type: string
+
+permissions:
+  contents: read
 
 jobs:
   build-apk:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout
+      - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Android SDK
-        run: |
-          export ANDROID_HOME=/usr/local/lib/android/sdk
-          export ANDROID_SDK_ROOT=/usr/local/lib/android/sdk
-          echo "ANDROID_HOME=$ANDROID_HOME" >> $GITHUB_ENV
-          echo "ANDROID_SDK_ROOT=$ANDROID_SDK_ROOT" >> $GITHUB_ENV
-          echo "$ANDROID_HOME/cmdline-tools/latest/bin" >> $GITHUB_PATH
-          echo "$ANDROID_HOME/platform-tools" >> $GITHUB_PATH
-      - name: Accept Android licenses
-        run: |
-          yes | sdkmanager --licenses > /dev/null || true
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
       - name: Install Android SDK packages
         run: |
+          yes | sdkmanager --licenses
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Generate app from idea using Gemini
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          APP_IDEA: ${{ inputs.idea }}
+          APP_NAME: ${{ inputs.app_name }}
+        run: |
+          set -e
+
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "Missing GEMINI_API_KEY repository secret."
+            exit 1
+          fi
+
+          mkdir -p app/src/main/assets
+
+          PROMPT=$(cat <<EOF
+          Create a complete, working, mobile-friendly app using HTML, CSS and JavaScript.
+          App name: $APP_NAME
+          User idea: $APP_IDEA
+
+          Requirements:
+          - Build the app described by the user idea, not an AI builder website.
+          - Return only a complete standalone HTML document.
+          - Include all CSS and JavaScript inside the HTML.
+          - Make buttons and core features functional.
+          - Use a responsive mobile-first layout.
+          - Avoid external libraries and external dependencies.
+          - Do not include markdown code fences.
+          - Do not claim unsupported features work.
+          EOF
+          )
+
+          PAYLOAD=$(jq -n --arg prompt "$PROMPT" '{
+            contents: [{parts: [{text: $prompt}]}],
+            generationConfig: {temperature: 0.2}
+          }')
+
+          RESPONSE=$(curl --fail-with-body -sS \
+            -X POST \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent" \
+            -H "Content-Type: application/json" \
+            -H "x-goog-api-key: $GEMINI_API_KEY" \
+            -d "$PAYLOAD")
+
+          HTML=$(printf '%s' "$RESPONSE" | jq -r \
+            '[.candidates[0].content.parts[]?.text // ""] | join("\n")')
+
+          if [ -z "$HTML" ] || [ "$HTML" = "null" ]; then
+            echo "Gemini did not generate the app."
+            printf '%s' "$RESPONSE" | jq .
+            exit 1
+          fi
+
+          GENERATED_HTML="$HTML" node <<'NODE'
+          const fs = require("fs");
+
+          let html = process.env.GENERATED_HTML || "";
+          html = html
+            .replace(/^```(?:html)?\s*/i, "")
+            .replace(/\s*```$/, "")
+            .trim();
+
+          if (!/<html[\s>]|<!doctype html/i.test(html)) {
+            throw new Error("Gemini output is not a complete HTML document.");
+          }
+
+          fs.writeFileSync(
+            "app/src/main/assets/index.html",
+            html,
+            "utf8"
+          );
+
+          console.log("Generated app HTML successfully.");
+          NODE
+
       - name: Create Android project
         run: |
-          mkdir -p app/src/main/java/com/aibuilder/app
-          mkdir -p app/src/main/assets
-          mkdir -p app/src/main/res/values
-          cp index.html app/src/main/assets/index.html
+          mkdir -p app/src/main/java/com/example/myapp
+
           cat > settings.gradle <<'EOF'
           pluginManagement {
               repositories {
@@ -46,23 +135,27 @@ jobs:
                   mavenCentral()
               }
           }
-          rootProject.name = "AIAppBuilder"
+          rootProject.name = "MyApp"
           include(":app")
           EOF
+
           cat > build.gradle <<'EOF'
           plugins {
               id 'com.android.application' version '8.7.3' apply false
           }
           EOF
+
           cat > app/build.gradle <<'EOF'
           plugins {
               id 'com.android.application'
           }
+
           android {
-              namespace 'com.aibuilder.app'
+              namespace 'com.example.myapp'
               compileSdk 35
+
               defaultConfig {
-                  applicationId 'com.aibuilder.app'
+                  applicationId 'com.example.myapp'
                   minSdk 23
                   targetSdk 35
                   versionCode 1
@@ -70,61 +163,58 @@ jobs:
               }
           }
           EOF
-          cat > app/src/main/res/values/styles.xml <<'EOF'
-          <resources>
-              <style name="AppTheme"
-                  parent="android:style/Theme.Material.Light.NoActionBar">
-                  <item name="android:fontFamily">sans</item>
-                  <item name="android:colorAccent">#6750A4</item>
-              </style>
-          </resources>
-          EOF
+
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
-              <uses-permission android:name="android.permission.INTERNET"/>
+              <uses-permission android:name="android.permission.INTERNET" />
               <application
-                  android:theme="@style/AppTheme"
-                  android:label="AI App Builder">
+                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
+                  android:label="AI Generated App"
+                  android:usesCleartextTraffic="true">
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
                       <intent-filter>
-                          <action android:name="android.intent.action.MAIN"/>
-                          <category android:name="android.intent.category.LAUNCHER"/>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
                       </intent-filter>
                   </activity>
               </application>
           </manifest>
           EOF
-          cat > app/src/main/java/com/aibuilder/app/MainActivity.java <<'EOF'
-          package com.aibuilder.app;
+
+          cat > app/src/main/java/com/example/myapp/MainActivity.java <<'EOF'
+          package com.example.myapp;
+
           import android.app.Activity;
           import android.os.Bundle;
-          import android.webkit.WebSettings;
           import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+
           public class MainActivity extends Activity {
               @Override
-              protected void onCreate(Bundle savedInstanceState) {
+              public void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
-                  WebView webView = new WebView(this);
-                  WebSettings settings = webView.getSettings();
-                  settings.setJavaScriptEnabled(true);
-                  settings.setDomStorageEnabled(true);
-                  webView.loadUrl("file:///android_asset/index.html");
-                  setContentView(webView);
+
+                  WebView web = new WebView(this);
+                  web.getSettings().setJavaScriptEnabled(true);
+                  web.getSettings().setDomStorageEnabled(true);
+                  web.setWebViewClient(new WebViewClient());
+                  setContentView(web);
+                  web.loadUrl("file:///android_asset/index.html");
               }
           }
           EOF
-      - name: Install Gradle
-        run: |
-          wget -q https://services.gradle.org/distributions/gradle-8.9-bin.zip
-          unzip -q gradle-8.9-bin.zip
-          echo "$PWD/gradle-8.9/bin" >> $GITHUB_PATH
-      - name: Build APK
-        run: |
-          gradle assembleDebug --no-daemon
+
+          echo "org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8" > gradle.properties
+
+          wget -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -O /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+          /tmp/gradle-8.9/bin/gradle assembleDebug --no-daemon
+
       - name: Upload APK
         uses: actions/upload-artifact@v4
         with:
           name: Myapp-APK
           path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
