@@ -1,4 +1,4 @@
-
+````javascript
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -9,14 +9,16 @@ app.use(express.json({ limit: "1mb" }));
 
 const port = Number(process.env.PORT || 10000);
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY || "";
-const GEMINI_MODEL = process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
+const GEMINI_MODEL =
+  process.env.GEMINI_MODEL || "gemini-3.1-flash-lite";
 const GH_ACTIONS_TOKEN = process.env.GH_ACTIONS_TOKEN || "";
 
 const OWNER = "Shreepals";
 const REPO = "ai-app-builder-backend";
 const WORKFLOW = "main.yml";
 const API_BASE = "https://api.github.com";
-const BACKEND_URL = "https://ai-app-builder-backend-1.onrender.com";
+const BACKEND_URL =
+  "https://ai-app-builder-backend-1.onrender.com";
 
 let lastBuildRequestedAt = 0;
 
@@ -32,10 +34,15 @@ async function github(path, options = {}) {
   });
 }
 
+// Home
 app.get("/", (_req, res) => {
-  res.json({ ok: true, service: "AI App Builder Gemini Backend" });
+  res.json({
+    ok: true,
+    service: "AI App Builder Gemini Backend"
+  });
 });
 
+// Health check
 app.get("/health", (_req, res) => {
   res.json({
     ok: true,
@@ -45,13 +52,18 @@ app.get("/health", (_req, res) => {
   });
 });
 
+// Generate app specification using Gemini
 app.post("/api/generate", async (req, res) => {
   try {
     const idea = String(req.body?.idea || "").trim();
-    const appName = String(req.body?.appName || "My AI App").trim();
+    const appName = String(
+      req.body?.appName || "My AI App"
+    ).trim();
 
     if (!idea) {
-      return res.status(400).json({ error: "App idea is required." });
+      return res.status(400).json({
+        error: "App idea is required."
+      });
     }
 
     if (!GEMINI_API_KEY) {
@@ -69,7 +81,9 @@ App name: ${appName}
 App idea: ${idea}`;
 
     const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(GEMINI_MODEL)}:generateContent`,
+      `https://generativelanguage.googleapis.com/v1beta/models/${encodeURIComponent(
+        GEMINI_MODEL
+      )}:generateContent`,
       {
         method: "POST",
         headers: {
@@ -78,7 +92,10 @@ App idea: ${idea}`;
         },
         body: JSON.stringify({
           contents: [
-            { role: "user", parts: [{ text: prompt }] }
+            {
+              role: "user",
+              parts: [{ text: prompt }]
+            }
           ],
           generationConfig: {
             responseMimeType: "application/json",
@@ -93,11 +110,14 @@ App idea: ${idea}`;
     if (!response.ok) {
       return res.status(502).json({
         error: "Gemini API request failed.",
-        detail: data?.error?.message || "Unknown Gemini error"
+        detail:
+          data?.error?.message || "Unknown Gemini error"
       });
     }
 
-    const output = (data?.candidates?.[0]?.content?.parts || [])
+    const output = (
+      data?.candidates?.[0]?.content?.parts || []
+    )
       .map(part => part.text || "")
       .join("")
       .trim();
@@ -109,19 +129,25 @@ App idea: ${idea}`;
     }
 
     let result;
+
     try {
       result = JSON.parse(
-        output.replace(/^```(?:json)?\s*/i, "")
+        output
+          .replace(/^```(?:json)?\s*/i, "")
           .replace(/\s*```$/, "")
           .trim()
       );
     } catch {
       return res.status(502).json({
-        error: "Gemini returned invalid JSON. Please try again."
+        error:
+          "Gemini returned invalid JSON. Please try again."
       });
     }
 
-    return res.json({ ok: true, result });
+    return res.json({
+      ok: true,
+      result
+    });
   } catch (error) {
     return res.status(500).json({
       error: "AI generation failed.",
@@ -130,17 +156,21 @@ App idea: ${idea}`;
   }
 });
 
+// Start APK build
 app.post("/api/build", async (req, res) => {
   try {
     const idea = String(req.body?.idea || "").trim();
 
     if (!idea) {
-      return res.status(400).json({ error: "App idea is required." });
+      return res.status(400).json({
+        error: "App idea is required."
+      });
     }
 
     if (!GH_ACTIONS_TOKEN) {
       return res.status(503).json({
-        error: "GitHub Actions token is not configured in Render."
+        error:
+          "GitHub Actions token is not configured in Render."
       });
     }
 
@@ -148,8 +178,12 @@ app.post("/api/build", async (req, res) => {
       `/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`,
       {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ ref: "main" })
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          ref: "main"
+        })
       }
     );
 
@@ -164,7 +198,8 @@ app.post("/api/build", async (req, res) => {
 
     return res.status(202).json({
       ok: true,
-      message: "APK build started. Please wait for the build to finish."
+      message:
+        "APK build started. Please wait for the build to finish."
     });
   } catch (error) {
     return res.status(500).json({
@@ -174,11 +209,13 @@ app.post("/api/build", async (req, res) => {
   }
 });
 
+// Check APK build status
 app.get("/api/build-status", async (_req, res) => {
   try {
     if (!GH_ACTIONS_TOKEN) {
       return res.status(503).json({
-        error: "GitHub Actions token is not configured in Render."
+        error:
+          "GitHub Actions token is not configured in Render."
       });
     }
 
@@ -198,7 +235,8 @@ app.get("/api/build-status", async (_req, res) => {
 
     const run = runs.find(item =>
       lastBuildRequestedAt
-        ? new Date(item.created_at).getTime() >= lastBuildRequestedAt
+        ? new Date(item.created_at).getTime() >=
+          lastBuildRequestedAt
         : true
     );
 
@@ -206,7 +244,8 @@ app.get("/api/build-status", async (_req, res) => {
       return res.json({
         ok: true,
         status: "not_found",
-        message: "Build not found yet. Please wait and try again."
+        message:
+          "Build not found yet. Please wait and try again."
       });
     }
 
@@ -224,7 +263,8 @@ app.get("/api/build-status", async (_req, res) => {
     }
 
     if (run.conclusion !== "success") {
-      result.message = "Build failed. Open the GitHub Actions run to check the error.";
+      result.message =
+        "Build failed. Open the GitHub Actions run to check the error.";
       return res.json(result);
     }
 
@@ -234,24 +274,29 @@ app.get("/api/build-status", async (_req, res) => {
 
     if (!artifactResponse.ok) {
       return res.status(502).json({
-        error: "Build succeeded, but artifacts could not be checked.",
+        error:
+          "Build succeeded, but artifacts could not be checked.",
         detail: await artifactResponse.text()
       });
     }
 
-    const data = await artifactResponse.json();
-    const artifact = (data.artifacts || []).find(item =>
-    item.name === "Myapp-APK" && !item.expired
-     );
+    // FIX: Use artifactData instead of declaring data again.
+    const artifactData = await artifactResponse.json();
 
+    const artifact = (artifactData.artifacts || []).find(
+      item =>
+        item.name === "Myapp-APK" && !item.expired
+    );
 
     if (!artifact) {
-      result.message = "Build finished, but the APK artifact was not found.";
+      result.message =
+        "Build finished, but the APK artifact was not found.";
       return res.json(result);
     }
 
     result.downloadUrl =
       `${BACKEND_URL}/api/apk-download?run_id=${run.id}`;
+
     result.message = "APK is ready to download.";
 
     return res.json(result);
@@ -263,18 +308,22 @@ app.get("/api/build-status", async (_req, res) => {
   }
 });
 
+// Download APK artifact as ZIP
 app.get("/api/apk-download", async (req, res) => {
   try {
     if (!GH_ACTIONS_TOKEN) {
       return res.status(503).json({
-        error: "GitHub Actions token is not configured in Render."
+        error:
+          "GitHub Actions token is not configured in Render."
       });
     }
 
     const runId = String(req.query.run_id || "");
 
     if (!/^\d+$/.test(runId)) {
-      return res.status(400).json({ error: "Invalid build run ID." });
+      return res.status(400).json({
+        error: "Invalid build run ID."
+      });
     }
 
     const artifactResponse = await github(
@@ -288,22 +337,25 @@ app.get("/api/apk-download", async (req, res) => {
       });
     }
 
+    // FIX: Parse the artifacts response before using it.
+    const artifactData = await artifactResponse.json();
 
-      console.log("RUN ID:", runId);
-      console.log(
-     "GITHUB ARTIFACTS:",
+    console.log("RUN ID:", runId);
+    console.log(
+      "GITHUB ARTIFACTS:",
       JSON.stringify(
-      (data.artifacts || []).map(a => ({
-      id: a.id,
-      name: a.name,
-      expired: a.expired
-       }))
+        (artifactData.artifacts || []).map(a => ({
+          id: a.id,
+          name: a.name,
+          expired: a.expired
+        }))
       )
-     );
+    );
 
-  const artifact = (artifactData.artifacts || []).find(item =>
-  item.name === "Myapp-APK" && !item.expired
-   );
+    const artifact = (artifactData.artifacts || []).find(
+      item =>
+        item.name === "Myapp-APK" && !item.expired
+    );
 
     if (!artifact) {
       return res.status(404).json({
@@ -322,13 +374,20 @@ app.get("/api/apk-download", async (req, res) => {
       });
     }
 
-    const zip = Buffer.from(await zipResponse.arrayBuffer());
+    const zip = Buffer.from(
+      await zipResponse.arrayBuffer()
+    );
 
-    res.setHeader("Content-Type", "application/zip");
+    res.setHeader(
+      "Content-Type",
+      "application/zip"
+    );
+
     res.setHeader(
       "Content-Disposition",
       'attachment; filename="AI-App-Builder-APK.zip"'
     );
+
     return res.send(zip);
   } catch (error) {
     return res.status(500).json({
@@ -338,6 +397,10 @@ app.get("/api/apk-download", async (req, res) => {
   }
 });
 
+// Start server
 app.listen(port, "0.0.0.0", () => {
-  console.log("Gemini backend running on port " + port);
+  console.log(
+    "Gemini backend running on port " + port
+  );
 });
+````
