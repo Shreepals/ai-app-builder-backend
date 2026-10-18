@@ -1,4 +1,4 @@
-````javascript
+
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
@@ -403,4 +403,3 @@ app.listen(port, "0.0.0.0", () => {
     "Gemini backend running on port " + port
   );
 });
-````
