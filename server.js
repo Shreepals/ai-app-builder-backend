@@ -167,6 +167,7 @@ app.post("/api/build", async (req, res) => {
       });
     }
 
+  
     if (!GH_ACTIONS_TOKEN) {
       return res.status(503).json({
         error:
@@ -182,12 +183,14 @@ app.post("/api/build", async (req, res) => {
           "Content-Type": "application/json"
         },
         body: JSON.stringify({
-      ref: "main",
-      inputs: {
-    idea: idea,
-    app_name: appName
-  }
-})
+          ref: "main",
+          inputs: {
+            idea: idea,
+            app_name: appName
+          }
+        })
+      }
+    );
 
     if (!response.ok) {
       return res.status(502).json({
@@ -202,7 +205,7 @@ app.post("/api/build", async (req, res) => {
       ok: true,
       message:
         "APK build started. Please wait for the build to finish."
-    });
+    });  
   } catch (error) {
     return res.status(500).json({
       error: "APK build request failed.",
