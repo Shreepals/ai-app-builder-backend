@@ -156,10 +156,15 @@ App idea: ${idea}`;
   }
 });
 
-// Start APK build
+
+ // Start APK build
 app.post("/api/build", async (req, res) => {
   try {
     const idea = String(req.body?.idea || "").trim();
+
+    const appName = String(
+      req.body?.appName || "My AI App"
+    ).trim();
 
     if (!idea) {
       return res.status(400).json({
