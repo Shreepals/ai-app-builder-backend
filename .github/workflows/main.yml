@@ -1,5 +1,4 @@
-
-
+ 
 
 name: Build Android APK
 
@@ -22,9 +21,6 @@ permissions:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
-    env:
-      ANDROID_HOME: /usr/local/lib/android/sdk
-      ANDROID_SDK_ROOT: /usr/local/lib/android/sdk
 
     steps:
       - name: Checkout repository
@@ -36,35 +32,38 @@ jobs:
           distribution: temurin
           java-version: "17"
 
-      - name: Install Android SDK
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Install Android packages
         run: |
           set -e
-          SDKMANAGER=$(find "$ANDROID_HOME/cmdline-tools" -type f -name sdkmanager | head -n 1)
-          if [ -z "$SDKMANAGER" ]; then
-            echo "sdkmanager not found"
-            exit 1
-          fi
-          export PATH="$(dirname "$SDKMANAGER"):$ANDROID_HOME/platform-tools:$PATH"
-          yes | "$SDKMANAGER" --licenses || true
-          "$SDKMANAGER" "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+          yes | sdkmanager --licenses
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Generate app with Gemini
+      - name: Generate app using Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           APP_IDEA: ${{ inputs.idea }}
           APP_NAME: ${{ inputs.app_name }}
         run: |
           set -e
-          test -n "$GEMINI_API_KEY" || (echo "Missing GEMINI_API_KEY secret" && exit 1)
+
+          if [ -z "$GEMINI_API_KEY" ]; then
+            echo "Missing GEMINI_API_KEY repository secret"
+            exit 1
+          fi
+
           mkdir -p app/src/main/assets
 
           PROMPT=$(cat <<EOF
-          Create a complete, functional, mobile-first HTML app.
+          Create a complete mobile-friendly app in HTML, CSS and JavaScript.
           App name: $APP_NAME
           App idea: $APP_IDEA
-          Return only a complete HTML document with inline CSS and JavaScript.
-          Build the requested app, not an app builder.
-          Make the main features and buttons work.
+          Return a complete standalone HTML document only.
+          Make the requested app, not an app builder.
+          Make core buttons and features work.
+          Put CSS and JavaScript inside the HTML.
           Do not use external libraries or markdown fences.
           EOF
           )
@@ -81,11 +80,12 @@ jobs:
             -H "x-goog-api-key: $GEMINI_API_KEY" \
             -d "$PAYLOAD")
 
-          printf '%s' "$RESPONSE" > /tmp/gemini-response.json
-          HTML=$(jq -r '[.candidates[0].content.parts[]?.text // ""] | join("\n")' /tmp/gemini-response.json)
+          HTML=$(printf '%s' "$RESPONSE" | jq -r \
+            '[.candidates[0].content.parts[]?.text // ""] | join("\n")')
 
           if [ -z "$HTML" ] || [ "$HTML" = "null" ]; then
-            cat /tmp/gemini-response.json
+            echo "Gemini did not return app HTML"
+            printf '%s' "$RESPONSE" | jq .
             exit 1
           fi
 
@@ -93,11 +93,12 @@ jobs:
           const fs = require("fs");
           let html = process.env.GENERATED_HTML || "";
           html = html.replace(/^```(?:html)?\s*/i, "").replace(/\s*```$/, "").trim();
+
           if (!/<html[\s>]|<!doctype html/i.test(html)) {
-            throw new Error("Gemini did not return a complete HTML document.");
+            throw new Error("Gemini output is not a complete HTML document");
           }
+
           fs.writeFileSync("app/src/main/assets/index.html", html, "utf8");
-          console.log("Generated app HTML successfully.");
           NODE
 
       - name: Create Android project
@@ -138,6 +139,7 @@ jobs:
           android {
               namespace 'com.example.myapp'
               compileSdk 35
+
               defaultConfig {
                   applicationId 'com.example.myapp'
                   minSdk 23
@@ -153,8 +155,7 @@ jobs:
               <uses-permission android:name="android.permission.INTERNET" />
               <application
                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:label="AI Generated App"
-                  android:usesCleartextTraffic="true">
+                  android:label="AI Generated App">
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
