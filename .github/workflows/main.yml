@@ -1,5 +1,4 @@
 
- 
 
 name: Build Android APK
 
@@ -7,12 +6,12 @@ on:
   workflow_dispatch:
     inputs:
       idea:
-        description: "App idea"
+        description: "Describe the app you want to build"
         required: true
         type: string
       app_name:
         description: "App name"
-        required: false
+        required: true
         default: "My AI App"
         type: string
 
@@ -34,12 +33,12 @@ jobs:
           java-version: "17"
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Install Android packages
         run: |
           set -e
-          yes | sdkmanager --licenses
+          sdkmanager --licenses
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
       - name: Generate app using Gemini
@@ -57,55 +56,59 @@ jobs:
 
           mkdir -p app/src/main/assets
 
-          PROMPT=$(cat <<EOF
-          Create a complete mobile-friendly app in HTML, CSS and JavaScript.
-          App name: $APP_NAME
-          App idea: $APP_IDEA
-          Return a complete standalone HTML document only.
-          Make the requested app, not an app builder.
-          Make core buttons and features work.
-          Put CSS and JavaScript inside the HTML.
-          Do not use external libraries or markdown fences.
-          EOF
-          )
+          jq -n \
+            --arg idea "$APP_IDEA" \
+            --arg name "$APP_NAME" \
+            '{
+              system_instruction: {
+                parts: [{
+                  text: "You are an expert mobile web app developer. Create a complete, functional, self-contained HTML app for Android WebView. Use inline HTML, CSS and JavaScript only. Make the app specifically match the user idea and app name. Make buttons work, provide a mobile-friendly interface, and use localStorage when suitable. Do not return explanations or Markdown fences. Return only the complete HTML document. Do not claim that unavailable APIs or online services work."
+                }]
+              },
+              contents: [{
+                parts: [{
+                  text: ("App name: " + $name + "\nUser app idea: " + $idea + "\nBuild the actual app described above, not a calculator or generic template.")
+                }]
+              }],
+              generationConfig: {
+                temperature: 0.4,
+                maxOutputTokens: 8192
+              }
+            }' > request.json
 
-          PAYLOAD=$(jq -n --arg prompt "$PROMPT" '{
-            contents: [{parts: [{text: $prompt}]}],
-            generationConfig: {temperature: 0.2}
-          }')
-
-          RESPONSE=$(curl --fail-with-body -sS \
+          curl --fail-with-body --silent --show-error \
+            --retry 2 \
+            --max-time 180 \
             -X POST \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent" \
+            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GEMINI_API_KEY}" \
             -H "Content-Type: application/json" \
-            -H "x-goog-api-key: $GEMINI_API_KEY" \
-            -d "$PAYLOAD")
+            -d @request.json \
+            -o response.json
 
-          HTML=$(printf '%s' "$RESPONSE" | jq -r \
-            '[.candidates[0].content.parts[]?.text // ""] | join("\n")')
+          HTML="$(jq -r '[.candidates[0].content.parts[]?.text // empty] | join("\n")' response.json)"
 
           if [ -z "$HTML" ] || [ "$HTML" = "null" ]; then
-            echo "Gemini did not return app HTML"
-            printf '%s' "$RESPONSE" | jq .
+            echo "Gemini did not return HTML."
+            cat response.json
             exit 1
           fi
 
-          GENERATED_HTML="$HTML" node <<'NODE'
-          const fs = require("fs");
-          let html = process.env.GENERATED_HTML || "";
-          html = html.replace(/^```(?:html)?\s*/i, "").replace(/\s*```$/, "").trim();
+          HTML="$(printf '%s' "$HTML" | sed '/^```html[[:space:]]*$/Id; /^```[[:space:]]*$/d')"
 
-          if (!/<html[\s>]|<!doctype html/i.test(html)) {
-            throw new Error("Gemini output is not a complete HTML document");
-          }
+          printf '%s\n' "$HTML" > app/src/main/assets/index.html
 
-          fs.writeFileSync("app/src/main/assets/index.html", html, "utf8");
-          NODE
+          if ! grep -qi '<html' app/src/main/assets/index.html; then
+            echo "Generated content is not a complete HTML document."
+            exit 1
+          fi
 
       - name: Create Android project
+        env:
+          APP_NAME: ${{ inputs.app_name }}
         run: |
           set -e
-          mkdir -p app/src/main/java/com/example/myapp
+
+          mkdir -p app/src/main/java/com/shreepals/aiapp
 
           cat > settings.gradle <<'EOF'
           pluginManagement {
@@ -138,13 +141,13 @@ jobs:
           }
 
           android {
-              namespace 'com.example.myapp'
+              namespace 'com.shreepals.aiapp'
               compileSdk 35
 
               defaultConfig {
-                  applicationId 'com.example.myapp'
+                  applicationId 'com.shreepals.aiapp'
                   minSdk 23
-                  targetSdk 35
+                  targetSdk 28
                   versionCode 1
                   versionName '1.0'
               }
@@ -156,7 +159,8 @@ jobs:
               <uses-permission android:name="android.permission.INTERNET" />
               <application
                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:label="AI Generated App">
+                  android:label="My AI App"
+                  android:usesCleartextTraffic="true">
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
@@ -169,33 +173,61 @@ jobs:
           </manifest>
           EOF
 
-          cat > app/src/main/java/com/example/myapp/MainActivity.java <<'EOF'
-          package com.example.myapp;
+          cat > app/src/main/java/com/shreepals/aiapp/MainActivity.java <<'EOF'
+          package com.shreepals.aiapp;
 
           import android.app.Activity;
           import android.os.Bundle;
           import android.webkit.WebView;
           import android.webkit.WebViewClient;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebSettings;
 
           public class MainActivity extends Activity {
               @Override
-              public void onCreate(Bundle savedInstanceState) {
+              protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
+
                   WebView web = new WebView(this);
-                  web.getSettings().setJavaScriptEnabled(true);
-                  web.getSettings().setDomStorageEnabled(true);
+                  WebSettings settings = web.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
                   web.setWebViewClient(new WebViewClient());
+                  web.setWebChromeClient(new WebChromeClient());
+
                   setContentView(web);
                   web.loadUrl("file:///android_asset/index.html");
+              }
+
+              @Override
+              public void onBackPressed() {
+                  WebView web = (WebView) findViewById(android.R.id.content).getRootView();
+                  super.onBackPressed();
               }
           }
           EOF
 
-          echo "org.gradle.jvmargs=-Xmx2g -Dfile.encoding=UTF-8" > gradle.properties
+          sed -i "s/android:label=\"My AI App\"/android:label=\"${APP_NAME//&/\\&amp;}\"/" app/src/main/AndroidManifest.xml
 
-          wget -q https://services.gradle.org/distributions/gradle-8.9-bin.zip -O /tmp/gradle.zip
+      - name: Download Gradle
+        run: |
+          set -e
+          curl -L --fail \
+            https://services.gradle.org/distributions/gradle-8.9-bin.zip \
+            -o /tmp/gradle.zip
           unzip -q /tmp/gradle.zip -d /tmp
-          /tmp/gradle-8.9/bin/gradle assembleDebug --no-daemon
+          echo "/tmp/gradle-8.9/bin" >> "$GITHUB_PATH"
+
+      - name: Build APK
+        run: |
+          set -e
+          gradle --no-daemon assembleDebug
+
+      - name: Verify APK
+        run: |
+          set -e
+          test -f app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK
         uses: actions/upload-artifact@v4
@@ -203,3 +235,4 @@ jobs:
           name: Myapp-APK
           path: app/build/outputs/apk/debug/app-debug.apk
           if-no-files-found: error
+          retention-days: 7
