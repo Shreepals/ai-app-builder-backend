@@ -276,32 +276,128 @@ async function generate(){
  finally{btn.disabled=false}
 }
 async function buildAPK(){
- const idea=document.getElementById('idea').value.trim();
- const name=document.getElementById('appName').value.trim()||'My AI App';
- if(!idea){alert('पहले ऐप का आइडिया लिखें।');showSection('home');return}
- const bar=document.getElementById('bar'),bar2=document.getElementById('bar2');
- const t=document.getElementById('buildText'),t2=document.getElementById('buildText2');
- const a=document.getElementById('downloadAPK'),a2=document.getElementById('downloadAPK2');
- [a,a2].forEach(x=>{x.style.display='none';x.removeAttribute('href')});
- [bar,bar2].forEach(x=>x.style.width='15%');
- t.textContent=t2.textContent='⏳ GitHub Actions को APK बनाने का अनुरोध भेज रहे हैं...';
- try{
-  const r=await fetch(API+'/api/build',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({appName:name,idea,theme:document.getElementById('theme').value})});
-  const d=await r.json();
-  if(!r.ok)throw Error((d.error||'Build error')+(d.detail?' — '+d.detail:''));
-  [bar,bar2].forEach(x=>x.style.width='65%');
-  t.textContent=t2.textContent=d.message||'✅ Build request भेज दिया गया। APK तैयार होने में कुछ मिनट लग सकते हैं।';
-  if(d.downloadUrl){
-   [a,a2].forEach(x=>{x.href=d.downloadUrl;x.style.display='block'});
-   [bar,bar2].forEach(x=>x.style.width='100%');
-   t.textContent=t2.textContent='✅ APK डाउनलोड के लिए उपलब्ध है।';
-  }else{
-   t.textContent=t2.textContent+=' अगर डाउनलोड लिंक तुरंत नहीं आया, तो GitHub Actions में build पूरा होने के बाद APK लिंक जाँचें।';
+  const idea = document.getElementById('idea').value.trim();
+  const name = document.getElementById('appName').value.trim() || 'My AI App';
+
+  if (!idea) {
+    alert('पहले अपने ऐप का आइडिया लिखें।');
+    showSection('home');
+    return;
   }
- }catch(e){
-  [bar,bar2].forEach(x=>x.style.width='0%');
-  t.textContent=t2.textContent='❌ '+e.message;
- }
+
+  const bars = [
+    document.getElementById('bar'),
+    document.getElementById('bar2')
+  ];
+  const texts = [
+    document.getElementById('buildText'),
+    document.getElementById('buildText2')
+  ];
+  const links = [
+    document.getElementById('downloadAPK'),
+    document.getElementById('downloadAPK2')
+  ];
+
+  const setText = message => texts.forEach(el => {
+    if (el) el.textContent = message;
+  });
+
+  const setProgress = value => bars.forEach(el => {
+    if (el) el.style.width = value + '%';
+  });
+
+  links.forEach(el => {
+    if (el) {
+      el.style.display = 'none';
+      el.removeAttribute('href');
+    }
+  });
+
+  setProgress(10);
+  setText('⏳ आपके आइडिया से APK बनाने का अनुरोध भेज रहे हैं...');
+
+  try {
+    const response = await fetch(API + '/api/build', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        appName: name,
+        idea: idea,
+        theme: document.getElementById('theme').value
+      })
+    });
+
+    const result = await response.json();
+
+    if (!response.ok) {
+      throw new Error(result.error || result.message || 'Build शुरू नहीं हुआ।');
+    }
+
+    setProgress(25);
+    setText('✅ अनुरोध भेज दिया गया। अब GitHub Actions APK बना रहा है।');
+
+    let attempts = 0;
+    const maxAttempts = 60;
+
+    while (attempts < maxAttempts) {
+      await new Promise(resolve => setTimeout(resolve, 5000));
+      attempts++;
+
+      const statusResponse = await fetch(API + '/api/build-status', {
+        cache: 'no-store'
+      });
+
+      const statusData = await statusResponse.json();
+
+      if (!statusResponse.ok) {
+        throw new Error(statusData.error || 'Build status नहीं मिल पाया।');
+      }
+
+      const status = String(statusData.status || '').toLowerCase();
+      const conclusion = String(statusData.conclusion || '').toLowerCase();
+
+      setProgress(Math.min(25 + Math.round(attempts / maxAttempts * 65), 90));
+
+      if (status === 'completed') {
+        if (conclusion !== 'success') {
+          throw new Error(
+            'APK build सफल नहीं हुआ। GitHub Actions में लाल error देखें।'
+          );
+        }
+
+        if (statusData.downloadUrl) {
+          links.forEach(el => {
+            if (el) {
+              el.href = statusData.downloadUrl;
+              el.style.display = 'block';
+              el.textContent = '⬇️ APK डाउनलोड करें';
+            }
+          });
+
+          setProgress(100);
+          setText('🎉 आपका APK तैयार है। डाउनलोड लिंक नीचे दिखाई दे रहा है।');
+          return;
+        }
+
+        throw new Error(
+          'Build पूरा हो गया, लेकिन APK artifact नहीं मिला। GitHub Actions में Myapp-APK जाँचें।'
+        );
+      }
+
+      setText(
+        '⏳ APK अभी बन रहा है। कृपया प्रतीक्षा करें... (' +
+        attempts + '/' + maxAttempts + ')'
+      );
+    }
+
+    setText(
+      '⌛ APK बनने में अधिक समय लग रहा है। GitHub Actions में स्थिति जाँचें; फिर यहाँ दोबारा प्रयास कर सकते हैं।'
+    );
+
+  } catch (error) {
+    setText('❌ ' + error.message);
+    setProgress(0);
+  }
 }
 </script>
 </body>
