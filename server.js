@@ -155,11 +155,19 @@ Return JSON only, with no Markdown fences.
     const data = await response.json();
 
     if (!response.ok) {
-      return res.status(502).json({
-        error: "Gemini could not generate the app.",
-        detail: data?.error?.message || "Unknown Gemini error"
-      });
-    }
+  const detail =
+    data?.error?.message || "Unknown Gemini error";
+
+  console.error("Gemini API error:", {
+    status: response.status,
+    message: detail
+  });
+
+  return res.status(502).json({
+    error: `Gemini error (${response.status}): ${detail}`,
+    detail
+  });
+}
 
     const output = (data?.candidates?.[0]?.content?.parts || [])
       .map(part => part.text || "")
