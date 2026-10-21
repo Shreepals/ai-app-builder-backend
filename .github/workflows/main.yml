@@ -6,13 +6,13 @@ on:
   workflow_dispatch:
     inputs:
       idea:
-        description: "Describe the app you want to build"
+        description: "App idea"
         required: true
         type: string
       app_name:
         description: "App name"
         required: true
-        default: "My AI App"
+        default: "Kisan Sahayata"
         type: string
 
 permissions:
@@ -37,11 +37,10 @@ jobs:
 
       - name: Install Android packages
         run: |
-          set -e
-          sdkmanager --licenses
+          yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Generate app using Gemini
+      - name: Generate full dashboard with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           APP_IDEA: ${{ inputs.idea }}
@@ -62,16 +61,16 @@ jobs:
             '{
               system_instruction: {
                 parts: [{
-                  text: "You are an expert mobile web app developer. Create a complete, functional, self-contained HTML app for Android WebView. Use inline HTML, CSS and JavaScript only. Make the app specifically match the user idea and app name. Make buttons work, provide a mobile-friendly interface, and use localStorage when suitable. Do not return explanations or Markdown fences. Return only the complete HTML document. Do not claim that unavailable APIs or online services work."
+                  text: "You are a senior mobile UI developer. Generate one complete, polished, responsive HTML5 application for Android WebView. The app must be a REAL MULTI-SECTION DASHBOARD, never a simple landing page. Use Hindi labels where suitable, modern green agriculture styling for farming apps, cards, icons using inline SVG or CSS, spacing, rounded panels, useful navigation, working buttons and forms, and inline CSS and JavaScript. Implement every feature requested in the user idea. For a farming or weather app, create a full dashboard with: top app bar and location selector; weather card with current temperature, condition, humidity, wind and feels-like; a 5-day forecast; refresh and location controls; farming tips based on weather; quick-action cards; a detailed weather section; and a bottom navigation bar with Home, Weather, Farming Tips and Profile. Use browser geolocation where available and Open-Meteo's public forecast API (https://api.open-meteo.com/v1/forecast) for actual weather, with current, relative_humidity_2m, apparent_temperature, wind_speed_10m and daily weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max. Use suitable latitude and longitude for the selected location, allow a manual fallback location, handle denied location, loading and network errors, and clearly show when sample/fallback data is being used. Do not fabricate live weather data. Navigation must change visible sections; all key buttons must work. Persist suitable preferences in localStorage. Do not use external JavaScript libraries. Return ONLY the complete HTML document, beginning with <!DOCTYPE html>. Do not return Markdown fences, explanations or a generic calculator."
                 }]
               },
               contents: [{
                 parts: [{
-                  text: ("App name: " + $name + "\nUser app idea: " + $idea + "\nBuild the actual app described above, not a calculator or generic template.")
+                  text: ("APP NAME: " + $name + "\nUSER REQUEST: " + $idea + "\nBuild the complete requested application, with a detailed dashboard and working sections. Prioritize the user's requested features.")
                 }]
               }],
               generationConfig: {
-                temperature: 0.4,
+                temperature: 0.3,
                 maxOutputTokens: 8192
               }
             }' > request.json
@@ -93,18 +92,23 @@ jobs:
             exit 1
           fi
 
-          HTML="$(printf '%s' "$HTML" | sed '/^```html[[:space:]]*$/Id; /^```[[:space:]]*$/d')"
-
-          printf '%s\n' "$HTML" > app/src/main/assets/index.html
+          printf '%s\n' "$HTML" | sed \
+            -e '1{/^```html[[:space:]]*$/Id;}' \
+            -e '/^```[[:space:]]*$/d' \
+            > app/src/main/assets/index.html
 
           if ! grep -qi '<html' app/src/main/assets/index.html; then
-            echo "Generated content is not a complete HTML document."
+            echo "Generated output is not a complete HTML document."
+            exit 1
+          fi
+
+          if grep -q 'finishReason' response.json && \
+             jq -e '.candidates[0].finishReason == "MAX_TOKENS"' response.json >/dev/null; then
+            echo "Gemini output was truncated. Increase output limit or shorten the prompt."
             exit 1
           fi
 
       - name: Create Android project
-        env:
-          APP_NAME: ${{ inputs.app_name }}
         run: |
           set -e
 
@@ -118,6 +122,7 @@ jobs:
                   gradlePluginPortal()
               }
           }
+
           dependencyResolutionManagement {
               repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
               repositories {
@@ -125,7 +130,8 @@ jobs:
                   mavenCentral()
               }
           }
-          rootProject.name = "MyApp"
+
+          rootProject.name = "KisanDashboard"
           include(":app")
           EOF
 
@@ -157,10 +163,14 @@ jobs:
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET" />
+              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
+              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
+
               <application
                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:label="My AI App"
-                  android:usesCleartextTraffic="true">
+                  android:label="Kisan Sahayata"
+                  android:usesCleartextTraffic="false">
+
                   <activity
                       android:name=".MainActivity"
                       android:exported="true">
@@ -182,32 +192,45 @@ jobs:
           import android.webkit.WebViewClient;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
+          import android.webkit.GeolocationPermissions;
 
           public class MainActivity extends Activity {
+              private WebView webView;
+
               @Override
               protected void onCreate(Bundle savedInstanceState) {
                   super.onCreate(savedInstanceState);
 
-                  WebView web = new WebView(this);
-                  WebSettings settings = web.getSettings();
+                  webView = new WebView(this);
+                  WebSettings settings = webView.getSettings();
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
-                  web.setWebViewClient(new WebViewClient());
-                  web.setWebChromeClient(new WebChromeClient());
+                  settings.setGeolocationEnabled(true);
 
-                  setContentView(web);
-                  web.loadUrl("file:///android_asset/index.html");
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.setWebChromeClient(new WebChromeClient() {
+                      @Override
+                      public void onGeolocationPermissionsShowPrompt(
+                              String origin,
+                              GeolocationPermissions.Callback callback) {
+                          callback.invoke(origin, true, false);
+                      }
+                  });
+
+                  setContentView(webView);
+                  webView.loadUrl("file:///android_asset/index.html");
               }
 
               @Override
               public void onBackPressed() {
-                  WebView web = (WebView) findViewById(android.R.id.content).getRootView();
-                  super.onBackPressed();
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
               }
           }
           EOF
-
-          sed -i "s/android:label=\"My AI App\"/android:label=\"${APP_NAME//&/\\&amp;}\"/" app/src/main/AndroidManifest.xml
 
       - name: Download Gradle
         run: |
@@ -218,7 +241,7 @@ jobs:
           unzip -q /tmp/gradle.zip -d /tmp
           echo "/tmp/gradle-8.9/bin" >> "$GITHUB_PATH"
 
-      - name: Build APK
+      - name: Build Android APK
         run: |
           set -e
           gradle --no-daemon assembleDebug
