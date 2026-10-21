@@ -37,14 +37,16 @@ jobs:
 
       - name: Install Android packages
         run: |
+          set -euo pipefail
           yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Generate app HTML with Gemini
+      - name: Generate complete app with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           APP_IDEA: ${{ inputs.idea }}
           APP_NAME: ${{ inputs.app_name }}
+          GEMINI_MODEL: gemini-3.1-flash-lite
         run: |
           set -euo pipefail
 
@@ -66,112 +68,203 @@ jobs:
           if not idea:
               raise SystemExit("App idea is empty.")
 
-          prompt = f"""
-          You are an expert Android mobile application developer and UI/UX designer.
-
-          Create a COMPLETE, polished, usable mobile-first HTML5 application
-          that will run inside an Android WebView.
+          prompt = """
+          You are a senior product designer, frontend engineer, and mobile
+          application developer. Build a COMPLETE, usable application from
+          the user's app idea. This is a real app-building task, not a request
+          for a landing page or a visual mockup.
 
           APP NAME:
-          {name}
+          """ + name + """
 
-          USER'S EXACT APP IDEA:
-          {idea}
+          USER'S APP IDEA:
+          """ + idea + """
 
-          IMPORTANT:
-          Build the application described by the user's idea, not a generic
-          landing page, calculator, farmer app, or AI App Builder website.
-          Never replace the requested idea with a different app.
+          FIRST UNDERSTAND THE IDEA:
+          Identify the type of app, target users, primary user tasks, essential
+          screens, data entities, and the navigation connecting those screens.
+          Build the app that the user actually requested.
 
-          REQUIREMENTS:
-          1. Return one complete HTML document with inline CSS and JavaScript.
-          2. Create a visually polished, responsive mobile dashboard.
-          3. Include a clear header, navigation, meaningful sections, cards,
-             forms, and useful screens appropriate to THIS app idea.
-          4. Implement the main requested features with working buttons,
-             navigation, form validation, and useful feedback.
-          5. Use localStorage where suitable for saving user-created data.
-          6. Include loading, empty, and error states where appropriate.
-          7. Use Hindi UI text when appropriate for the user's idea.
-          8. Use accessible labels, readable text, and mobile-friendly controls.
-          9. Do not invent real user accounts, payments, live prices, or
-             successful server operations when those services are not connected.
-          10. If a requested external service needs credentials or a backend,
-              explain this limitation within the relevant screen and provide
-              a usable demo where possible.
-          11. Use only HTTPS for external requests. Do not use external
-              JavaScript libraries or require a build step.
-          12. Make the app work offline for features that do not need a network.
-          13. Use the requested app name in the interface.
-          14. Do not include a hardcoded unrelated brand such as Kisan Sahayata.
-          15. Return ONLY the complete HTML, starting with <!DOCTYPE html>.
-              Do not wrap the output in Markdown fences.
+          NEVER substitute a calculator, generic dashboard, farmer app,
+          portfolio, or AI App Builder page unless that is the requested idea.
 
-          Build the best complete implementation possible within a single
-          HTML file. Prioritize functional features over decorative text.
+          DASHBOARD AND SCREENS:
+          - Create a complete home/dashboard screen appropriate for this app.
+          - Include all important screens expected for this app category.
+          - Include a clear header, app branding, navigation, content sections,
+            cards, lists, forms, and relevant action buttons.
+          - Create separate views or sections for major features. Do not put
+            every feature on one short page.
+          - Use a bottom navigation bar or a sidebar/menu when appropriate.
+          - Every navigation item must open its corresponding view or section.
+          - Provide a coherent design system, spacing, typography, icons,
+            colors, and responsive layouts.
+          - Include sensible empty states, validation, success messages,
+            and error messages.
+          - Add search, filters, sorting, tabs, dialogs, or detail views when
+            relevant to the requested app.
+          - Make the interface polished on Android phone screens.
+
+          FEATURE COMPLETENESS:
+          - Implement the core user workflows from beginning to end.
+          - Make buttons, forms, menus, tabs, and interactive controls work.
+          - Do not create buttons that do nothing.
+          - Do not use placeholder text instead of required app functionality.
+          - Use JavaScript to implement real client-side interactions.
+          - Save suitable user-created data in localStorage.
+          - Support edit, delete, add, and view operations where relevant.
+          - Include demo/sample data when it helps demonstrate the app.
+          - Do not claim that demo data is live or belongs to real users.
+          - Avoid dead links and unfinished TODO sections.
+          - If a feature is too large for a single-file offline app, implement
+            the useful frontend flow and clearly explain what backend service
+            is still required.
+
+          APP-SPECIFIC EXPECTATIONS:
+          Select features based on the user's idea, not a fixed template.
+          Examples:
+          - Shopping: products, categories, search, product details, cart,
+            quantities, checkout demo, orders, and profile.
+          - Education: courses, lessons, progress, quizzes, results, and profile.
+          - Video: feed, video cards/player, categories, search, saved items,
+            and profile.
+          - Finance/trading: watchlist, instruments, charts or visual demos,
+            portfolio, transactions demo, and risk notices as appropriate.
+          - Booking: search, available demo listings, details, booking form,
+            booking confirmation demo, and booking history.
+          These examples are guidance only. Do not add unrelated features.
+
+          TECHNICAL REQUIREMENTS:
+          1. Return one complete standalone HTML5 document.
+          2. Put all CSS inside a style element and JavaScript inside script
+             elements in that document.
+          3. Start the output with <!DOCTYPE html> and finish with </html>.
+          4. Use semantic HTML and accessible form labels.
+          5. Use responsive CSS suitable for Android WebView.
+          6. Avoid external JavaScript libraries, package installation, and
+             compilation of the HTML.
+          7. Use localStorage safely, handling invalid or unavailable data.
+          8. Escape user-provided content before inserting it into HTML.
+          9. Do not use eval or dynamically execute generated strings.
+          10. Do not invent real accounts, successful payments, live market
+              prices, real bookings, or server-side operations.
+          11. For missing APIs or credentials, provide a working demo and
+              clearly identify the limitation in the relevant screen.
+          12. Use Hindi UI text when appropriate for the user's audience.
+          13. Keep all important app features reachable through navigation.
+          14. Ensure every required closing tag is present and JavaScript is
+              syntactically complete.
+          15. Do not return an explanation, Markdown fences, or a partial
+              code sample. Return only the complete HTML document.
+
+          QUALITY CHECK BEFORE RESPONDING:
+          Check that the requested idea is implemented, major screens exist,
+          navigation works, core buttons have event handlers, forms validate,
+          and no unrelated fixed app has been substituted.
+
+          Prioritize functional completeness over decorative descriptions.
+          Produce the best complete implementation possible within one HTML
+          file. Do not intentionally omit major screens to save space.
           """
 
           Path("prompt.json").write_text(
-              json.dumps({"prompt": prompt}, ensure_ascii=False)
+              json.dumps({"prompt": prompt}, ensure_ascii=False),
+              encoding="utf-8"
+          )
+
+          request = {
+              "contents": [{
+                  "parts": [{
+                      "text": prompt
+                  }]
+              }],
+              "generationConfig": {
+                  "temperature": 0.2,
+                  "maxOutputTokens": 16384
+              }
+          }
+
+          Path("request.json").write_text(
+              json.dumps(request, ensure_ascii=False),
+              encoding="utf-8"
           )
           PY
 
-          jq -n --arg prompt "$(python3 -c 'import json; print(json.load(open("prompt.json"))["prompt"])')" '{
-            contents: [
-              {
-                parts: [
-                  {
-                    text: $prompt
-                  }
-                ]
-              }
-            ],
-            generationConfig: {
-              temperature: 0.3,
-              maxOutputTokens: 8192
-            }
-          }' > request.json
-
           curl --fail-with-body --silent --show-error \
             --retry 2 \
-            --max-time 240 \
+            --max-time 300 \
             -X POST \
-            "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GEMINI_API_KEY}" \
+            "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
             -H "Content-Type: application/json" \
             -d @request.json \
             -o response.json
-
-          if jq -e '.error' response.json >/dev/null; then
-            echo "Gemini API returned an error:"
-            jq -r '.error.message' response.json
-            exit 1
-          fi
-
-          if jq -e '.candidates[0].finishReason == "MAX_TOKENS"' response.json >/dev/null; then
-            echo "Gemini output was truncated. Shorten the requested app or increase the output limit."
-            exit 1
-          fi
 
           python3 - <<'PY'
           import json
           import re
           from pathlib import Path
 
-          data = json.loads(Path("response.json").read_text())
-          parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
+          data = json.loads(Path("response.json").read_text(encoding="utf-8"))
+
+          if data.get("error"):
+              raise SystemExit(
+                  "Gemini API error: " +
+                  str(data["error"].get("message", "Unknown error"))
+              )
+
+          candidates = data.get("candidates", [])
+          if not candidates:
+              raise SystemExit("Gemini returned no candidates.")
+
+          candidate = candidates[0]
+          finish = candidate.get("finishReason", "")
+
+          if finish == "MAX_TOKENS":
+              raise SystemExit(
+                  "Gemini output reached its token limit. "
+                  "No APK will be built from truncated HTML."
+              )
+
+          parts = candidate.get("content", {}).get("parts", [])
           html = "\n".join(
-              p.get("text", "") for p in parts if p.get("text")
+              part.get("text", "")
+              for part in parts
+              if part.get("text")
           ).strip()
 
-          html = re.sub(r"^```(?:html)?\s*", "", html, flags=re.I)
-          html = re.sub(r"\s*```$", "", html)
+          html = re.sub(
+              r"^\s*```(?:html)?\s*",
+              "",
+              html,
+              flags=re.IGNORECASE
+          )
+          html = re.sub(r"\s*```\s*$", "", html)
 
-          if not re.search(r"<!doctype\s+html|<html[\s>]", html, re.I):
-              raise SystemExit("Gemini did not return a complete HTML document.")
+          if not re.search(r"<!doctype\s+html", html, re.IGNORECASE):
+              raise SystemExit("Output is missing the HTML doctype.")
 
-          Path("app/src/main/assets/index.html").write_text(html)
-          print("App HTML generated successfully.")
-          print(f"Generated HTML size: {len(html)} characters")
+          if not re.search(r"</html\s*>", html, re.IGNORECASE):
+              raise SystemExit("HTML is incomplete: closing html tag missing.")
+
+          if len(html) < 3000:
+              raise SystemExit(
+                  "Generated HTML is unexpectedly short. "
+                  "Refusing to build an incomplete app."
+              )
+
+          if not re.search(r"<style[\s>]", html, re.IGNORECASE):
+              raise SystemExit("Generated HTML has no embedded CSS.")
+
+          if not re.search(r"<script[\s>]", html, re.IGNORECASE):
+              raise SystemExit("Generated HTML has no embedded JavaScript.")
+
+          output = Path("app/src/main/assets/index.html")
+          output.write_text(html, encoding="utf-8")
+
+          print("Complete HTML document received.")
+          print("HTML characters:", len(html))
+          print("Gemini finish reason:", finish or "not provided")
+          print("Saved to:", output)
           PY
 
       - name: Create Android project
@@ -231,8 +324,6 @@ jobs:
           cat > app/src/main/AndroidManifest.xml <<'EOF'
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET" />
-              <uses-permission android:name="android.permission.ACCESS_COARSE_LOCATION" />
-              <uses-permission android:name="android.permission.ACCESS_FINE_LOCATION" />
 
               <application
                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
@@ -257,10 +348,13 @@ jobs:
           from xml.sax.saxutils import escape
 
           name = os.environ.get("APP_NAME", "My App").strip() or "My App"
-          manifest = Path("app/src/main/AndroidManifest.xml")
-          content = manifest.read_text()
-          content = content.replace("APP_NAME_PLACEHOLDER", escape(name, {'"': '&quot;'}))
-          manifest.write_text(content)
+          path = Path("app/src/main/AndroidManifest.xml")
+          content = path.read_text(encoding="utf-8")
+          content = content.replace(
+              "APP_NAME_PLACEHOLDER",
+              escape(name, {'"': '&quot;'})
+          )
+          path.write_text(content, encoding="utf-8")
           PY
 
           cat > app/src/main/java/com/shreepals/aiapp/MainActivity.java <<'EOF'
@@ -272,7 +366,6 @@ jobs:
           import android.webkit.WebViewClient;
           import android.webkit.WebChromeClient;
           import android.webkit.WebSettings;
-          import android.webkit.GeolocationPermissions;
 
           public class MainActivity extends Activity {
               private WebView webView;
@@ -282,20 +375,15 @@ jobs:
                   super.onCreate(savedInstanceState);
 
                   webView = new WebView(this);
+
                   WebSettings settings = webView.getSettings();
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
-                  settings.setGeolocationEnabled(true);
+                  settings.setAllowFileAccess(true);
+                  settings.setAllowContentAccess(true);
 
                   webView.setWebViewClient(new WebViewClient());
-                  webView.setWebChromeClient(new WebChromeClient() {
-                      @Override
-                      public void onGeolocationPermissionsShowPrompt(
-                              String origin,
-                              GeolocationPermissions.Callback callback) {
-                          callback.invoke(origin, true, false);
-                      }
-                  });
+                  webView.setWebChromeClient(new WebChromeClient());
 
                   setContentView(webView);
                   webView.loadUrl("file:///android_asset/index.html");
@@ -308,6 +396,15 @@ jobs:
                   } else {
                       super.onBackPressed();
                   }
+              }
+
+              @Override
+              protected void onDestroy() {
+                  if (webView != null) {
+                      webView.destroy();
+                      webView = null;
+                  }
+                  super.onDestroy();
               }
           }
           EOF
@@ -329,7 +426,9 @@ jobs:
       - name: Verify APK
         run: |
           set -euo pipefail
+          test -s app/src/main/assets/index.html
           test -s app/build/outputs/apk/debug/app-debug.apk
+          ls -lh app/src/main/assets/index.html
           ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK
