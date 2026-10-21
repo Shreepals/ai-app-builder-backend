@@ -39,41 +39,74 @@ jobs:
         run: |
           yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-
+    
       - name: Generate full dashboard with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           APP_IDEA: ${{ inputs.idea }}
           APP_NAME: ${{ inputs.app_name }}
         run: |
-          set -e
+          set -euo pipefail
 
-          if [ -z "$GEMINI_API_KEY" ]; then
+          if [ -z "${GEMINI_API_KEY:-}" ]; then
             echo "Missing GEMINI_API_KEY repository secret"
             exit 1
           fi
 
           mkdir -p app/src/main/assets
 
-          jq -n \
-            --arg idea "$APP_IDEA" \
-            --arg name "$APP_NAME" \
-            '{
-              system_instruction: {
-                parts: [{
-                  text: "You are a senior mobile UI developer. Generate one complete, polished, responsive HTML5 application for Android WebView. The app must be a REAL MULTI-SECTION DASHBOARD, never a simple landing page. Use Hindi labels where suitable, modern green agriculture styling for farming apps, cards, icons using inline SVG or CSS, spacing, rounded panels, useful navigation, working buttons and forms, and inline CSS and JavaScript. Implement every feature requested in the user idea. For a farming or weather app, create a full dashboard with: top app bar and location selector; weather card with current temperature, condition, humidity, wind and feels-like; a 5-day forecast; refresh and location controls; farming tips based on weather; quick-action cards; a detailed weather section; and a bottom navigation bar with Home, Weather, Farming Tips and Profile. Use browser geolocation where available and Open-Meteo's public forecast API (https://api.open-meteo.com/v1/forecast) for actual weather, with current, relative_humidity_2m, apparent_temperature, wind_speed_10m and daily weather_code,temperature_2m_max,temperature_2m_min,precipitation_probability_max. Use suitable latitude and longitude for the selected location, allow a manual fallback location, handle denied location, loading and network errors, and clearly show when sample/fallback data is being used. Do not fabricate live weather data. Navigation must change visible sections; all key buttons must work. Persist suitable preferences in localStorage. Do not use external JavaScript libraries. Return ONLY the complete HTML document, beginning with <!DOCTYPE html>. Do not return Markdown fences, explanations or a generic calculator."
-                }]
-              },
-              contents: [{
-                parts: [{
-                  text: ("APP NAME: " + $name + "\nUSER REQUEST: " + $idea + "\nBuild the complete requested application, with a detailed dashboard and working sections. Prioritize the user's requested features.")
-                }]
-              }],
-              generationConfig: {
-                temperature: 0.3,
-                maxOutputTokens: 8192
+          cat > prompt.txt <<'PROMPT'
+          You are a senior mobile app developer. Create one complete, polished, responsive HTML5 application for Android WebView.
+
+          APP NAME: APP_NAME_PLACEHOLDER
+          USER IDEA: APP_IDEA_PLACEHOLDER
+
+          Build the app specifically for the user's idea. Do not make a generic calculator or landing page.
+
+          Requirements:
+          - Make a real multi-section mobile dashboard.
+          - Use modern styling, cards, clear navigation, responsive layout, inline CSS and JavaScript.
+          - Use Hindi labels when suitable for the user's idea.
+          - Implement the requested features as far as possible.
+          - Make navigation switch between visible sections.
+          - Make buttons and forms functional.
+          - Include loading, empty and error states where appropriate.
+          - Do not invent live information or claim an API is connected when it is not.
+          - For farming or weather apps, use Open-Meteo's public forecast API:
+            https://api.open-meteo.com/v1/forecast
+          - For weather apps, include current temperature, humidity, wind, feels-like temperature and a 5-day forecast, plus location controls and weather-based farming tips.
+          - Handle denied location permission and network errors gracefully.
+          - Do not use external JavaScript libraries.
+          - Return ONLY a complete HTML document beginning with <!DOCTYPE html>.
+          - Do not return Markdown fences or explanations.
+          PROMPT
+
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+
+          p = Path("prompt.txt")
+          text = p.read_text()
+          text = text.replace("APP_NAME_PLACEHOLDER", os.environ.get("APP_NAME", "My App"))
+          text = text.replace("APP_IDEA_PLACEHOLDER", os.environ.get("APP_IDEA", "Create a useful mobile app"))
+          p.write_text(text)
+          PY
+
+          jq -n --rawfile prompt prompt.txt '{
+            contents: [
+              {
+                parts: [
+                  {
+                    text: $prompt
+                  }
+                ]
               }
-            }' > request.json
+            ],
+            generationConfig: {
+              temperature: 0.3,
+              maxOutputTokens: 8192
+            }
+          }' > request.json
 
           curl --fail-with-body --silent --show-error \
             --retry 2 \
@@ -102,11 +135,12 @@ jobs:
             exit 1
           fi
 
-          if grep -q 'finishReason' response.json && \
-             jq -e '.candidates[0].finishReason == "MAX_TOKENS"' response.json >/dev/null; then
+          if jq -e '.candidates[0].finishReason == "MAX_TOKENS"' response.json >/dev/null; then
             echo "Gemini output was truncated. Increase output limit or shorten the prompt."
             exit 1
           fi
+
+          echo "App HTML generated successfully."  
 
       - name: Create Android project
         run: |
