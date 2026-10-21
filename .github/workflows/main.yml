@@ -6,11 +6,11 @@ on:
   workflow_dispatch:
     inputs:
       idea:
-        description: "App idea"
+        description: "Describe the app you want to build"
         required: true
         type: string
       app_name:
-        description: "App name"
+        description: "Name of your app"
         required: true
         default: "My App"
         type: string
@@ -39,8 +39,8 @@ jobs:
         run: |
           yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
-    
-      - name: Generate full dashboard with Gemini
+
+      - name: Generate app HTML with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           APP_IDEA: ${{ inputs.idea }}
@@ -55,44 +55,68 @@ jobs:
 
           mkdir -p app/src/main/assets
 
-          cat > prompt.txt <<'PROMPT'
-          You are a senior mobile app developer. Create one complete, polished, responsive HTML5 application for Android WebView.
-
-          APP NAME: APP_NAME_PLACEHOLDER
-          USER IDEA: APP_IDEA_PLACEHOLDER
-
-          Build the app specifically for the user's idea. Do not make a generic calculator or landing page.
-
-          Requirements:
-          - Make a real multi-section mobile dashboard.
-          - Use modern styling, cards, clear navigation, responsive layout, inline CSS and JavaScript.
-          - Use Hindi labels when suitable for the user's idea.
-          - Implement the requested features as far as possible.
-          - Make navigation switch between visible sections.
-          - Make buttons and forms functional.
-          - Include loading, empty and error states where appropriate.
-          - Do not invent live information or claim an API is connected when it is not.
-          - For farming or weather apps, use Open-Meteo's public forecast API:
-            https://api.open-meteo.com/v1/forecast
-          - For weather apps, include current temperature, humidity, wind, feels-like temperature and a 5-day forecast, plus location controls and weather-based farming tips.
-          - Handle denied location permission and network errors gracefully.
-          - Do not use external JavaScript libraries.
-          - Return ONLY a complete HTML document beginning with <!DOCTYPE html>.
-          - Do not return Markdown fences or explanations.
-          PROMPT
-
           python3 - <<'PY'
           import os
+          import json
           from pathlib import Path
 
-          p = Path("prompt.txt")
-          text = p.read_text()
-          text = text.replace("APP_NAME_PLACEHOLDER", os.environ.get("APP_NAME", "My App"))
-          text = text.replace("APP_IDEA_PLACEHOLDER", os.environ.get("APP_IDEA", "Create a useful mobile app"))
-          p.write_text(text)
+          name = os.environ.get("APP_NAME", "My App").strip() or "My App"
+          idea = os.environ.get("APP_IDEA", "").strip()
+
+          if not idea:
+              raise SystemExit("App idea is empty.")
+
+          prompt = f"""
+          You are an expert Android mobile application developer and UI/UX designer.
+
+          Create a COMPLETE, polished, usable mobile-first HTML5 application
+          that will run inside an Android WebView.
+
+          APP NAME:
+          {name}
+
+          USER'S EXACT APP IDEA:
+          {idea}
+
+          IMPORTANT:
+          Build the application described by the user's idea, not a generic
+          landing page, calculator, farmer app, or AI App Builder website.
+          Never replace the requested idea with a different app.
+
+          REQUIREMENTS:
+          1. Return one complete HTML document with inline CSS and JavaScript.
+          2. Create a visually polished, responsive mobile dashboard.
+          3. Include a clear header, navigation, meaningful sections, cards,
+             forms, and useful screens appropriate to THIS app idea.
+          4. Implement the main requested features with working buttons,
+             navigation, form validation, and useful feedback.
+          5. Use localStorage where suitable for saving user-created data.
+          6. Include loading, empty, and error states where appropriate.
+          7. Use Hindi UI text when appropriate for the user's idea.
+          8. Use accessible labels, readable text, and mobile-friendly controls.
+          9. Do not invent real user accounts, payments, live prices, or
+             successful server operations when those services are not connected.
+          10. If a requested external service needs credentials or a backend,
+              explain this limitation within the relevant screen and provide
+              a usable demo where possible.
+          11. Use only HTTPS for external requests. Do not use external
+              JavaScript libraries or require a build step.
+          12. Make the app work offline for features that do not need a network.
+          13. Use the requested app name in the interface.
+          14. Do not include a hardcoded unrelated brand such as Kisan Sahayata.
+          15. Return ONLY the complete HTML, starting with <!DOCTYPE html>.
+              Do not wrap the output in Markdown fences.
+
+          Build the best complete implementation possible within a single
+          HTML file. Prioritize functional features over decorative text.
+          """
+
+          Path("prompt.json").write_text(
+              json.dumps({"prompt": prompt}, ensure_ascii=False)
+          )
           PY
 
-          jq -n --rawfile prompt prompt.txt '{
+          jq -n --arg prompt "$(python3 -c 'import json; print(json.load(open("prompt.json"))["prompt"])')" '{
             contents: [
               {
                 parts: [
@@ -110,41 +134,51 @@ jobs:
 
           curl --fail-with-body --silent --show-error \
             --retry 2 \
-            --max-time 180 \
+            --max-time 240 \
             -X POST \
             "https://generativelanguage.googleapis.com/v1beta/models/gemini-3.1-flash-lite:generateContent?key=${GEMINI_API_KEY}" \
             -H "Content-Type: application/json" \
             -d @request.json \
             -o response.json
 
-          HTML="$(jq -r '[.candidates[0].content.parts[]?.text // empty] | join("\n")' response.json)"
-
-          if [ -z "$HTML" ] || [ "$HTML" = "null" ]; then
-            echo "Gemini did not return HTML."
-            cat response.json
-            exit 1
-          fi
-
-          printf '%s\n' "$HTML" | sed \
-            -e '1{/^```html[[:space:]]*$/Id;}' \
-            -e '/^```[[:space:]]*$/d' \
-            > app/src/main/assets/index.html
-
-          if ! grep -qi '<html' app/src/main/assets/index.html; then
-            echo "Generated output is not a complete HTML document."
+          if jq -e '.error' response.json >/dev/null; then
+            echo "Gemini API returned an error:"
+            jq -r '.error.message' response.json
             exit 1
           fi
 
           if jq -e '.candidates[0].finishReason == "MAX_TOKENS"' response.json >/dev/null; then
-            echo "Gemini output was truncated. Increase output limit or shorten the prompt."
+            echo "Gemini output was truncated. Shorten the requested app or increase the output limit."
             exit 1
           fi
 
-          echo "App HTML generated successfully."  
+          python3 - <<'PY'
+          import json
+          import re
+          from pathlib import Path
+
+          data = json.loads(Path("response.json").read_text())
+          parts = data.get("candidates", [{}])[0].get("content", {}).get("parts", [])
+          html = "\n".join(
+              p.get("text", "") for p in parts if p.get("text")
+          ).strip()
+
+          html = re.sub(r"^```(?:html)?\s*", "", html, flags=re.I)
+          html = re.sub(r"\s*```$", "", html)
+
+          if not re.search(r"<!doctype\s+html|<html[\s>]", html, re.I):
+              raise SystemExit("Gemini did not return a complete HTML document.")
+
+          Path("app/src/main/assets/index.html").write_text(html)
+          print("App HTML generated successfully.")
+          print(f"Generated HTML size: {len(html)} characters")
+          PY
 
       - name: Create Android project
+        env:
+          APP_NAME: ${{ inputs.app_name }}
         run: |
-          set -e
+          set -euo pipefail
 
           mkdir -p app/src/main/java/com/shreepals/aiapp
 
@@ -217,6 +251,18 @@ jobs:
           </manifest>
           EOF
 
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          from xml.sax.saxutils import escape
+
+          name = os.environ.get("APP_NAME", "My App").strip() or "My App"
+          manifest = Path("app/src/main/AndroidManifest.xml")
+          content = manifest.read_text()
+          content = content.replace("APP_NAME_PLACEHOLDER", escape(name, {'"': '&quot;'}))
+          manifest.write_text(content)
+          PY
+
           cat > app/src/main/java/com/shreepals/aiapp/MainActivity.java <<'EOF'
           package com.shreepals.aiapp;
 
@@ -268,7 +314,7 @@ jobs:
 
       - name: Download Gradle
         run: |
-          set -e
+          set -euo pipefail
           curl -L --fail \
             https://services.gradle.org/distributions/gradle-8.9-bin.zip \
             -o /tmp/gradle.zip
@@ -277,13 +323,13 @@ jobs:
 
       - name: Build Android APK
         run: |
-          set -e
+          set -euo pipefail
           gradle --no-daemon assembleDebug
 
       - name: Verify APK
         run: |
-          set -e
-          test -f app/build/outputs/apk/debug/app-debug.apk
+          set -euo pipefail
+          test -s app/build/outputs/apk/debug/app-debug.apk
           ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK
