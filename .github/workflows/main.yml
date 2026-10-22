@@ -111,33 +111,38 @@ jobs:
 
           if is_game:
               prompt += """
-          THIS REQUEST IS A GAME. Build a complete playable 3D car racing game,
-          not a static mockup or pretend demo.
+          THIS REQUEST IS A GAME. Build the exact kind of game described
+          in USER IDEA. Do not turn every game into car racing.
+          Only make a car racing game if the user specifically asks for one.
+          Cricket must be a cricket game, football a football game, a puzzle
+          a puzzle game, and a platformer a platformer game.
 
           GAME DASHBOARD:
-          - Create a polished home screen with game title and Play button.
-          - Show current score, best score, instructions and sound toggle.
-          - Keep dashboard and gameplay as separate screens.
-          - Add working pause, resume, restart and back/home buttons.
+          - Create a polished game home screen with a title and working Play button.
+          - Show instructions, score and best score where appropriate.
+          - Keep the home screen and gameplay clearly separated.
+          - Add working pause, resume, restart and home buttons when appropriate.
+          - Make every main button perform its advertised action.
 
-          REAL 3D GAME:
-          - Use Three.js with the classic global THREE API, not ES modules.
-          - Include this exact script URL:
+          GAMEPLAY:
+          - Implement actual playable mechanics that match the requested game.
+          - Add suitable controls for the chosen game, including mobile touch controls.
+          - Track score, win/lose states and restart behavior where appropriate.
+          - Use canvas or CSS/JavaScript for 2D games and simple games.
+          - Use Three.js only when a real 3D game is suitable for the user's idea.
+          - If using Three.js, use the classic global THREE API, not ES modules.
+          - Include this exact script URL when using Three.js:
             https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js
           - The workflow replaces that URL with a local APK asset.
-          - Create a real 3D road, lane markings, player car, traffic and obstacles.
-          - Use a perspective camera, renderer and continuous animation loop.
-          - Add working keyboard controls and mobile touch controls.
-          - Include collision detection, score, increasing speed and game-over.
-          - Make the game fit Android portrait screens.
-          - Show useful feedback if the 3D library cannot load.
-          - Do not use imports, modules, npm or other external JS libraries.
+          - For a 3D game, create an interactive 3D scene and animation loop.
+          - Do not use imports, modules, npm or additional external JS libraries.
           - Put all other CSS and JavaScript directly in this HTML file.
-          - The game must actually be playable, not just a picture or animation.
+          - Make the game fit Android phone screens and work with touch.
           """
           else:
               prompt += """
-          Do not create a game unless the user requested one.
+          This is a regular application, not a game.
+          Build a complete dashboard and working features that match the USER IDEA.
           Keep essential functionality available offline.
           Do not require external JavaScript libraries.
           """
