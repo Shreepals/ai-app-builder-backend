@@ -230,6 +230,154 @@ app.post("/api/generate", async (req, res) => {
   }
 });
 
+app.post("/api/edit-app", async (req, res) => {
+  try {
+    const appName = String(req.body?.appName || "My App").trim();
+    const idea = String(req.body?.idea || "").trim();
+    const theme = String(req.body?.theme || "Modern").trim();
+    const instruction = String(req.body?.instruction || "").trim();
+    const html = String(req.body?.html || "");
+
+    if (!GEMINI_API_KEY) {
+      return res.status(500).json({
+        error: "GEMINI_API_KEY is missing on the server."
+      });
+    }
+
+    if (!instruction) {
+      return res.status(400).json({
+        error: "Please describe what you want to change."
+      });
+    }
+
+    if (!html || !html.includes("<")) {
+      return res.status(400).json({
+        error: "Existing app HTML is missing."
+      });
+    }
+
+    const prompt = `
+You are an expert web app developer.
+
+Edit the existing app according to the user's instructions.
+
+APP NAME:
+${appName}
+
+ORIGINAL APP IDEA:
+${idea}
+
+THEME:
+${theme}
+
+USER'S REQUESTED CHANGES:
+${instruction}
+
+EXISTING APP HTML:
+${html}
+
+REQUIREMENTS:
+1. Return the COMPLETE updated HTML document, not partial code.
+2. Keep all existing working features unless the user requests changing them.
+3. Implement the requested changes in the actual interface and functionality.
+4. Make the dashboard professional, responsive and mobile-friendly.
+5. Use HTML, CSS and JavaScript that work inside an Android WebView.
+6. Do not use Markdown fences.
+7. Do not include explanations outside the JSON.
+8. Return valid JSON with these fields:
+{
+  "appName": "App name",
+  "summary": "Short description of changes",
+  "html": "Complete HTML document as a string",
+  "features": ["Feature 1", "Feature 2"]
+}
+`;
+
+    const response = await fetch(
+      "https://generativelanguage.googleapis.com/v1beta/models/" +
+        encodeURIComponent(GEMINI_MODEL) +
+        ":generateContent?key=" +
+        encodeURIComponent(GEMINI_API_KEY),
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          contents: [
+            {
+              role: "user",
+              parts: [{ text: prompt }]
+            }
+          ],
+          generationConfig: {
+            responseMimeType: "application/json",
+            temperature: 0.3
+          }
+        })
+      }
+    );
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      console.error("Gemini edit error:", data);
+      return res.status(502).json({
+        error:
+          data?.error?.message ||
+          "AI could not edit the app. Please try again."
+      });
+    }
+
+    const text = data?.candidates?.[0]?.content?.parts
+      ?.map((part) => part.text || "")
+      .join("");
+
+    if (!text) {
+      return res.status(502).json({
+        error: "AI returned an empty response."
+      });
+    }
+
+    let result;
+
+    try {
+      result = JSON.parse(text);
+    } catch {
+      return res.status(502).json({
+        error: "AI returned invalid JSON. Please try again."
+      });
+    }
+
+    if (
+      typeof result.html !== "string" ||
+      !result.html.toLowerCase().includes("<html")
+    ) {
+      return res.status(502).json({
+        error: "AI did not return a complete HTML app."
+      });
+    }
+
+    return res.json({
+      ok: true,
+      result: {
+        appName: String(result.appName || appName),
+        summary: String(result.summary || "App updated"),
+        html: result.html,
+        features: Array.isArray(result.features)
+          ? result.features
+          : []
+      }
+    });
+  } catch (error) {
+    console.error("Edit app error:", error);
+    return res.status(500).json({
+      error: "App editing failed.",
+      detail: error?.message || "Unknown server error"
+    });
+  }
+});
+
 app.post("/api/build", async (req, res) => {
   try {
     const idea = String(req.body?.idea || "").trim();
