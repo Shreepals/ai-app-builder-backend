@@ -60,7 +60,6 @@ async function github(path, options = {}) {
   return response;
 }
 
-// Generate a complete app as HTML, not just a written plan.
 app.post("/api/generate", async (req, res) => {
   try {
     const idea = String(req.body?.idea || "").trim();
@@ -80,16 +79,80 @@ app.post("/api/generate", async (req, res) => {
       });
     }
 
-    const prompt = `
-You are an expert full-stack app developer and mobile UI designer.
+    const gamePattern =
+      /\b(game|gaming|3d|2d|racing|race|runner|platformer|shooter|shooting|adventure|puzzle|arcade|football|cricket|car game|bike game|battle|survival|minecraft|gameplay)\b|गेम|खेल|रेसिंग|दौड़|शूटिंग|एडवेंचर|पहेली|क्रिकेट गेम|कार गेम|बाइक गेम/i;
+
+    const isGameIdea = gamePattern.test(`${appName} ${idea}`);
+
+    const gameInstructions = `
+SPECIAL GAME DEVELOPMENT MODE:
+
+The user wants a GAME. Build an actual playable game, not a game
+dashboard, game store, landing page, or description of a game.
+
+Use Three.js version 0.149.0 through this classic browser script:
+<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+
+Do not use JavaScript modules or import statements. Use the global
+THREE object so the game can be previewed in a normal browser.
+
+The HTML must implement:
+1. A real THREE.Scene, PerspectiveCamera and WebGLRenderer.
+2. A visible 3D environment with lighting, ground and appropriate objects.
+3. A player or controllable game object that visibly moves.
+4. Touch-friendly on-screen controls for mobile and keyboard controls
+   for desktop.
+5. A real game loop using requestAnimationFrame.
+6. Gameplay with a clear objective, score, collisions or obstacles,
+   and a win/lose or game-over condition appropriate to the idea.
+7. Start, pause if appropriate, and restart controls.
+8. Responsive sizing and renderer resizing when the screen changes.
+9. A visible loading/error message if WebGL or Three.js cannot load.
+10. All gameplay logic in the HTML itself. Do not substitute a
+    dashboard, static image, mockup, or unrelated calculator.
+11. Use simple original geometric 3D objects where external models
+    are unavailable. The game must still be playable without them.
+12. Keep the code concise enough to return the complete HTML.
+13. Clearly state if any requested online or multiplayer feature is
+    only simulated. Do not claim real online multiplayer.
+
+Because this is a game, Three.js is allowed as an external dependency.
+Do not use other libraries or external 3D model files.
+`;
+
+    const appInstructions = `
+GENERAL APP DEVELOPMENT MODE:
 
 Create a COMPLETE, usable app based on the user's exact idea.
 Do not create a generic calculator or unrelated dashboard.
-The app must be specifically designed for the idea below.
+
+Requirements:
+1. Return a complete standalone HTML document.
+2. Include CSS and JavaScript in the HTML.
+3. Make it responsive for Android phones and desktop.
+4. Design a polished, modern app specific to the user's idea.
+5. Include relevant navigation, cards, forms, lists, buttons and sections.
+6. Use realistic sample data appropriate to the idea.
+7. Make buttons and forms work with JavaScript where practical.
+8. Include search, filtering and localStorage persistence when appropriate.
+9. Do not leave the main features as "coming soon" placeholders.
+10. Do not claim that real payments, live prices, login or remote services
+    work unless they are actually integrated.
+11. Use clearly identified demo data where real services are unavailable.
+12. Use semantic HTML, accessible labels and touch-friendly controls.
+13. Return complete HTML, not a plan or a partial code snippet.
+14. Include <!DOCTYPE html>, <html>, <head>, <style>, <body> and scripts.
+15. The features array must list features actually implemented.
+`;
+
+    const prompt = `
+You are an expert app developer and mobile UI designer.
 
 APP NAME: ${appName}
 APP IDEA: ${idea}
 DESIGN THEME: ${theme}
+
+${isGameIdea ? gameInstructions : appInstructions}
 
 Return ONLY valid JSON with these keys:
 {
@@ -99,32 +162,8 @@ Return ONLY valid JSON with these keys:
   "features": ["string"]
 }
 
-Requirements for html:
-1. Provide a complete standalone HTML document.
-2. Include all CSS and JavaScript inside the HTML.
-3. Make it responsive for Android phones and desktop.
-4. Design a polished, modern, complete dashboard for this exact idea.
-5. Include a header, navigation, relevant cards, forms, lists,
-   buttons and sections that make sense for this app.
-6. Use realistic sample data appropriate to the idea.
-7. Buttons and forms must work using JavaScript where practical.
-8. Add useful interactions, search, filtering, and localStorage
-   persistence when appropriate.
-9. Do not use placeholder text such as "coming soon" for the
-   main features. Implement the main features as far as possible.
-10. Do not require external libraries, a server, or an API key
-    for the core demo to run.
-11. Do not claim that real payments, live prices, login, or
-    remote services work unless actually integrated. Use clearly
-    identified demo data when real services are unavailable.
-12. Use semantic HTML, accessible labels, and touch-friendly controls.
-13. The HTML must not be truncated. Keep it self-contained.
-14. The summary should briefly explain what was built.
-15. features must list the actual implemented features.
-
-The html field must contain the entire runnable HTML source,
-including <!DOCTYPE html>, <html>, <head>, <style>,
-<body>, and <script> as needed.
+The html field must contain the complete runnable HTML source.
+Escape all quotes and newlines correctly so the response is valid JSON.
 Return JSON only, with no Markdown fences.
 `;
 
@@ -155,19 +194,19 @@ Return JSON only, with no Markdown fences.
     const data = await response.json();
 
     if (!response.ok) {
-  const detail =
-    data?.error?.message || "Unknown Gemini error";
+      const detail =
+        data?.error?.message || "Unknown Gemini error";
 
-  console.error("Gemini API error:", {
-    status: response.status,
-    message: detail
-  });
+      console.error("Gemini API error:", {
+        status: response.status,
+        message: detail
+      });
 
-  return res.status(502).json({
-    error: `Gemini error (${response.status}): ${detail}`,
-    detail
-  });
-}
+      return res.status(502).json({
+        error: `Gemini error (${response.status}): ${detail}`,
+        detail
+      });
+    }
 
     const output = (data?.candidates?.[0]?.content?.parts || [])
       .map(part => part.text || "")
@@ -208,6 +247,15 @@ Return JSON only, with no Markdown fences.
       });
     }
 
+    if (
+      isGameIdea &&
+      !/THREE\.WebGLRenderer|new THREE\.WebGLRenderer/.test(result.html)
+    ) {
+      console.warn(
+        "Game HTML did not include the expected Three.js renderer."
+      );
+    }
+
     return res.json({
       ok: true,
       result: {
@@ -229,7 +277,6 @@ Return JSON only, with no Markdown fences.
   }
 });
 
-// Start an Android APK build using the user's idea.
 app.post("/api/build", async (req, res) => {
   try {
     const idea = String(req.body?.idea || "").trim();
@@ -291,7 +338,6 @@ app.post("/api/build", async (req, res) => {
   }
 });
 
-// Check build progress and locate the APK artifact.
 app.get("/api/build-status", async (_req, res) => {
   try {
     if (!GH_ACTIONS_TOKEN) {
@@ -380,7 +426,6 @@ app.get("/api/build-status", async (_req, res) => {
   }
 });
 
-// Extract the APK from GitHub's ZIP artifact.
 app.get("/api/apk-download", async (req, res) => {
   try {
     const runId = String(req.query?.run_id || "").trim();
@@ -432,7 +477,6 @@ app.get("/api/apk-download", async (req, res) => {
 
     const zipBuffer = Buffer.from(await zipResponse.arrayBuffer());
 
-    // Find the APK entry in the ZIP central directory.
     let offset = 0;
     let apkBuffer = null;
 
