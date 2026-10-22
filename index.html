@@ -295,62 +295,76 @@
       }
     }
 
-    async function buildApk() {
-      if (buildInProgress) return;
+   
+async function buildApk() {
+  if (buildInProgress) return;
 
-      const idea = $("idea").value.trim();
-      const appName = $("appName").value.trim() || "My AI App";
+  const idea = $("idea").value.trim();
+  const appName = $("appName").value.trim() || "My AI App";
+  const theme = $("theme").value;
 
-      if (!idea) {
-        setStatus("पहले ऐप का आइडिया लिखें।");
-        return;
-      }
+  const appHtml = $("preview").srcdoc;
 
-      buildInProgress = true;
-      $("buildBtn").disabled = true;
-      $("downloadLink").style.display = "none";
-      setStatus("GitHub Actions को APK बनाने का अनुरोध भेज रहे हैं...");
+  if (!generated || !appHtml || !appHtml.toLowerCase().includes("<html")) {
+    setStatus("पहले ऐप बनाओ और उसका Preview तैयार होने दो।");
+    return;
+  }
 
-      try {
-        const response = await fetch(API + "/api/build", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ idea, appName })
-        });
+  buildInProgress = true;
+  $("buildBtn").disabled = true;
+  $("downloadLink").style.display = "none";
+  setStatus("आपके Preview वाले ऐप को APK में बदला जा रहा है...");
 
-        await readResponse(response);
-        setStatus("APK बिल्ड शुरू हो गया। कृपया प्रतीक्षा करें...");
+  try {
+    const response = await fetch(API + "/api/build", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        idea,
+        appName,
+        theme,
+        html: appHtml
+      })
+    });
 
-        const deadline = Date.now() + 10 * 60 * 1000;
+    const data = await readResponse(response);
 
-        while (Date.now() < deadline) {
-          await new Promise(resolve => setTimeout(resolve, 6000));
+    setStatus("APK बिल्ड शुरू हो गया। कृपया प्रतीक्षा करें...");
 
-          const statusResponse = await fetch(API + "/api/build-status");
-          const status = await readResponse(statusResponse);
+    const deadline = Date.now() + 10 * 60 * 1000;
 
-          if (status.status === "completed") {
-            if (status.conclusion === "success" && status.downloadUrl) {
-              $("downloadLink").href = status.downloadUrl;
-              $("downloadLink").style.display = "inline-block";
-              setStatus("APK तैयार है! नीचे डाउनलोड लिंक दबाएँ।");
-            } else {
-              setStatus(status.message || "APK बिल्ड पूरा नहीं हुआ। GitHub Actions लॉग देखें।");
-            }
-            return;
-          }
+    while (Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 6000));
 
-          setStatus("APK बन रहा है... स्थिति: " + (status.status || "प्रतीक्षा"));
+      const statusResponse = await fetch(API + "/api/build-status");
+      const status = await readResponse(statusResponse);
+
+      if (status.downloadUrl && status.status === "completed") {
+        if (status.conclusion === "success") {
+          $("downloadLink").href = status.downloadUrl;
+          $("downloadLink").style.display = "inline-block";
+          setStatus("APK तैयार है! नीचे डाउनलोड लिंक दबाएँ।");
+          return;
         }
 
-        setStatus("बिल्ड में अधिक समय लग रहा है। GitHub Actions में स्थिति देखें।");
-      } catch (error) {
-        setStatus("APK बनाने में समस्या: " + error.message);
-      } finally {
-        buildInProgress = false;
-        $("buildBtn").disabled = false;
+        throw new Error("APK बिल्ड असफल हुआ। GitHub Actions लॉग देखें।");
       }
+
+      if (status.status === "completed" && status.conclusion === "failure") {
+        throw new Error("APK बिल्ड असफल हुआ। GitHub Actions लॉग देखें।");
+      }
+
+      setStatus("APK बन रहा है... कृपया प्रतीक्षा करें।");
     }
+
+    setStatus("बिल्ड में समय लग रहा है। GitHub Actions में स्थिति देखें।");
+  } catch (error) {
+    setStatus("APK बनाने में समस्या: " + error.message);
+  } finally {
+    buildInProgress = false;
+    $("buildBtn").disabled = false;
+  }
+    } 
   </script>
 </body>
 </html>
