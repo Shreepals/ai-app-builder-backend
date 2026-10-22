@@ -59,7 +59,7 @@ jobs:
           mkdir -p app/src/main/assets
 
           python3 - <<'PY'
-          import os, json
+          import os, json, re
           from pathlib import Path
 
           name = os.environ["APP_NAME"].strip() or "My App"
@@ -67,6 +67,19 @@ jobs:
 
           if not idea:
               raise SystemExit("ERROR: App idea is empty")
+
+          game_pattern = re.compile(
+              r"\b(game|gaming|3d|2d|racing|race|runner|platformer|shooter|"
+              r"shooting|adventure|puzzle|arcade|football|cricket|car game|"
+              r"bike game|battle|survival|minecraft|gameplay)\b|"
+              r"गेम|खेल|रेसिंग|दौड़|शूटिंग|एडवेंचर|पहेली|क्रिकेट गेम|कार गेम|बाइक गेम",
+              re.I
+          )
+
+          is_game = bool(game_pattern.search(name + " " + idea))
+          Path("is_game.txt").write_text(
+              "yes" if is_game else "no", encoding="utf-8"
+          )
 
           prompt = f"""
           Build a complete, usable mobile application.
@@ -94,28 +107,59 @@ jobs:
           Choose features based on the actual idea.
           Do not claim that mock data, payments, bookings, or live prices
           are real. Clearly indicate features that need a backend or API.
+          """
 
+          if is_game:
+              prompt += """
+          THIS REQUEST IS A GAME. Build a complete playable 3D car racing game,
+          not a static mockup or pretend demo.
+
+          GAME DASHBOARD:
+          - Create a polished home screen with game title and Play button.
+          - Show current score, best score, instructions and sound toggle.
+          - Keep dashboard and gameplay as separate screens.
+          - Add working pause, resume, restart and back/home buttons.
+
+          REAL 3D GAME:
+          - Use Three.js with the classic global THREE API, not ES modules.
+          - Include this exact script URL:
+            https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js
+          - The workflow replaces that URL with a local APK asset.
+          - Create a real 3D road, lane markings, player car, traffic and obstacles.
+          - Use a perspective camera, renderer and continuous animation loop.
+          - Add working keyboard controls and mobile touch controls.
+          - Include collision detection, score, increasing speed and game-over.
+          - Make the game fit Android portrait screens.
+          - Show useful feedback if the 3D library cannot load.
+          - Do not use imports, modules, npm or other external JS libraries.
+          - Put all other CSS and JavaScript directly in this HTML file.
+          - The game must actually be playable, not just a picture or animation.
+          """
+          else:
+              prompt += """
+          Do not create a game unless the user requested one.
+          Keep essential functionality available offline.
+          Do not require external JavaScript libraries.
+          """
+
+          prompt += """
           TECHNICAL RULES:
           Return ONE complete standalone HTML document only.
           Start with <!DOCTYPE html> and end with </html>.
           Include CSS inside <style> and JavaScript inside <script>.
-          Do not require npm, a build step, or external JavaScript libraries.
-          Keep essential functionality available offline.
           Avoid eval and dynamically executing generated strings.
-          Use accessible labels, semantic HTML, and safe input handling.
-          Implement real event handlers for the app's primary controls.
+          Use accessible labels, semantic HTML and safe input handling.
+          Implement real event handlers for the primary controls.
           No Markdown fences, no explanation, no truncated examples.
-
-          Before responding, check that the HTML is complete, its main
-          navigation works, and core buttons perform their intended actions.
+          Check that the HTML is complete, navigation works and core buttons work.
           """
 
           Path("request.json").write_text(json.dumps({
-            "contents": [{"parts": [{"text": prompt}]}],
-            "generationConfig": {
-              "temperature": 0.2,
-              "maxOutputTokens": 16384
-            }
+              "contents": [{"parts": [{"text": prompt}]}],
+              "generationConfig": {
+                  "temperature": 0.2,
+                  "maxOutputTokens": 16384
+              }
           }), encoding="utf-8")
           PY
 
@@ -131,11 +175,15 @@ jobs:
           import json, re
           from pathlib import Path
 
-          data = json.loads(Path("response.json").read_text(encoding="utf-8"))
+          data = json.loads(
+              Path("response.json").read_text(encoding="utf-8")
+          )
 
           if data.get("error"):
-              raise SystemExit("Gemini API error: " +
-                  data["error"].get("message", "Unknown error"))
+              raise SystemExit(
+                  "Gemini API error: " +
+                  data["error"].get("message", "Unknown error")
+              )
 
           candidates = data.get("candidates", [])
           if not candidates:
@@ -148,7 +196,10 @@ jobs:
               )
 
           parts = candidate.get("content", {}).get("parts", [])
-          html = "\n".join(p.get("text", "") for p in parts if p.get("text")).strip()
+          html = "\n".join(
+              p.get("text", "") for p in parts if p.get("text")
+          ).strip()
+
           html = re.sub(r"^\s*```(?:html)?\s*", "", html, flags=re.I)
           html = re.sub(r"\s*```\s*$", "", html)
 
@@ -171,9 +222,45 @@ jobs:
           Path("app/src/main/assets/index.html").write_text(
               html, encoding="utf-8"
           )
+
           print("Generated HTML length:", len(html))
           print("App HTML saved successfully.")
           PY
+
+      - name: Add local Three.js for 3D games
+        run: |
+          set -euo pipefail
+
+          if [ "$(cat is_game.txt)" = "yes" ]; then
+            echo "Game detected. Downloading Three.js..."
+
+            curl --fail --location --silent --show-error --retry 2 \
+              "https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js" \
+              -o app/src/main/assets/three.min.js
+
+            test -s app/src/main/assets/three.min.js
+
+            python3 - <<'PY'
+          from pathlib import Path
+
+          path = Path("app/src/main/assets/index.html")
+          html = path.read_text(encoding="utf-8")
+
+          cdn = "https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"
+
+          if cdn not in html:
+              raise SystemExit(
+                  "ERROR: Game HTML did not include the required Three.js URL."
+              )
+
+          html = html.replace(cdn, "three.min.js")
+          path.write_text(html, encoding="utf-8")
+
+          print("Three.js script changed to local asset.")
+          PY
+          else
+            echo "Regular app detected. Three.js is not needed."
+          fi
 
       - name: Create Android project
         env:
@@ -258,6 +345,7 @@ jobs:
           name = os.environ.get("APP_NAME", "My App").strip() or "My App"
           path = Path("app/src/main/AndroidManifest.xml")
           text = path.read_text(encoding="utf-8")
+
           path.write_text(
               text.replace("APP_NAME_PLACEHOLDER", escape(name)),
               encoding="utf-8"
@@ -332,9 +420,20 @@ jobs:
       - name: Verify APK
         run: |
           set -euo pipefail
+
           test -s app/src/main/assets/index.html
           test -s app/build/outputs/apk/debug/app-debug.apk
+
+          if [ "$(cat is_game.txt)" = "yes" ]; then
+            test -s app/src/main/assets/three.min.js
+          fi
+
           ls -lh app/src/main/assets/index.html
+
+          if [ -f app/src/main/assets/three.min.js ]; then
+            ls -lh app/src/main/assets/three.min.js
+          fi
+
           ls -lh app/build/outputs/apk/debug/app-debug.apk
 
       - name: Upload APK artifact
