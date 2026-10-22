@@ -2,7 +2,7 @@
 import "dotenv/config";
 import express from "express";
 import cors from "cors";
-import { inflateRawSync } from "node:zlib";
+import { inflateRawSync, gzipSync } from "node:zlib";
 
 const app = express();
 
@@ -46,18 +46,13 @@ app.get("/health", (_req, res) => {
 });
 
 async function github(path, options = {}) {
-  const response = await fetch(
-    `https://api.github.com${path}`,
-    {
-      ...options,
-      headers: {
-        ...GH_HEADERS,
-        ...(options.headers || {})
-      }
+  return fetch(`https://api.github.com${path}`, {
+    ...options,
+    headers: {
+      ...GH_HEADERS,
+      ...(options.headers || {})
     }
-  );
-
-  return response;
+  });
 }
 
 app.post("/api/generate", async (req, res) => {
@@ -83,74 +78,64 @@ app.post("/api/generate", async (req, res) => {
       /\b(game|gaming|3d|2d|racing|race|runner|platformer|shooter|shooting|adventure|puzzle|arcade|football|cricket|car game|bike game|battle|survival|minecraft|gameplay)\b|गेम|खेल|रेसिंग|दौड़|शूटिंग|एडवेंचर|पहेली|क्रिकेट गेम|कार गेम|बाइक गेम/i;
 
     const isGameIdea = gamePattern.test(`${appName} ${idea}`);
-  
-const gameInstructions = `
+
+    const gameInstructions = `
 SPECIAL GAME DEVELOPMENT MODE:
 
-Build a complete playable game with a full professional game
-interface. Do NOT create only a small demo or a game dashboard
-without actual gameplay.
-
-The game must include TWO connected screens:
+Build a complete playable game with a professional interface.
+Build the exact type of game requested by the user.
+Do not turn every game into car racing.
 
 SCREEN 1 — GAME HOME DASHBOARD:
 - Game title and attractive game logo made with HTML/CSS.
-- Play Game button that starts the actual game.
-- Best score and current score.
+- Play Game button that starts actual gameplay.
+- Best score and current score where appropriate.
 - How to Play instructions.
-- Sound on/off toggle.
+- Sound toggle where appropriate.
 - Pause/resume and restart options where appropriate.
 - Mobile-friendly layout and large touch buttons.
-- Attractive game-specific colors, backgrounds and animations.
+- Game-specific colors, backgrounds and animations.
 
 SCREEN 2 — ACTUAL GAME:
-- Use Three.js version 0.149.0 using:
+- Implement actual gameplay matching the user's idea.
+- Use appropriate 2D canvas or CSS/JavaScript for 2D games.
+- Use Three.js version 0.149.0 only when suitable for the requested game.
+- If using Three.js, use the classic global THREE API, not ES modules.
+- Include this URL when using Three.js:
   <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
-- Create a real THREE.Scene, PerspectiveCamera and WebGLRenderer.
-- Create a visible 3D environment and controllable player.
-- Add real movement, obstacles, collision detection and scoring
-  appropriate to the user's game idea.
-- Add touch controls for mobile and keyboard controls for desktop.
-- Include game over, final score and play-again screen.
-- The Play button on the home dashboard MUST start the real game.
-- Keep the game loop running correctly and resize the renderer.
-- Use original geometric 3D objects if models are unavailable.
+- Create a real interactive scene and animation loop for 3D games.
+- Add controls, scoring and collision detection where appropriate.
+- Add touch controls for mobile and keyboard controls where suitable.
+- Include game over and play-again behavior where appropriate.
+- The Play button must start actual gameplay.
 - Show a useful message if WebGL or Three.js fails to load.
-
-IMPORTANT:
-- Build the game described by the user's exact idea.
-- Do not substitute a calculator, business dashboard, static image,
-  or generic landing page for the requested game.
-- Implement working buttons, not decorative buttons.
-- Store best score in localStorage when available.
-- Keep all HTML, CSS and gameplay code in one complete HTML file.
+- Keep all HTML, CSS and JavaScript in one complete HTML file.
 - Do not use JavaScript modules or import statements.
-- Do not claim that online multiplayer, payments or online services
-  work unless they are actually implemented.
+- Do not claim that online multiplayer or online services work unless implemented.
 - Return the complete runnable HTML document in the required JSON.
-`; 
+`;
 
     const appInstructions = `
 GENERAL APP DEVELOPMENT MODE:
 
-Create a COMPLETE, usable app based on the user's exact idea.
+Create a complete, usable app based on the user's exact idea.
 Do not create a generic calculator or unrelated dashboard.
 
 Requirements:
 1. Return a complete standalone HTML document.
 2. Include CSS and JavaScript in the HTML.
 3. Make it responsive for Android phones and desktop.
-4. Design a polished, modern app specific to the user's idea.
+4. Design a polished app specific to the user's idea.
 5. Include relevant navigation, cards, forms, lists, buttons and sections.
 6. Use realistic sample data appropriate to the idea.
 7. Make buttons and forms work with JavaScript where practical.
 8. Include search, filtering and localStorage persistence when appropriate.
-9. Do not leave the main features as "coming soon" placeholders.
-10. Do not claim that real payments, live prices, login or remote services
+9. Do not leave main features as "coming soon" placeholders.
+10. Do not claim real payments, live prices, login or remote services
     work unless they are actually integrated.
-11. Use clearly identified demo data where real services are unavailable.
+11. Identify demo data when real services are unavailable.
 12. Use semantic HTML, accessible labels and touch-friendly controls.
-13. Return complete HTML, not a plan or a partial code snippet.
+13. Return complete HTML, not a plan or partial snippet.
 14. Include <!DOCTYPE html>, <html>, <head>, <style>, <body> and scripts.
 15. The features array must list features actually implemented.
 `;
@@ -257,15 +242,6 @@ Return JSON only, with no Markdown fences.
       });
     }
 
-    if (
-      isGameIdea &&
-      !/THREE\.WebGLRenderer|new THREE\.WebGLRenderer/.test(result.html)
-    ) {
-      console.warn(
-        "Game HTML did not include the expected Three.js renderer."
-      );
-    }
-
     return res.json({
       ok: true,
       result: {
@@ -292,6 +268,7 @@ app.post("/api/build", async (req, res) => {
     const idea = String(req.body?.idea || "").trim();
     const appName =
       String(req.body?.appName || "My AI App").trim();
+    const html = String(req.body?.html || "").trim();
 
     if (!idea) {
       return res.status(400).json({
@@ -305,7 +282,40 @@ app.post("/api/build", async (req, res) => {
       });
     }
 
+    let compressedHtml = "";
+
+    if (html) {
+      if (
+        !html.toLowerCase().includes("<html") ||
+        !html.toLowerCase().includes("</html>")
+      ) {
+        return res.status(400).json({
+          error: "The supplied HTML app is incomplete."
+        });
+      }
+
+      compressedHtml = gzipSync(
+        Buffer.from(html, "utf8")
+      ).toString("base64");
+
+      if (compressedHtml.length > 50000) {
+        return res.status(413).json({
+          error:
+            "This app is too large to send directly to the build workflow. A file-upload method is needed."
+        });
+      }
+    }
+
     lastBuildRequestedAt = Date.now();
+
+    const inputs = {
+      idea,
+      app_name: appName
+    };
+
+    if (compressedHtml) {
+      inputs.app_html_gzip_b64 = compressedHtml;
+    }
 
     const response = await github(
       `/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`,
@@ -316,10 +326,7 @@ app.post("/api/build", async (req, res) => {
         },
         body: JSON.stringify({
           ref: "main",
-          inputs: {
-            idea,
-            app_name: appName
-          }
+          inputs
         })
       }
     );
@@ -336,7 +343,8 @@ app.post("/api/build", async (req, res) => {
     return res.status(202).json({
       ok: true,
       message: "APK build started.",
-      appName
+      appName,
+      sameHtmlProvided: Boolean(compressedHtml)
     });
   } catch (error) {
     console.error("Build error:", error);
@@ -545,8 +553,7 @@ app.get("/api/apk-download", async (req, res) => {
         break;
       }
 
-      offset +=
-        46 + fileNameLength + extraLength + commentLength;
+      offset += 46 + fileNameLength + extraLength + commentLength;
     }
 
     if (!apkBuffer) {
