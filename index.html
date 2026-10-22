@@ -80,6 +80,7 @@ a{color:#a9bcff}
   <div class="nav">
    <button class="active" data-page="home">⌂ Dashboard</button>
    <button data-page="builder">✦ App Generator</button>
+   <button data-page="editor">✎ AI Editor</button>
    <button data-page="projects">▦ My Projects</button>
    <button data-page="preview">▣ App Preview</button>
    <button data-page="android">⬇ Android APK</button>
@@ -149,6 +150,39 @@ a{color:#a9bcff}
   </section>
 
   <section id="projects" class="section">
+  <section id="editor" class="section">
+  <div class="workspace">
+    <div class="card">
+      <h2>✎ AI Editor</h2>
+      <p>अपने ऐप में जो बदलाव चाहते हैं, यहाँ लिखें।</p>
+
+      <div class="status" id="editProjectInfo">
+        पहले My Projects से ऐप खोलें।
+      </div>
+
+      <label for="editInstruction">क्या बदलाव करना है?</label>
+      <textarea id="editInstruction"
+        placeholder="डैशबोर्ड सुंदर बनाओ, लॉगिन पेज जोड़ो, नए फीचर बनाओ..."></textarea>
+
+      <div class="actions">
+        <button class="btn" id="editBtn" onclick="editCurrentApp()">
+          ✎ AI से ऐप एडिट करें
+        </button>
+      </div>
+
+      <div class="status" id="editStatus">
+        बदलाव का निर्देश लिखें।
+      </div>
+    </div>
+
+    <div class="card">
+      <h2>अपडेटेड ऐप प्रीव्यू</h2>
+      <iframe id="editPreview" class="preview"
+        title="AI Editor Preview"
+        sandbox="allow-scripts allow-forms allow-modals"></iframe>
+    </div>
+  </div>
+  </section> 
    <div class="card" style="margin-bottom:15px">
     <h2>My Projects</h2><p>अपने सेव किए गए ऐप खोलें और उनमें बदलाव करें।</p>
     <button class="btn" onclick="showPage('builder')">＋ नया प्रोजेक्ट</button>
@@ -333,6 +367,150 @@ function loadProject(id){
  updateDashboard();showPage("builder");
 }
 
+function openEditor() {
+  if (!appHtml) {
+    alert("पहले App Generator से एक ऐप बनाइए या My Projects से अपना ऐप खोलिए।");
+    showPage("builder");
+    return;
+  }
+
+  showPage("editor");
+
+  const frame = document.getElementById("editPreview");
+  const info = document.getElementById("editProjectInfo");
+  const status = document.getElementById("editStatus");
+
+  if (frame) frame.srcdoc = appHtml;
+  if (info) {
+    info.textContent = "एडिट होने वाला ऐप: " +
+      (document.getElementById("appName")?.value || "My App");
+  }
+  if (status) status.textContent = "आपके निर्देश का इंतज़ार है।";
+}
+
+async function editCurrentApp() {
+  const instruction =
+    document.getElementById("editInstruction")?.value.trim();
+
+  const status = document.getElementById("editStatus");
+  const button = document.getElementById("editButton");
+  const frame = document.getElementById("editPreview");
+
+  if (!instruction) {
+    alert("पहले लिखिए कि ऐप में क्या बदलाव करना है।");
+    return;
+  }
+
+  const projects = loadProjects();
+  let project = projects.find(p => String(p.id) === String(currentId));
+
+  let oldHtml = project?.html || appHtml;
+
+  if (!oldHtml) {
+    alert("पहले कोई ऐप बनाइए या My Projects से ऐप खोलिए।");
+    return;
+  }
+
+  const appName =
+    project?.appName ||
+    document.getElementById("appName")?.value ||
+    "My App";
+
+  const idea =
+    project?.idea ||
+    document.getElementById("idea")?.value ||
+    appName;
+
+  const theme =
+    project?.theme ||
+    document.getElementById("theme")?.value ||
+    "Modern";
+
+  try {
+    if (button) button.disabled = true;
+    if (status) status.textContent = "AI आपके ऐप में बदलाव कर रहा है…";
+
+    const response = await fetch(API + "/api/edit-app", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        appName,
+        idea,
+        theme,
+        instruction,
+        html: oldHtml
+      })
+    });
+
+    const data = await response.json();
+
+    if (!response.ok || data.ok === false) {
+      throw new Error(data.error || data.message || "ऐप एडिट नहीं हो पाया।");
+    }
+
+    const newHtml = extractHtml(data);
+
+    if (!newHtml || newHtml.length < 30) {
+      throw new Error("AI से सही HTML नहीं मिला। दोबारा कोशिश करें।");
+    }
+
+    appHtml = newHtml;
+
+    if (project) {
+      project.html = newHtml;
+      project.appName = data.result?.appName || appName;
+      project.updatedAt = new Date().toISOString();
+
+      const index = projects.findIndex(
+        p => String(p.id) === String(project.id)
+      );
+
+      if (index !== -1) projects[index] = project;
+
+      saveProjects(projects);
+      currentId = project.id;
+    } else {
+      project = {
+        id: Date.now(),
+        appName: data.result?.appName || appName,
+        idea,
+        theme,
+        html: newHtml,
+        updatedAt: new Date().toISOString()
+      };
+
+      projects.unshift(project);
+      saveProjects(projects);
+      currentId = project.id;
+    }
+
+    const nameInput = document.getElementById("appName");
+    if (nameInput) nameInput.value = project.appName;
+
+    if (frame) frame.srcdoc = newHtml;
+
+    const instructionBox = document.getElementById("editInstruction");
+    if (instructionBox) instructionBox.value = "";
+
+    if (status) {
+      status.textContent =
+        "बदलाव सफल! अब Preview देखें और Android APK बनाएँ।";
+    }
+
+    if (typeof updateDashboard === "function") updateDashboard();
+    if (typeof renderProjects === "function") renderProjects();
+
+  } catch (error) {
+    console.error("AI Editor error:", error);
+    if (status) {
+      status.textContent = "समस्या: " + error.message;
+    }
+    alert("ऐप एडिट नहीं हुआ: " + error.message);
+  } finally {
+    if (button) button.disabled = false;
+  }
+ }
+ 
 function updateBuildInfo(){
  const p=projects.find(x=>x.id===currentId);
  setText("buildInfo",p?"चुना गया ऐप: "+p.name+"\nAPK बनाने से पहले सुनिश्चित करें कि प्रीव्यू सही है।":"कोई ऐप चुना नहीं गया। पहले ऐप बनाएं या My Projects से खोलें।");
