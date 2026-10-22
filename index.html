@@ -149,6 +149,38 @@ a{color:#a9bcff}
    </div>
   </section>
 
+<section id="editor" class="section">
+  <h2>✏️ AI App Editor</h2>
+  <p>अपना ऐप खोलें और लिखें कि उसमें क्या बदलाव चाहिए।</p>
+
+  <label for="editInstruction">ऐप में क्या बदलाव करना है?</label>
+  <textarea
+    id="editInstruction"
+    rows="5"
+    placeholder="उदाहरण: Login page, पूरा Dashboard, Profile और Settings जोड़ो। मौजूदा फीचर्स मत हटाना।"
+    style="width:100%;box-sizing:border-box;padding:12px;margin:12px 0;"
+  ></textarea>
+
+  <p id="editProjectInfo">पहले My Projects से अपना ऐप खोलें।</p>
+
+  <button
+    id="editButton"
+    onclick="editCurrentApp()"
+    style="padding:12px 18px;margin:8px 0;"
+  >
+    AI से ऐप एडिट करें
+  </button>
+
+  <p id="editStatus">ऐप एडिट करने के लिए निर्देश लिखें।</p>
+
+  <h3>ऐप का Preview</h3>
+  <iframe
+    id="editPreview"
+    title="AI Editor Preview"
+    style="width:100%;height:500px;border:1px solid #888;border-radius:8px;background:white;"
+  ></iframe>
+</section>
+  
   <section id="projects" class="section">
   <section id="editor" class="section">
   <div class="workspace">
