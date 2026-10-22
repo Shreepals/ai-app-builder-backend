@@ -21,6 +21,7 @@ permissions:
 jobs:
   build-apk:
     runs-on: ubuntu-latest
+    timeout-minutes: 30
 
     steps:
       - name: Checkout repository
@@ -35,13 +36,13 @@ jobs:
       - name: Set up Android SDK
         uses: android-actions/setup-android@v4
 
-      - name: Install Android packages
+      - name: Install Android SDK packages
         run: |
-          set -euo pipefail
+          set -e
           yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
-      - name: Generate complete app with Gemini
+      - name: Generate app HTML with Gemini
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           APP_IDEA: ${{ inputs.idea }}
@@ -50,149 +51,76 @@ jobs:
         run: |
           set -euo pipefail
 
-          if [ -z "${GEMINI_API_KEY:-}" ]; then
-            echo "Missing GEMINI_API_KEY repository secret"
+          test -n "$GEMINI_API_KEY" || {
+            echo "ERROR: GEMINI_API_KEY secret is missing"
             exit 1
-          fi
+          }
 
           mkdir -p app/src/main/assets
 
           python3 - <<'PY'
-          import os
-          import json
+          import os, json
           from pathlib import Path
 
-          name = os.environ.get("APP_NAME", "My App").strip() or "My App"
-          idea = os.environ.get("APP_IDEA", "").strip()
+          name = os.environ["APP_NAME"].strip() or "My App"
+          idea = os.environ["APP_IDEA"].strip()
 
           if not idea:
-              raise SystemExit("App idea is empty.")
+              raise SystemExit("ERROR: App idea is empty")
 
-          prompt = """
-          You are a senior product designer, frontend engineer, and mobile
-          application developer. Build a COMPLETE, usable application from
-          the user's app idea. This is a real app-building task, not a request
-          for a landing page or a visual mockup.
+          prompt = f"""
+          Build a complete, usable mobile application.
 
-          APP NAME:
-          """ + name + """
+          APP NAME: {name}
+          USER IDEA: {idea}
 
-          USER'S APP IDEA:
-          """ + idea + """
+          IMPORTANT:
+          Build the exact application requested. Never replace it with
+          a calculator, generic dashboard, or unrelated template.
 
-          FIRST UNDERSTAND THE IDEA:
-          Identify the type of app, target users, primary user tasks, essential
-          screens, data entities, and the navigation connecting those screens.
-          Build the app that the user actually requested.
+          Create a polished, mobile-first app with:
+          - A useful home/dashboard screen for this specific app.
+          - Multiple relevant screens or sections.
+          - Working navigation and back/home behavior.
+          - Relevant forms, cards, lists, search, and action buttons.
+          - Working core workflows, not decorative controls.
+          - Form validation and useful success/error messages.
+          - Add, view, edit, and delete functionality when appropriate.
+          - localStorage persistence where useful, with safe error handling.
+          - Responsive styling for Android phone screens.
+          - Clear empty states and realistic demo data where helpful.
+          - Hindi labels when suitable for the intended audience.
 
-          NEVER substitute a calculator, generic dashboard, farmer app,
-          portfolio, or AI App Builder page unless that is the requested idea.
+          Choose features based on the actual idea.
+          Do not claim that mock data, payments, bookings, or live prices
+          are real. Clearly indicate features that need a backend or API.
 
-          DASHBOARD AND SCREENS:
-          - Create a complete home/dashboard screen appropriate for this app.
-          - Include all important screens expected for this app category.
-          - Include a clear header, app branding, navigation, content sections,
-            cards, lists, forms, and relevant action buttons.
-          - Create separate views or sections for major features. Do not put
-            every feature on one short page.
-          - Use a bottom navigation bar or a sidebar/menu when appropriate.
-          - Every navigation item must open its corresponding view or section.
-          - Provide a coherent design system, spacing, typography, icons,
-            colors, and responsive layouts.
-          - Include sensible empty states, validation, success messages,
-            and error messages.
-          - Add search, filters, sorting, tabs, dialogs, or detail views when
-            relevant to the requested app.
-          - Make the interface polished on Android phone screens.
+          TECHNICAL RULES:
+          Return ONE complete standalone HTML document only.
+          Start with <!DOCTYPE html> and end with </html>.
+          Include CSS inside <style> and JavaScript inside <script>.
+          Do not require npm, a build step, or external JavaScript libraries.
+          Keep essential functionality available offline.
+          Avoid eval and dynamically executing generated strings.
+          Use accessible labels, semantic HTML, and safe input handling.
+          Implement real event handlers for the app's primary controls.
+          No Markdown fences, no explanation, no truncated examples.
 
-          FEATURE COMPLETENESS:
-          - Implement the core user workflows from beginning to end.
-          - Make buttons, forms, menus, tabs, and interactive controls work.
-          - Do not create buttons that do nothing.
-          - Do not use placeholder text instead of required app functionality.
-          - Use JavaScript to implement real client-side interactions.
-          - Save suitable user-created data in localStorage.
-          - Support edit, delete, add, and view operations where relevant.
-          - Include demo/sample data when it helps demonstrate the app.
-          - Do not claim that demo data is live or belongs to real users.
-          - Avoid dead links and unfinished TODO sections.
-          - If a feature is too large for a single-file offline app, implement
-            the useful frontend flow and clearly explain what backend service
-            is still required.
-
-          APP-SPECIFIC EXPECTATIONS:
-          Select features based on the user's idea, not a fixed template.
-          Examples:
-          - Shopping: products, categories, search, product details, cart,
-            quantities, checkout demo, orders, and profile.
-          - Education: courses, lessons, progress, quizzes, results, and profile.
-          - Video: feed, video cards/player, categories, search, saved items,
-            and profile.
-          - Finance/trading: watchlist, instruments, charts or visual demos,
-            portfolio, transactions demo, and risk notices as appropriate.
-          - Booking: search, available demo listings, details, booking form,
-            booking confirmation demo, and booking history.
-          These examples are guidance only. Do not add unrelated features.
-
-          TECHNICAL REQUIREMENTS:
-          1. Return one complete standalone HTML5 document.
-          2. Put all CSS inside a style element and JavaScript inside script
-             elements in that document.
-          3. Start the output with <!DOCTYPE html> and finish with </html>.
-          4. Use semantic HTML and accessible form labels.
-          5. Use responsive CSS suitable for Android WebView.
-          6. Avoid external JavaScript libraries, package installation, and
-             compilation of the HTML.
-          7. Use localStorage safely, handling invalid or unavailable data.
-          8. Escape user-provided content before inserting it into HTML.
-          9. Do not use eval or dynamically execute generated strings.
-          10. Do not invent real accounts, successful payments, live market
-              prices, real bookings, or server-side operations.
-          11. For missing APIs or credentials, provide a working demo and
-              clearly identify the limitation in the relevant screen.
-          12. Use Hindi UI text when appropriate for the user's audience.
-          13. Keep all important app features reachable through navigation.
-          14. Ensure every required closing tag is present and JavaScript is
-              syntactically complete.
-          15. Do not return an explanation, Markdown fences, or a partial
-              code sample. Return only the complete HTML document.
-
-          QUALITY CHECK BEFORE RESPONDING:
-          Check that the requested idea is implemented, major screens exist,
-          navigation works, core buttons have event handlers, forms validate,
-          and no unrelated fixed app has been substituted.
-
-          Prioritize functional completeness over decorative descriptions.
-          Produce the best complete implementation possible within one HTML
-          file. Do not intentionally omit major screens to save space.
+          Before responding, check that the HTML is complete, its main
+          navigation works, and core buttons perform their intended actions.
           """
 
-          Path("prompt.json").write_text(
-              json.dumps({"prompt": prompt}, ensure_ascii=False),
-              encoding="utf-8"
-          )
-
-          request = {
-              "contents": [{
-                  "parts": [{
-                      "text": prompt
-                  }]
-              }],
-              "generationConfig": {
-                  "temperature": 0.2,
-                  "maxOutputTokens": 16384
-              }
-          }
-
-          Path("request.json").write_text(
-              json.dumps(request, ensure_ascii=False),
-              encoding="utf-8"
-          )
+          Path("request.json").write_text(json.dumps({
+            "contents": [{"parts": [{"text": prompt}]}],
+            "generationConfig": {
+              "temperature": 0.2,
+              "maxOutputTokens": 16384
+            }
+          }), encoding="utf-8")
           PY
 
           curl --fail-with-body --silent --show-error \
-            --retry 2 \
-            --max-time 300 \
+            --retry 2 --max-time 300 \
             -X POST \
             "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
             -H "Content-Type: application/json" \
@@ -200,71 +128,51 @@ jobs:
             -o response.json
 
           python3 - <<'PY'
-          import json
-          import re
+          import json, re
           from pathlib import Path
 
           data = json.loads(Path("response.json").read_text(encoding="utf-8"))
 
           if data.get("error"):
-              raise SystemExit(
-                  "Gemini API error: " +
-                  str(data["error"].get("message", "Unknown error"))
-              )
+              raise SystemExit("Gemini API error: " +
+                  data["error"].get("message", "Unknown error"))
 
           candidates = data.get("candidates", [])
           if not candidates:
-              raise SystemExit("Gemini returned no candidates.")
+              raise SystemExit("Gemini returned no app.")
 
           candidate = candidates[0]
-          finish = candidate.get("finishReason", "")
-
-          if finish == "MAX_TOKENS":
+          if candidate.get("finishReason") == "MAX_TOKENS":
               raise SystemExit(
-                  "Gemini output reached its token limit. "
-                  "No APK will be built from truncated HTML."
+                  "Generated app was truncated. No incomplete APK will be built."
               )
 
           parts = candidate.get("content", {}).get("parts", [])
-          html = "\n".join(
-              part.get("text", "")
-              for part in parts
-              if part.get("text")
-          ).strip()
-
-          html = re.sub(
-              r"^\s*```(?:html)?\s*",
-              "",
-              html,
-              flags=re.IGNORECASE
-          )
+          html = "\n".join(p.get("text", "") for p in parts if p.get("text")).strip()
+          html = re.sub(r"^\s*```(?:html)?\s*", "", html, flags=re.I)
           html = re.sub(r"\s*```\s*$", "", html)
 
-          if not re.search(r"<!doctype\s+html", html, re.IGNORECASE):
-              raise SystemExit("Output is missing the HTML doctype.")
+          checks = [
+              (r"<!doctype\s+html", "Missing HTML doctype"),
+              (r"<html[\s>]", "Missing HTML root element"),
+              (r"</html\s*>", "HTML is incomplete"),
+              (r"<body[\s>]", "Missing body element"),
+              (r"<style[\s>]", "Missing embedded CSS"),
+              (r"<script[\s>]", "Missing embedded JavaScript"),
+          ]
 
-          if not re.search(r"</html\s*>", html, re.IGNORECASE):
-              raise SystemExit("HTML is incomplete: closing html tag missing.")
+          for pattern, message in checks:
+              if not re.search(pattern, html, re.I):
+                  raise SystemExit("ERROR: " + message)
 
           if len(html) < 3000:
-              raise SystemExit(
-                  "Generated HTML is unexpectedly short. "
-                  "Refusing to build an incomplete app."
-              )
+              raise SystemExit("ERROR: Generated HTML is too short")
 
-          if not re.search(r"<style[\s>]", html, re.IGNORECASE):
-              raise SystemExit("Generated HTML has no embedded CSS.")
-
-          if not re.search(r"<script[\s>]", html, re.IGNORECASE):
-              raise SystemExit("Generated HTML has no embedded JavaScript.")
-
-          output = Path("app/src/main/assets/index.html")
-          output.write_text(html, encoding="utf-8")
-
-          print("Complete HTML document received.")
-          print("HTML characters:", len(html))
-          print("Gemini finish reason:", finish or "not provided")
-          print("Saved to:", output)
+          Path("app/src/main/assets/index.html").write_text(
+              html, encoding="utf-8"
+          )
+          print("Generated HTML length:", len(html))
+          print("App HTML saved successfully.")
           PY
 
       - name: Create Android project
@@ -349,12 +257,11 @@ jobs:
 
           name = os.environ.get("APP_NAME", "My App").strip() or "My App"
           path = Path("app/src/main/AndroidManifest.xml")
-          content = path.read_text(encoding="utf-8")
-          content = content.replace(
-              "APP_NAME_PLACEHOLDER",
-              escape(name, {'"': '&quot;'})
+          text = path.read_text(encoding="utf-8")
+          path.write_text(
+              text.replace("APP_NAME_PLACEHOLDER", escape(name)),
+              encoding="utf-8"
           )
-          path.write_text(content, encoding="utf-8")
           PY
 
           cat > app/src/main/java/com/shreepals/aiapp/MainActivity.java <<'EOF'
@@ -375,7 +282,6 @@ jobs:
                   super.onCreate(savedInstanceState);
 
                   webView = new WebView(this);
-
                   WebSettings settings = webView.getSettings();
                   settings.setJavaScriptEnabled(true);
                   settings.setDomStorageEnabled(true);
@@ -409,7 +315,7 @@ jobs:
           }
           EOF
 
-      - name: Download Gradle
+      - name: Install Gradle
         run: |
           set -euo pipefail
           curl -L --fail \
@@ -418,7 +324,7 @@ jobs:
           unzip -q /tmp/gradle.zip -d /tmp
           echo "/tmp/gradle-8.9/bin" >> "$GITHUB_PATH"
 
-      - name: Build Android APK
+      - name: Compile Android APK
         run: |
           set -euo pipefail
           gradle --no-daemon assembleDebug
@@ -431,7 +337,7 @@ jobs:
           ls -lh app/src/main/assets/index.html
           ls -lh app/build/outputs/apk/debug/app-debug.apk
 
-      - name: Upload APK
+      - name: Upload APK artifact
         uses: actions/upload-artifact@v4
         with:
           name: Myapp-APK
