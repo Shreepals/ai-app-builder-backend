@@ -14,6 +14,11 @@ on:
         required: true
         default: "My App"
         type: string
+      app_html_gzip_b64:
+        description: "Generated app HTML compressed as base64"
+        required: false
+        type: string
+        default: ""
 
 permissions:
   contents: read
@@ -42,7 +47,72 @@ jobs:
           yes | sdkmanager --licenses || true
           sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
 
+      - name: Use HTML supplied by the website
+        if: ${{ inputs.app_html_gzip_b64 != '' }}
+        env:
+          APP_HTML_GZIP_B64: ${{ inputs.app_html_gzip_b64 }}
+          APP_IDEA: ${{ inputs.idea }}
+          APP_NAME: ${{ inputs.app_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p app/src/main/assets
+
+          python3 - <<'PY'
+          import os, base64, gzip, re
+          from pathlib import Path
+
+          encoded = os.environ.get("APP_HTML_GZIP_B64", "").strip()
+          if not encoded:
+              raise SystemExit("ERROR: Supplied HTML is empty")
+
+          try:
+              compressed = base64.b64decode(encoded, validate=True)
+              html = gzip.decompress(compressed).decode("utf-8")
+          except Exception as exc:
+              raise SystemExit("ERROR: Could not decode website HTML: " + str(exc))
+
+          checks = [
+              (r"<!doctype\s+html", "Missing HTML doctype"),
+              (r"<html[\s>]", "Missing HTML root element"),
+              (r"</html\s*>", "HTML is incomplete"),
+              (r"<body[\s>]", "Missing body element"),
+              (r"<script[\s>]", "Missing JavaScript"),
+          ]
+
+          for pattern, message in checks:
+              if not re.search(pattern, html, re.I):
+                  raise SystemExit("ERROR: " + message)
+
+          if len(html) < 500:
+              raise SystemExit("ERROR: Supplied HTML is too short")
+
+          Path("app/src/main/assets/index.html").write_text(
+              html, encoding="utf-8"
+          )
+
+          game_pattern = re.compile(
+              r"\b(game|gaming|3d|2d|racing|race|runner|platformer|shooter|"
+              r"shooting|adventure|puzzle|arcade|football|cricket|car game|"
+              r"bike game|battle|survival|minecraft|gameplay)\b|"
+              r"गेम|खेल|रेसिंग|दौड़|शूटिंग|एडवेंचर|पहेली|क्रिकेट गेम|कार गेम|बाइक गेम",
+              re.I
+          )
+
+          name = os.environ.get("APP_NAME", "")
+          idea = os.environ.get("APP_IDEA", "")
+          is_game = bool(game_pattern.search(name + " " + idea))
+
+          Path("is_game.txt").write_text(
+              "yes" if is_game else "no", encoding="utf-8"
+          )
+
+          print("Website HTML received successfully.")
+          print("HTML length:", len(html))
+          print("Game detected:", is_game)
+          PY
+
       - name: Generate app HTML with Gemini
+        if: ${{ inputs.app_html_gzip_b64 == '' }}
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
           APP_IDEA: ${{ inputs.idea }}
