@@ -83,42 +83,52 @@ app.post("/api/generate", async (req, res) => {
       /\b(game|gaming|3d|2d|racing|race|runner|platformer|shooter|shooting|adventure|puzzle|arcade|football|cricket|car game|bike game|battle|survival|minecraft|gameplay)\b|गेम|खेल|रेसिंग|दौड़|शूटिंग|एडवेंचर|पहेली|क्रिकेट गेम|कार गेम|बाइक गेम/i;
 
     const isGameIdea = gamePattern.test(`${appName} ${idea}`);
-
-    const gameInstructions = `
+  
+const gameInstructions = `
 SPECIAL GAME DEVELOPMENT MODE:
 
-The user wants a GAME. Build an actual playable game, not a game
-dashboard, game store, landing page, or description of a game.
+Build a complete playable game with a full professional game
+interface. Do NOT create only a small demo or a game dashboard
+without actual gameplay.
 
-Use Three.js version 0.149.0 through this classic browser script:
-<script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+The game must include TWO connected screens:
 
-Do not use JavaScript modules or import statements. Use the global
-THREE object so the game can be previewed in a normal browser.
+SCREEN 1 — GAME HOME DASHBOARD:
+- Game title and attractive game logo made with HTML/CSS.
+- Play Game button that starts the actual game.
+- Best score and current score.
+- How to Play instructions.
+- Sound on/off toggle.
+- Pause/resume and restart options where appropriate.
+- Mobile-friendly layout and large touch buttons.
+- Attractive game-specific colors, backgrounds and animations.
 
-The HTML must implement:
-1. A real THREE.Scene, PerspectiveCamera and WebGLRenderer.
-2. A visible 3D environment with lighting, ground and appropriate objects.
-3. A player or controllable game object that visibly moves.
-4. Touch-friendly on-screen controls for mobile and keyboard controls
-   for desktop.
-5. A real game loop using requestAnimationFrame.
-6. Gameplay with a clear objective, score, collisions or obstacles,
-   and a win/lose or game-over condition appropriate to the idea.
-7. Start, pause if appropriate, and restart controls.
-8. Responsive sizing and renderer resizing when the screen changes.
-9. A visible loading/error message if WebGL or Three.js cannot load.
-10. All gameplay logic in the HTML itself. Do not substitute a
-    dashboard, static image, mockup, or unrelated calculator.
-11. Use simple original geometric 3D objects where external models
-    are unavailable. The game must still be playable without them.
-12. Keep the code concise enough to return the complete HTML.
-13. Clearly state if any requested online or multiplayer feature is
-    only simulated. Do not claim real online multiplayer.
+SCREEN 2 — ACTUAL GAME:
+- Use Three.js version 0.149.0 using:
+  <script src="https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js"></script>
+- Create a real THREE.Scene, PerspectiveCamera and WebGLRenderer.
+- Create a visible 3D environment and controllable player.
+- Add real movement, obstacles, collision detection and scoring
+  appropriate to the user's game idea.
+- Add touch controls for mobile and keyboard controls for desktop.
+- Include game over, final score and play-again screen.
+- The Play button on the home dashboard MUST start the real game.
+- Keep the game loop running correctly and resize the renderer.
+- Use original geometric 3D objects if models are unavailable.
+- Show a useful message if WebGL or Three.js fails to load.
 
-Because this is a game, Three.js is allowed as an external dependency.
-Do not use other libraries or external 3D model files.
-`;
+IMPORTANT:
+- Build the game described by the user's exact idea.
+- Do not substitute a calculator, business dashboard, static image,
+  or generic landing page for the requested game.
+- Implement working buttons, not decorative buttons.
+- Store best score in localStorage when available.
+- Keep all HTML, CSS and gameplay code in one complete HTML file.
+- Do not use JavaScript modules or import statements.
+- Do not claim that online multiplayer, payments or online services
+  work unless they are actually implemented.
+- Return the complete runnable HTML document in the required JSON.
+`; 
 
     const appInstructions = `
 GENERAL APP DEVELOPMENT MODE:
