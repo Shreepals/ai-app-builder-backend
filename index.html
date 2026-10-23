@@ -181,8 +181,15 @@ a{color:#a9bcff}
   ></iframe>
 </section>
   
-  <section id="projects" class="section">
-  <section id="editor" class="section">
+<section id="projects" class="section">
+  <div class="card" style="margin-bottom:15px">
+    <h2>My Projects</h2>
+    <p>अपने सेव किए गए ऐप खोलें और उनमें बदलाव करें।</p>
+    <button class="btn" onclick="showPage('builder')">＋ नया प्रोजेक्ट</button>
+  </div>
+  <div id="projectList" class="projects"></div>
+</section>
+  
   <div class="workspace">
     <div class="card">
       <h2>✎ AI Editor</h2>
@@ -260,10 +267,13 @@ try { projects = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
 catch(e) { projects = []; }
 
 function saveProjects(){
- try { localStorage.setItem(STORAGE_KEY, JSON.stringify(projects)); }
- catch(e){ setText("generateStatus","फोन में स्टोरेज की जगह कम है। पुराने प्रोजेक्ट हटाकर फिर सेव करें।"); }
- updateDashboard();
- renderProjects();
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
+  } catch(e) {
+    setText("generateStatus", "प्रोजेक्ट सेव नहीं हो पाया।");
+  }
+  updateDashboard();
+  renderProjects();
 }
 
 function setText(id,text){
