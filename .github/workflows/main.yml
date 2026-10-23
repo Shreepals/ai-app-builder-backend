@@ -395,10 +395,12 @@ jobs:
           <manifest xmlns:android="http://schemas.android.com/apk/res/android">
               <uses-permission android:name="android.permission.INTERNET" />
 
-              <application
-                  android:theme="@android:style/Theme.Material.Light.NoActionBar"
-                  android:label="APP_NAME_PLACEHOLDER"
-                  android:usesCleartextTraffic="false">
+             <application
+                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
+                   android:label="APP_NAME_PLACEHOLDER"
+                   android:icon="@mipmap/ic_launcher"
+                   android:roundIcon="@mipmap/ic_launcher"
+                   android:usesCleartextTraffic="false"> 
 
                   <activity
                       android:name=".MainActivity"
@@ -477,6 +479,94 @@ jobs:
               }
           }
           EOF
+
+      - name: Generate app-specific launcher icon
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          APP_IDEA: ${{ inputs.idea }}
+        run: |
+          set -euo pipefail
+          python3 -m pip install --user Pillow
+
+          mkdir -p app/src/main/res/mipmap-mdpi
+          mkdir -p app/src/main/res/mipmap-hdpi
+          mkdir -p app/src/main/res/mipmap-xhdpi
+          mkdir -p app/src/main/res/mipmap-xxhdpi
+          mkdir -p app/src/main/res/mipmap-xxxhdpi
+
+          python3 - <<'PY'
+          import os, hashlib
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+
+          name = os.environ.get("APP_NAME", "My App").strip() or "My App"
+          idea = os.environ.get("APP_IDEA", "").strip()
+          seed = hashlib.sha256((name + " " + idea).encode()).digest()
+
+          colors = [
+              (30, 100, 220), (120, 65, 190), (0, 145, 110),
+              (220, 90, 45), (30, 145, 180), (190, 65, 100)
+          ]
+          bg = colors[seed[0] % len(colors)]
+          accent = (255, 255, 255)
+
+          # App name initials create a distinct icon for each app.
+          words = [w for w in name.split() if w]
+          initials = "".join(w[0] for w in words[:2]).upper()
+          initials = initials or "A"
+
+          sizes = {
+              "mipmap-mdpi": 48,
+              "mipmap-hdpi": 72,
+              "mipmap-xhdpi": 96,
+              "mipmap-xxhdpi": 144,
+              "mipmap-xxxhdpi": 192,
+          }
+
+          for folder, size in sizes.items():
+              image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+              draw = ImageDraw.Draw(image)
+              margin = int(size * 0.06)
+              draw.rounded_rectangle(
+                  (margin, margin, size-margin, size-margin),
+                  radius=int(size * 0.23), fill=bg
+              )
+
+              # Simple white symbol and app initials.
+              cx = size // 2
+              top = int(size * 0.19)
+              draw.ellipse(
+                  (cx-size*.12, top, cx+size*.12, top+size*.24),
+                  fill=accent
+              )
+              draw.rounded_rectangle(
+                  (cx-size*.25, int(size*.48),
+                   cx+size*.25, int(size*.55)),
+                  radius=max(1, int(size*.03)), fill=accent
+              )
+
+              try:
+                  from PIL import ImageFont
+                  font = ImageFont.truetype(
+                      "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                      int(size * 0.25)
+                  )
+              except Exception:
+                  font = ImageFont.load_default()
+
+              box = draw.textbbox((0, 0), initials, font=font)
+              tw, th = box[2]-box[0], box[3]-box[1]
+              draw.text(
+                  ((size-tw)/2, int(size*.60)-th/2),
+                  initials, font=font, fill=accent
+              )
+
+              image.save(
+                  Path("app/src/main/res") / folder / "ic_launcher.png"
+              )
+
+          print("App-specific launcher icon generated for:", name)
+          PY
 
       - name: Install Gradle
         run: |
