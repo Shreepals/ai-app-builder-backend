@@ -180,54 +180,26 @@ a{color:#a9bcff}
     style="width:100%;height:500px;border:1px solid #888;border-radius:8px;background:white;"
   ></iframe>
 </section>
-  
+ 
 <section id="projects" class="section">
   <div class="card" style="margin-bottom:15px">
-    <h2>My Projects</h2>
-    <p>अपने सेव किए गए ऐप खोलें और उनमें बदलाव करें।</p>
+    <h2>📱 My Projects</h2>
+    <p>अपने सेव किए गए ऐप खोलें, Preview देखें या AI से बदलाव करें।</p>
     <button class="btn" onclick="showPage('builder')">＋ नया प्रोजेक्ट</button>
   </div>
   <div id="projectList" class="projects"></div>
 </section>
-  
-  <div class="workspace">
-    <div class="card">
-      <h2>✎ AI Editor</h2>
-      <p>अपने ऐप में जो बदलाव चाहते हैं, यहाँ लिखें।</p>
 
-      <div class="status" id="editProjectInfo">
-        पहले My Projects से ऐप खोलें।
-      </div>
-
-      <label for="editInstruction">क्या बदलाव करना है?</label>
-      <textarea id="editInstruction"
-        placeholder="डैशबोर्ड सुंदर बनाओ, लॉगिन पेज जोड़ो, नए फीचर बनाओ..."></textarea>
-
-      <div class="actions">
-        <button class="btn" id="editBtn" onclick="editCurrentApp()">
-          ✎ AI से ऐप एडिट करें
-        </button>
-      </div>
-
-      <div class="status" id="editStatus">
-        बदलाव का निर्देश लिखें।
-      </div>
+<section id="preview" class="section">
+  <div class="card">
+    <h2 id="previewHeading">App Preview</h2>
+    <div class="actions" style="margin-bottom:14px">
+      <button class="btn secondary" onclick="showPage('builder')">वापस एडिट करें</button>
+      <button class="btn" onclick="showPage('android')">APK बनाएं</button>
     </div>
-
-    <div class="card">
-      <h2>अपडेटेड ऐप प्रीव्यू</h2>
-      <iframe id="editPreview" class="preview"
-        title="AI Editor Preview"
-        sandbox="allow-scripts allow-forms allow-modals"></iframe>
-    </div>
+    <iframe id="bigPreview" class="preview" style="height:75vh" title="Full App Preview" sandbox="allow-scripts allow-forms allow-modals"></iframe>
   </div>
-  </section> 
-   <div class="card" style="margin-bottom:15px">
-    <h2>My Projects</h2><p>अपने सेव किए गए ऐप खोलें और उनमें बदलाव करें।</p>
-    <button class="btn" onclick="showPage('builder')">＋ नया प्रोजेक्ट</button>
-   </div>
-   <div id="projectList" class="projects"></div>
-  </section>
+</section>
 
   <section id="preview" class="section">
    <div class="card">
