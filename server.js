@@ -213,14 +213,19 @@ app.post("/api/generate", async (req, res) => {
     }
 
     return res.json({
-      ok: true,
-      result: {
-        appName: String(result.appName || appName),
-        summary: String(result.summary || ""),
-        html: result.html,
-        features: Array.isArray(result.features) ? result.features : []
-      }
-    });
+  ok: true,
+  appName: String(result.appName || appName),
+  summary: String(result.summary || ""),
+  html: result.html,
+  features: Array.isArray(result.features) ? result.features : [],
+  result: {
+    appName: String(result.appName || appName),
+    summary: String(result.summary || ""),
+    html: result.html,
+    features: Array.isArray(result.features) ? result.features : []
+  }
+});
+  
   } catch (error) {
     console.error("Generate error:", error);
     return res.status(500).json({
