@@ -94,13 +94,21 @@ APP-SPECIFIC ICON AND VISUAL IDENTITY:
   for the main app icon.
 
 ${isGame ? `
-GAME REQUIREMENTS:
-- Build the specific game described by the user.
-- Include a start screen, actual gameplay, scoring, restart and suitable controls.
-- Support touch controls on mobile and keyboard controls where appropriate.
-- Use Canvas or CSS/JavaScript for suitable 2D games.
-- Use Three.js only when needed for the requested 3D game.
-- Do not claim multiplayer or online services work unless implemented.
+GAME REQUIREMENTS — THESE ARE MANDATORY:
+- Build the exact type of game requested in the user's idea. Do not turn every game into a car-racing game.
+- Build a complete game dashboard, not just a gameplay canvas. Include a polished home/start screen with the game title, matching inline SVG/logo, Play button, instructions, and best score where suitable.
+- Separate the home screen from gameplay. Include working Pause/Resume, Restart/Replay, and Home buttons. Show a proper Game Over or win screen and the final score.
+- Every visible button must have a real event handler and perform its stated action.
+- Implement real gameplay mechanics appropriate to the requested game, including collision/win/lose rules and score updates where suitable.
+- For car/racing games specifically: include left and right controls, and make the vehicle actually change lanes/steer when these controls are used.
+- Mobile controls must work in Android WebView using pointer events. For each press-and-hold control, implement pointerdown, pointerup, pointercancel, pointerleave and lostpointercapture (or an equivalent reliable release mechanism). Use setPointerCapture when safe, prevent accidental page scrolling with CSS touch-action: none on game controls, and clear all held-key/held-button state on window blur and document visibility change.
+- Support both tapping and holding left/right controls. Holding a direction must keep steering continuously until release; movement must be processed by the game loop, not only by a one-time click handler.
+- Add keyboard controls for desktop testing when appropriate, and prevent arrow keys from scrolling the page while the game is active.
+- Keep the game loop running only when gameplay is active; pause it on Pause/Game Over and resume it correctly. Restart must reset score, player position, traffic/obstacles, timers and game-over state.
+- Ensure touch targets are large enough for thumbs and remain visible on narrow Android screens.
+- Use Canvas or CSS/JavaScript for suitable 2D games. Use Three.js only when genuinely needed for the requested 3D game; if used, use the classic global THREE API, not ES modules.
+- Do not claim multiplayer, online services, real payments or server features work unless implemented.
+- Before returning HTML, check that every button ID referenced by JavaScript exists, event listeners are attached after the DOM exists, and the core gameplay can start, steer/control, pause, resume, restart and return home without console errors.
 ` : `
 APP REQUIREMENTS:
 - Build a complete, useful app tailored to the exact user idea.
@@ -113,7 +121,6 @@ APP REQUIREMENTS:
 - Clearly label demo data. Do not fake live APIs, payments,
   authentication or cloud services.
 `}
-
 PROFESSIONAL DASHBOARD:
 - Create a polished, modern dashboard with a clear visual hierarchy.
 - Include a top header with the custom app icon and app name.
@@ -252,19 +259,18 @@ app.post("/api/generate", async (req, res) => {
     }
 
     return res.json({
-  ok: true,
-  appName: String(result.appName || appName),
-  summary: String(result.summary || ""),
-  html: result.html,
-  features: Array.isArray(result.features) ? result.features : [],
-  result: {
-    appName: String(result.appName || appName),
-    summary: String(result.summary || ""),
-    html: result.html,
-    features: Array.isArray(result.features) ? result.features : []
-  }
-});
-  
+      ok: true,
+      appName: String(result.appName || appName),
+      summary: String(result.summary || ""),
+      html: result.html,
+      features: Array.isArray(result.features) ? result.features : [],
+      result: {
+        appName: String(result.appName || appName),
+        summary: String(result.summary || ""),
+        html: result.html,
+        features: Array.isArray(result.features) ? result.features : []
+      }
+    });
   } catch (error) {
     console.error("Generate error:", error);
     return res.status(500).json({
@@ -273,7 +279,6 @@ app.post("/api/generate", async (req, res) => {
     });
   }
 });
-
 app.post("/api/edit-app", async (req, res) => {
   try {
     const appName = String(req.body?.appName || "My App").trim();
@@ -496,7 +501,6 @@ app.post("/api/build", async (req, res) => {
     });
   }
 });
-
 app.get("/api/build-status", async (_req, res) => {
   try {
     if (!GH_ACTIONS_TOKEN) {
