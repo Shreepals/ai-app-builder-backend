@@ -302,7 +302,7 @@ jobs:
           print("App HTML saved successfully.")
           PY
 
-            - name: Add local Three.js for 3D games
+             - name: Add local Three.js for 3D games
         run: |
           set -euo pipefail
 
@@ -316,25 +316,25 @@ jobs:
             test -s app/src/main/assets/three.min.js
 
             python3 - <<'PY'
-                  from pathlib import Path
-                  import re
+from pathlib import Path
+import re
 
-             path = Path("app/src/main/assets/index.html")
-              html = path.read_text(encoding="utf-8")
+path = Path("app/src/main/assets/index.html")
+html = path.read_text(encoding="utf-8")
 
-              html, count = re.subn(
-              r'https?://cdn\.jsdelivr\.net/npm/three@0\.149\.0/build/three\.min\.js',
-              'three.min.js',
-              html,
-              flags=re.I
-              )
+html, count = re.subn(
+    r'https?://cdn\.jsdelivr\.net/npm/three@0\.149\.0/build/three\.min\.js',
+    'three.min.js',
+    html,
+    flags=re.I
+)
 
-             path.write_text(html, encoding="utf-8")
-             print("Three.js local asset configuration completed.")
-              PY
-             else
+path.write_text(html, encoding="utf-8")
+print("Three.js local asset configuration completed.")
+PY
+          else
             echo "Regular app detected. Three.js is not needed."
-            fi
+          fi
 
       - name: Create Android project
         env:
