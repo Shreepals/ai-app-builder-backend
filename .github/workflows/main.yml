@@ -64,6 +64,8 @@ jobs:
           name = os.environ.get("APP_NAME", "My App").strip() or "My App"
           idea = os.environ.get("APP_IDEA", "").strip()
           encoded = os.environ.get("APP_HTML_GZIP_B64", "").strip()
+          key = os.environ.get("GEMINI_API_KEY", "")
+          model = os.environ.get("GEMINI_MODEL", "gemini-3.1-flash-lite")
 
           if not idea:
               raise SystemExit("ERROR: App idea is empty")
@@ -87,34 +89,56 @@ jobs:
                   ).decode("utf-8")
               except Exception as exc:
                   raise SystemExit("ERROR: Website HTML decode failed: " + str(exc))
+
+              if not re.search(r"<!doctype\s+html", html, re.I):
+                  raise SystemExit("ERROR: Website HTML has no doctype")
+              if not re.search(r"</html\s*>", html, re.I):
+                  raise SystemExit("ERROR: Website HTML is incomplete")
+              if len(html) < 500:
+                  raise SystemExit("ERROR: Website HTML is too short")
+
+              Path("app/src/main/assets/index.html").write_text(
+                  html, encoding="utf-8"
+              )
+              print("Using HTML supplied by the website.")
+
           else:
-              key = os.environ.get("GEMINI_API_KEY", "")
               if not key:
                   raise SystemExit("ERROR: GEMINI_API_KEY secret is missing")
 
               prompt = f"""
-          Create a complete, functional, mobile-first Android web app.
-          App name: {name}
-          Exact user idea: {idea}
+          Create a complete, functional, mobile-first Android web application.
 
-          Build the actual app described, not a calculator or generic template.
-          Create a polished dashboard, relevant screens, working navigation,
-          working primary buttons, useful forms and data lists, and localStorage
-          persistence where appropriate. Use a distinct inline SVG icon that
-          matches the app idea. Use coordinated colors and responsive layout.
+          APP NAME: {name}
+          EXACT USER IDEA: {idea}
 
-          For games, build the specific game requested with actual gameplay,
-          mobile touch controls, score and restart when suitable. Do not turn
-          every game into racing. Use Canvas/CSS/JavaScript for 2D games.
-          Only use Three.js when a real 3D game is appropriate. If used, include
-          this exact script URL:
+          Build the actual application requested. Do not substitute a calculator,
+          generic template, or unrelated dashboard.
+
+          Requirements:
+          - A polished dashboard designed specifically for this idea.
+          - Multiple useful screens or sections when appropriate.
+          - Working navigation and working primary buttons.
+          - Relevant forms, cards, search, lists, and action flows.
+          - Add, view, edit, and delete features where appropriate.
+          - Save suitable user data using localStorage.
+          - Mobile-first responsive design for Android phones.
+          - A distinct inline SVG icon matching this app idea.
+          - Clear success, error, and empty-state messages.
+          - Label demo data honestly; do not pretend it is live.
+
+          If this is a game, create the specific requested game with actual
+          playable mechanics and mobile touch controls. Do not turn every game
+          into racing. Use Canvas/CSS/JavaScript for 2D games. Use Three.js
+          only if a real 3D game is appropriate. When using Three.js, include
+          this exact URL:
           https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js
           Use the classic global THREE API, not ES modules.
 
-          Do not pretend demo data is live. Clearly label demo data.
-          Return only one complete standalone HTML document, starting with
-          <!DOCTYPE html> and ending with </html>. Include CSS and JavaScript.
-          No Markdown fences. Do not truncate the document.
+          Return one complete standalone HTML document only.
+          Start with <!DOCTYPE html> and end with </html>.
+          Put CSS in style tags and JavaScript in script tags.
+          No Markdown fences, no explanations, and no truncated examples.
           """
 
               request = {
@@ -127,44 +151,68 @@ jobs:
               Path("request.json").write_text(
                   json.dumps(request), encoding="utf-8"
               )
-              PY
+              print("Prepared Gemini request for:", name)
+          PY
 
-              curl --fail-with-body --silent --show-error \
-                --retry 2 --max-time 300 \
-                -X POST \
-                "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
-                -H "Content-Type: application/json" \
-                -d @request.json -o response.json
+          if [ -z "$APP_HTML_GZIP_B64" ]; then
+            curl --fail-with-body --silent --show-error \
+              --retry 2 --max-time 300 \
+              -X POST \
+              "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d @request.json \
+              -o response.json
 
-              python3 - <<'PY'
+            python3 - <<'PY'
           import json, re
           from pathlib import Path
 
-          data = json.loads(Path("response.json").read_text(encoding="utf-8"))
+          data = json.loads(
+              Path("response.json").read_text(encoding="utf-8")
+          )
+
           if data.get("error"):
-              raise SystemExit("Gemini API error: " + data["error"].get("message", "Unknown error"))
+              raise SystemExit(
+                  "Gemini API error: " +
+                  data["error"].get("message", "Unknown error")
+              )
 
           candidates = data.get("candidates", [])
           if not candidates:
-              raise SystemExit("Gemini returned no app HTML")
+              raise SystemExit("ERROR: Gemini returned no app HTML")
 
           candidate = candidates[0]
           if candidate.get("finishReason") == "MAX_TOKENS":
-              raise SystemExit("ERROR: Generated HTML was truncated")
+              raise SystemExit("ERROR: Gemini output was truncated")
 
           parts = candidate.get("content", {}).get("parts", [])
-          html = "\n".join(p.get("text", "") for p in parts if p.get("text")).strip()
+          html = "\n".join(
+              part.get("text", "") for part in parts if part.get("text")
+          ).strip()
+
           html = re.sub(r"^\s*```(?:html)?\s*", "", html, flags=re.I)
           html = re.sub(r"\s*```\s*$", "", html)
 
-          if not re.search(r"<!doctype\s+html", html, re.I):
-              raise SystemExit("ERROR: Missing HTML doctype")
-          if not re.search(r"</html\s*>", html, re.I):
-              raise SystemExit("ERROR: Generated HTML is incomplete")
+          checks = [
+              (r"<!doctype\s+html", "Missing HTML doctype"),
+              (r"<html[\s>]", "Missing HTML root"),
+              (r"<body[\s>]", "Missing body"),
+              (r"</html\s*>", "HTML is incomplete"),
+              (r"<script[\s>]", "Missing JavaScript")
+          ]
+
+          for pattern, message in checks:
+              if not re.search(pattern, html, re.I):
+                  raise SystemExit("ERROR: " + message)
+
           if len(html) < 3000:
               raise SystemExit("ERROR: Generated HTML is too short")
-          PY
 
+          Path("app/src/main/assets/index.html").write_text(
+              html, encoding="utf-8"
+          )
+          print("Generated app HTML saved. Length:", len(html))
+          PY
           fi
 
           python3 - <<'PY'
@@ -176,11 +224,11 @@ jobs:
 
           checks = [
               (r"<!doctype\s+html", "Missing HTML doctype"),
-              (r"<html[\s>]", "Missing HTML root element"),
-              (r"</html\s*>", "HTML is incomplete"),
-              (r"<body[\s>]", "Missing body element"),
-              (r"<script[\s>]", "Missing JavaScript")
+              (r"<html[\s>]", "Missing HTML root"),
+              (r"<body[\s>]", "Missing body"),
+              (r"</html\s*>", "HTML is incomplete")
           ]
+
           for pattern, message in checks:
               if not re.search(pattern, html, re.I):
                   raise SystemExit("ERROR: " + message)
@@ -188,7 +236,7 @@ jobs:
           if len(html) < 500:
               raise SystemExit("ERROR: HTML is too short")
 
-          print("HTML saved. Length:", len(html))
+          print("HTML validation successful. Length:", len(html))
           PY
 
       
