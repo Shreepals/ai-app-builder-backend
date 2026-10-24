@@ -316,6 +316,345 @@ jobs:
             test -s app/src/main/assets/three.min.js
 
             python3 - <<'PY'
+        
+Continued from ऐप डैशबोर्ड समस्या
+
+Generated image: AI App Builder Robot Icon
+
+
+
+मैंने आपके AI App Builder के लिए नया प्रोफेशनल आइकन बना दिया है। 🎨 इसमें AI रोबोट, चमकदार रंग और आधुनिक डिज़ाइन है।
+
+अब इसे आपके APK में लगाने के लिए main.yml में Generate app-specific launcher icon वाला हिस्सा बदलना होगा। अभी उस हिस्से में Python कोड से साधारण आइकन बनता है।
+
+अगला कदम: मैं आपको ऐसा कोड दूँगा जिससे यह नया आइकन APK में लगे। यह आइकन लगाने के बाद अगला APK फिर से बनाना होगा।
+
+
+Generated image: AI App Builder Neon Icon
+
+
+
+
+
+
+name: Build Android APK
+
+on:
+  workflow_dispatch:
+    inputs:
+      idea:
+        description: "Describe the app you want to build"
+        required: true
+        type: string
+      app_name:
+        description: "Name of your app"
+        required: true
+        default: "My App"
+        type: string
+      app_html_gzip_b64:
+        description: "Generated app HTML compressed as base64"
+        required: false
+        type: string
+        default: ""
+
+permissions:
+  contents: read
+
+jobs:
+  build-apk:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: "17"
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v4
+
+      - name: Install Android SDK packages
+        run: |
+          set -e
+          yes | sdkmanager --licenses || true
+          sdkmanager "platform-tools" "platforms;android-35" "build-tools;35.0.0"
+
+      - name: Use HTML supplied by the website
+        if: ${{ inputs.app_html_gzip_b64 != '' }}
+        env:
+          APP_HTML_GZIP_B64: ${{ inputs.app_html_gzip_b64 }}
+          APP_IDEA: ${{ inputs.idea }}
+          APP_NAME: ${{ inputs.app_name }}
+        run: |
+          set -euo pipefail
+          mkdir -p app/src/main/assets
+
+          python3 - <<'PY'
+          import os, base64, gzip, re
+          from pathlib import Path
+
+          encoded = os.environ.get("APP_HTML_GZIP_B64", "").strip()
+          if not encoded:
+              raise SystemExit("ERROR: Supplied HTML is empty")
+
+          try:
+              compressed = base64.b64decode(encoded, validate=True)
+              html = gzip.decompress(compressed).decode("utf-8")
+          except Exception as exc:
+              raise SystemExit("ERROR: Could not decode website HTML: " + str(exc))
+
+          checks = [
+              (r"<!doctype\s+html", "Missing HTML doctype"),
+              (r"<html[\s>]", "Missing HTML root element"),
+              (r"</html\s*>", "HTML is incomplete"),
+              (r"<body[\s>]", "Missing body element"),
+              (r"<script[\s>]", "Missing JavaScript"),
+          ]
+
+          for pattern, message in checks:
+              if not re.search(pattern, html, re.I):
+                  raise SystemExit("ERROR: " + message)
+
+          if len(html) < 500:
+              raise SystemExit("ERROR: Supplied HTML is too short")
+
+          Path("app/src/main/assets/index.html").write_text(
+              html, encoding="utf-8"
+          )
+
+          game_pattern = re.compile(
+              r"\b(game|gaming|3d|2d|racing|race|runner|platformer|shooter|"
+              r"shooting|adventure|puzzle|arcade|football|cricket|car game|"
+              r"bike game|battle|survival|minecraft|gameplay)\b|"
+              r"गेम|खेल|रेसिंग|दौड़|शूटिंग|एडवेंचर|पहेली|क्रिकेट गेम|कार गेम|बाइक गेम",
+              re.I
+          )
+
+          name = os.environ.get("APP_NAME", "")
+          idea = os.environ.get("APP_IDEA", "")
+          is_game = bool(game_pattern.search(name + " " + idea))
+
+          Path("is_game.txt").write_text(
+              "yes" if is_game else "no", encoding="utf-8"
+          )
+
+          print("Website HTML received successfully.")
+          print("HTML length:", len(html))
+          print("Game detected:", is_game)
+          PY
+
+      - name: Generate app HTML with Gemini
+        if: ${{ inputs.app_html_gzip_b64 == '' }}
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+          APP_IDEA: ${{ inputs.idea }}
+          APP_NAME: ${{ inputs.app_name }}
+          GEMINI_MODEL: gemini-3.1-flash-lite
+        run: |
+          set -euo pipefail
+
+          test -n "$GEMINI_API_KEY" || {
+            echo "ERROR: GEMINI_API_KEY secret is missing"
+            exit 1
+          }
+
+          mkdir -p app/src/main/assets
+
+          python3 - <<'PY'
+          import os, json, re
+          from pathlib import Path
+
+          name = os.environ["APP_NAME"].strip() or "My App"
+          idea = os.environ["APP_IDEA"].strip()
+
+          if not idea:
+              raise SystemExit("ERROR: App idea is empty")
+
+          game_pattern = re.compile(
+              r"\b(game|gaming|3d|2d|racing|race|runner|platformer|shooter|"
+              r"shooting|adventure|puzzle|arcade|football|cricket|car game|"
+              r"bike game|battle|survival|minecraft|gameplay)\b|"
+              r"गेम|खेल|रेसिंग|दौड़|शूटिंग|एडवेंचर|पहेली|क्रिकेट गेम|कार गेम|बाइक गेम",
+              re.I
+          )
+
+          is_game = bool(game_pattern.search(name + " " + idea))
+          Path("is_game.txt").write_text(
+              "yes" if is_game else "no", encoding="utf-8"
+          )
+
+          prompt = f"""
+          Build a complete, usable mobile application.
+
+          APP NAME: {name}
+          USER IDEA: {idea}
+
+          IMPORTANT:
+          Build the exact application requested. Never replace it with
+          a calculator, generic dashboard, or unrelated template.
+
+          Create a polished, mobile-first app with:
+          - A useful home/dashboard screen for this specific app.
+          - Multiple relevant screens or sections.
+          - Working navigation and back/home behavior.
+          - Relevant forms, cards, lists, search, and action buttons.
+          - Working core workflows, not decorative controls.
+          - Form validation and useful success/error messages.
+          - Add, view, edit, and delete functionality when appropriate.
+          - localStorage persistence where useful, with safe error handling.
+          - Responsive styling for Android phone screens.
+          - Clear empty states and realistic demo data where helpful.
+          - Hindi labels when suitable for the intended audience.
+
+          Choose features based on the actual idea.
+          Do not claim that mock data, payments, bookings, or live prices
+          are real. Clearly indicate features that need a backend or API.
+          """
+
+          if is_game:
+              prompt += """
+          THIS REQUEST IS A GAME. Build the exact kind of game described
+          in USER IDEA. Do not turn every game into car racing.
+          Only make a car racing game if the user specifically asks for one.
+          Cricket must be a cricket game, football a football game, a puzzle
+          a puzzle game, and a platformer a platformer game.
+
+          GAME DASHBOARD:
+          - Create a polished game home screen with a title and working Play button.
+          - Show instructions, score and best score where appropriate.
+          - Keep the home screen and gameplay clearly separated.
+          - Add working pause, resume, restart and home buttons when appropriate.
+          - Make every main button perform its advertised action.
+
+          GAMEPLAY:
+          - Implement actual playable mechanics that match the requested game.
+          - Add suitable controls for the chosen game, including mobile touch controls.
+          - Track score, win/lose states and restart behavior where appropriate.
+          - Use canvas or CSS/JavaScript for 2D games and simple games.
+          - Use Three.js only when a real 3D game is suitable for the user's idea.
+          - If using Three.js, use the classic global THREE API, not ES modules.
+          - Include this exact script URL when using Three.js:
+            https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js
+          - The workflow replaces that URL with a local APK asset.
+          - For a 3D game, create an interactive 3D scene and animation loop.
+          - Do not use imports, modules, npm or additional external JS libraries.
+          - Put all other CSS and JavaScript directly in this HTML file.
+          - Make the game fit Android phone screens and work with touch.
+          """
+          else:
+              prompt += """
+          This is a regular application, not a game.
+          Build a complete dashboard and working features that match the USER IDEA.
+          Keep essential functionality available offline.
+          Do not require external JavaScript libraries.
+          """
+
+          prompt += """
+          TECHNICAL RULES:
+          Return ONE complete standalone HTML document only.
+          Start with <!DOCTYPE html> and end with </html>.
+          Include CSS inside <style> and JavaScript inside <script>.
+          Avoid eval and dynamically executing generated strings.
+          Use accessible labels, semantic HTML and safe input handling.
+          Implement real event handlers for the primary controls.
+          No Markdown fences, no explanation, no truncated examples.
+          Check that the HTML is complete, navigation works and core buttons work.
+          """
+
+          Path("request.json").write_text(json.dumps({
+              "contents": [{"parts": [{"text": prompt}]}],
+              "generationConfig": {
+                  "temperature": 0.2,
+                  "maxOutputTokens": 16384
+              }
+          }), encoding="utf-8")
+          PY
+
+          curl --fail-with-body --silent --show-error \
+            --retry 2 --max-time 300 \
+            -X POST \
+            "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
+            -H "Content-Type: application/json" \
+            -d @request.json \
+            -o response.json
+
+          python3 - <<'PY'
+          import json, re
+          from pathlib import Path
+
+          data = json.loads(
+              Path("response.json").read_text(encoding="utf-8")
+          )
+
+          if data.get("error"):
+              raise SystemExit(
+                  "Gemini API error: " +
+                  data["error"].get("message", "Unknown error")
+              )
+
+          candidates = data.get("candidates", [])
+          if not candidates:
+              raise SystemExit("Gemini returned no app.")
+
+          candidate = candidates[0]
+          if candidate.get("finishReason") == "MAX_TOKENS":
+              raise SystemExit(
+                  "Generated app was truncated. No incomplete APK will be built."
+              )
+
+          parts = candidate.get("content", {}).get("parts", [])
+          html = "\n".join(
+              p.get("text", "") for p in parts if p.get("text")
+          ).strip()
+
+          html = re.sub(r"^\s*
+(?:html)?\s*", "", html, flags=re.I)
+          html = re.sub(r"\s*
+\s*$", "", html)
+
+          checks = [
+              (r"<!doctype\s+html", "Missing HTML doctype"),
+              (r"<html[\s>]", "Missing HTML root element"),
+              (r"</html\s*>", "HTML is incomplete"),
+              (r"<body[\s>]", "Missing body element"),
+              (r"<style[\s>]", "Missing embedded CSS"),
+              (r"<script[\s>]", "Missing embedded JavaScript"),
+          ]
+
+          for pattern, message in checks:
+              if not re.search(pattern, html, re.I):
+                  raise SystemExit("ERROR: " + message)
+
+          if len(html) < 3000:
+              raise SystemExit("ERROR: Generated HTML is too short")
+
+          Path("app/src/main/assets/index.html").write_text(
+              html, encoding="utf-8"
+          )
+
+          print("Generated HTML length:", len(html))
+          print("App HTML saved successfully.")
+          PY
+
+             - name: Add local Three.js for 3D games
+        run: |
+          set -euo pipefail
+
+          if [ "$(cat is_game.txt)" = "yes" ]; then
+            echo "Game detected. Downloading Three.js..."
+
+            curl --fail --location --silent --show-error --retry 2 \
+              "https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js" \
+              -o app/src/main/assets/three.min.js
+
+            test -s app/src/main/assets/three.min.js
+
+            python3 - <<'PY'
 from pathlib import Path
 import re
 
@@ -336,6 +675,333 @@ PY
             echo "Regular app detected. Three.js is not needed."
           fi
 
+      - name: Create Android project
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          APP_IDEA: ${{ inputs.idea }}
+        run: |
+          set -euo pipefail
+          APP_PACKAGE_ID="$(python3 -c 'import os,re; n=os.environ.get("APP_NAME","My App").lower(); n=re.sub(r"[^a-z0-9]+","",n); n=n or "myapp"; n=("app"+n) if n[0].isdigit() else n; print("com."+n)')"
+          echo "APP_PACKAGE_ID=$APP_PACKAGE_ID" >> "$GITHUB_ENV"
+
+          mkdir -p app/src/main/java/com/shreepals/aiapp
+
+          cat > settings.gradle <<'EOF'
+          pluginManagement {
+              repositories {
+                  google()
+                  mavenCentral()
+                  gradlePluginPortal()
+              }
+          }
+
+          dependencyResolutionManagement {
+              repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
+              repositories {
+                  google()
+                  mavenCentral()
+              }
+          }
+
+          rootProject.name = "AIAppBuilder"
+          include(":app")
+          EOF
+
+          cat > build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application' version '8.7.3' apply false
+          }
+          EOF
+
+          
+          cat > app/build.gradle <<'EOF'
+          plugins {
+              id 'com.android.application'
+          }
+
+          def appId = System.getenv("APP_PACKAGE_ID") ?: "com.myapp"
+
+          android {
+              namespace 'com.shreepals.aiapp'
+              compileSdk 35
+
+              defaultConfig {
+                  applicationId appId
+                  minSdk 23
+                  targetSdk 28
+                  versionCode 1
+                  versionName '1.0'
+              }
+          }
+          EOF
+
+          cat > app/src/main/AndroidManifest.xml <<'EOF'
+          <manifest xmlns:android="http://schemas.android.com/apk/res/android">
+              <uses-permission android:name="android.permission.INTERNET" />
+
+             <application
+                   android:theme="@android:style/Theme.Material.Light.NoActionBar"
+                   android:label="APP_NAME_PLACEHOLDER"
+                   android:icon="@mipmap/ic_launcher"
+                   android:roundIcon="@mipmap/ic_launcher"
+                   android:usesCleartextTraffic="false"> 
+
+                  <activity
+                      android:name=".MainActivity"
+                      android:exported="true">
+                      <intent-filter>
+                          <action android:name="android.intent.action.MAIN" />
+                          <category android:name="android.intent.category.LAUNCHER" />
+                      </intent-filter>
+                  </activity>
+              </application>
+          </manifest>
+          EOF
+
+          python3 - <<'PY'
+          import os
+          from pathlib import Path
+          from xml.sax.saxutils import escape
+
+          name = os.environ.get("APP_NAME", "My App").strip() or "My App"
+          path = Path("app/src/main/AndroidManifest.xml")
+          text = path.read_text(encoding="utf-8")
+
+          path.write_text(
+              text.replace("APP_NAME_PLACEHOLDER", escape(name)),
+              encoding="utf-8"
+          )
+          PY
+
+          cat > app/src/main/java/com/shreepals/aiapp/MainActivity.java <<'EOF'
+          package com.shreepals.aiapp;
+
+          import android.app.Activity;
+          import android.os.Bundle;
+          import android.webkit.WebView;
+          import android.webkit.WebViewClient;
+          import android.webkit.WebChromeClient;
+          import android.webkit.WebSettings;
+
+          public class MainActivity extends Activity {
+              private WebView webView;
+
+              @Override
+              protected void onCreate(Bundle savedInstanceState) {
+                  super.onCreate(savedInstanceState);
+
+                  webView = new WebView(this);
+                  WebSettings settings = webView.getSettings();
+                  settings.setJavaScriptEnabled(true);
+                  settings.setDomStorageEnabled(true);
+                  settings.setAllowFileAccess(true);
+                  settings.setAllowContentAccess(true);
+
+                  webView.setWebViewClient(new WebViewClient());
+                  webView.setWebChromeClient(new WebChromeClient());
+
+                  setContentView(webView);
+                  webView.loadUrl("file:///android_asset/index.html");
+              }
+
+              @Override
+              public void onBackPressed() {
+                  if (webView != null && webView.canGoBack()) {
+                      webView.goBack();
+                  } else {
+                      super.onBackPressed();
+                  }
+              }
+
+              @Override
+              protected void onDestroy() {
+                  if (webView != null) {
+                      webView.destroy();
+                      webView = null;
+                  }
+                  super.onDestroy();
+              }
+          }
+          EOF
+
+      - name: Generate app-specific launcher icon
+        env:
+          APP_NAME: ${{ inputs.app_name }}
+          APP_IDEA: ${{ inputs.idea }}
+        run: |
+          set -euo pipefail
+          python3 -m pip install --user Pillow
+
+          mkdir -p app/src/main/res/mipmap-mdpi
+          mkdir -p app/src/main/res/mipmap-hdpi
+          mkdir -p app/src/main/res/mipmap-xhdpi
+          mkdir -p app/src/main/res/mipmap-xxhdpi
+          mkdir -p app/src/main/res/mipmap-xxxhdpi
+
+          python3 - <<'PY'
+          import os, hashlib
+          from pathlib import Path
+          from PIL import Image, ImageDraw
+
+          name = os.environ.get("APP_NAME", "My App").strip() or "My App"
+          idea = os.environ.get("APP_IDEA", "").strip()
+          seed = hashlib.sha256((name + " " + idea).encode()).digest()
+
+          colors = [
+              (30, 100, 220), (120, 65, 190), (0, 145, 110),
+              (220, 90, 45), (30, 145, 180), (190, 65, 100)
+          ]
+          bg = colors[seed[0] % len(colors)]
+          accent = (255, 255, 255)
+
+          # App name initials create a distinct icon for each app.
+          words = [w for w in name.split() if w]
+          initials = "".join(w[0] for w in words[:2]).upper()
+          initials = initials or "A"
+
+          sizes = {
+              "mipmap-mdpi": 48,
+              "mipmap-hdpi": 72,
+              "mipmap-xhdpi": 96,
+              "mipmap-xxhdpi": 144,
+              "mipmap-xxxhdpi": 192,
+          }
+
+          for folder, size in sizes.items():
+              image = Image.new("RGBA", (size, size), (0, 0, 0, 0))
+              draw = ImageDraw.Draw(image)
+              margin = int(size * 0.06)
+              draw.rounded_rectangle(
+                  (margin, margin, size-margin, size-margin),
+                  radius=int(size * 0.23), fill=bg
+              )
+
+              # Simple white symbol and app initials.
+              cx = size // 2
+              top = int(size * 0.19)
+              draw.ellipse(
+                  (cx-size*.12, top, cx+size*.12, top+size*.24),
+                  fill=accent
+              )
+              draw.rounded_rectangle(
+                  (cx-size*.25, int(size*.48),
+                   cx+size*.25, int(size*.55)),
+                  radius=max(1, int(size*.03)), fill=accent
+              )
+
+              try:
+                  from PIL import ImageFont
+                  font = ImageFont.truetype(
+                      "/usr/share/fonts/truetype/dejavu/DejaVuSans-Bold.ttf",
+                      int(size * 0.25)
+                  )
+              except Exception:
+                  font = ImageFont.load_default()
+
+              box = draw.textbbox((0, 0), initials, font=font)
+              tw, th = box[2]-box[0], box[3]-box[1]
+              draw.text(
+                  ((size-tw)/2, int(size*.60)-th/2),
+                  initials, font=font, fill=accent
+              )
+
+              image.save(
+                  Path("app/src/main/res") / folder / "ic_launcher.png"
+              )
+
+          print("App-specific launcher icon generated for:", name)
+          PY
+
+      - name: Install Gradle
+        run: |
+          set -euo pipefail
+          curl -L --fail \
+            https://services.gradle.org/distributions/gradle-8.9-bin.zip \
+            -o /tmp/gradle.zip
+          unzip -q /tmp/gradle.zip -d /tmp
+          echo "/tmp/gradle-8.9/bin" >> "$GITHUB_PATH"
+
+      - name: Compile Android APK
+        run: |
+          set -euo pipefail
+          gradle --no-daemon assembleDebug
+
+      - name: Verify APK
+        run: |
+          set -euo pipefail
+
+          test -s app/src/main/assets/index.html
+          test -s app/build/outputs/apk/debug/app-debug.apk
+
+          if [ "$(cat is_game.txt)" = "yes" ]; then
+            test -s app/src/main/assets/three.min.js
+          fi
+
+          ls -lh app/src/main/assets/index.html
+
+          if [ -f app/src/main/assets/three.min.js ]; then
+            ls -lh app/src/main/assets/three.min.js
+          fi
+
+          ls -lh app/build/outputs/apk/debug/app-debug.apk
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Myapp-APK
+          path: app/build/outputs/apk/debug/app-debug.apk
+          if-no-files-found: error
+          retention-days: 7
+
+      - name: Add local Three.js for 3D games
+        run: |
+          set -euo pipefail
+
+          if [ "$(cat is_game.txt)" = "yes" ]; then
+            echo "Game detected. Downloading Three.js..."
+
+            curl --fail --location --silent --show-error --retry 2 \
+              "https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js" \
+              -o app/src/main/assets/three.min.js
+
+            test -s app/src/main/assets/three.min.js
+
+            python3 - <<'PY'
+         from pathlib import Path
+         import re
+
+         path = Path("app/src/main/assets/index.html")
+         html = path.read_text(encoding="utf-8")
+
+         cdn_pattern = (
+            r'https?://cdn\.jsdelivr\.net/npm/three@0\.149\.0/'
+            r'build/three\.min\.js'
+         )
+
+         html, count = re.subn(
+           cdn_pattern,
+           "three.min.js",
+           html,
+          flags=re.I
+        )
+
+        if count == 0:
+      print("No matching Three.js CDN URL found; checking HTML.")
+     if re.search(r'three\.min\.js', html, re.I):
+          print("A local Three.js reference already exists.")
+     else:
+        raise SystemExit(
+            "ERROR: Game HTML does not reference Three.js. "
+            "Regenerate the game HTML with the required Three.js script."
+        )
+
+     path.write_text(html, encoding="utf-8")
+     print("Three.js local asset configuration completed.")
+         PY
+          else
+            echo "Regular app detected. Three.js is not needed."
+          fi
+          
       - name: Create Android project
         env:
           APP_NAME: ${{ inputs.app_name }}
