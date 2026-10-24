@@ -54,20 +54,49 @@ function getAppPrompt({ appName, idea, theme }) {
   const isGame = gamePattern.test(`${appName} ${idea}`);
 
   return `
-You are an expert mobile app developer and UI/UX designer.
+You are an expert mobile app developer, visual designer and UI/UX expert.
 
 APP NAME: ${appName}
 USER'S EXACT APP IDEA: ${idea}
 DESIGN THEME: ${theme}
 
-Your most important task is to build the actual app requested by the user.
-Do not replace the requested app with a generic calculator or unrelated dashboard.
-Do not return just a description, wireframe, or a single welcome screen.
+MAIN GOAL:
+Build the complete app requested by the user. Do not replace it
+with a generic calculator or unrelated dashboard.
+
+APP-SPECIFIC ICON AND VISUAL IDENTITY:
+- Design a beautiful, polished icon specifically for this app.
+- The icon must represent the actual app idea, not a random emoji.
+- Place the icon prominently beside the app name in the dashboard header.
+- Also use it in the home screen, welcome area and relevant app cards.
+- Create the icon using inline SVG embedded directly in the HTML.
+- Use clean shapes, smooth gradients, balanced spacing and rounded corners.
+- Make the icon look professional at both small and large sizes.
+- Use a suitable symbol based on the app idea:
+  shopping: shopping bag or cart;
+  trading: chart or candlestick;
+  cricket: bat and ball;
+  education: book or graduation cap;
+  food: plate or chef symbol;
+  farming: leaf, crop or tractor;
+  fitness: dumbbell;
+  travel: location pin or airplane;
+  music: musical note;
+  messaging: chat bubble;
+  games: a symbol matching the specific game.
+- These are examples, not fixed rules. Choose the best symbol for
+  the user's exact idea.
+- Never use the same generic icon for every app.
+- Use SVG shapes rather than external icon libraries.
+- Create a matching visual identity with 2-3 coordinated colors.
+- Use the app name and icon together in a premium-looking header.
+- Do not show broken image placeholders or depend on external images
+  for the main app icon.
 
 ${isGame ? `
 GAME REQUIREMENTS:
 - Build the specific game described by the user.
-- Include a start screen, real gameplay, scoring, restart and suitable controls.
+- Include a start screen, actual gameplay, scoring, restart and suitable controls.
 - Support touch controls on mobile and keyboard controls where appropriate.
 - Use Canvas or CSS/JavaScript for suitable 2D games.
 - Use Three.js only when needed for the requested 3D game.
@@ -77,41 +106,51 @@ APP REQUIREMENTS:
 - Build a complete, useful app tailored to the exact user idea.
 - Create all major screens and features relevant to that idea.
 - Implement navigation so each menu opens its corresponding screen.
-- Implement forms, add/edit/delete operations, search, filters and calculations where appropriate.
+- Implement forms, add/edit/delete operations, search, filters and
+  calculations where appropriate.
 - Use localStorage for appropriate local data persistence.
-- Include realistic sample data that matches the app idea.
-- Clearly label demo data. Do not fake live APIs, payments, authentication or cloud services.
+- Include realistic sample data matching the app idea.
+- Clearly label demo data. Do not fake live APIs, payments,
+  authentication or cloud services.
 `}
 
+PROFESSIONAL DASHBOARD:
+- Create a polished, modern dashboard with a clear visual hierarchy.
+- Include a top header with the custom app icon and app name.
+- Use attractive cards, consistent spacing, readable typography
+  and coordinated colors.
+- Add a welcome area and useful summary cards relevant to the idea.
+- Include suitable navigation and distinct screens.
+- Avoid excessive empty space and oversized decorative elements.
+- Make the interface feel like a finished product, not a basic demo.
+- Ensure icons and text remain readable on small phone screens.
+
 MANDATORY MOBILE RESPONSIVENESS:
-- Mobile-first design, tested conceptually at widths of 320px, 360px and 390px.
-- Must fit Android portrait screens without horizontal scrolling.
-- Use a responsive CSS grid and flexbox with min-width: 0.
-- Use box-sizing: border-box and max-width: 100% for content.
-- On small screens, collapse the desktop sidebar into a top bar with a menu button or a compact navigation drawer.
-- The sidebar must not remain permanently open and consume most of the mobile screen.
-- Close the mobile navigation drawer after the user selects a menu item.
-- Main content must use the full available width on mobile.
-- Forms, tables, cards, dialogs and buttons must fit mobile screens.
-- Buttons must be touch-friendly, preferably at least 44px high.
-- Use responsive typography and spacing.
-- Make charts responsive if charts are included.
-- Do not hide major features merely to fit the screen.
+- Design mobile-first for widths of 320px, 360px and 390px.
+- Avoid horizontal scrolling.
+- Use box-sizing: border-box, responsive flexbox and CSS grid.
+- Use min-width: 0 and max-width: 100% where appropriate.
+- Collapse desktop sidebars into a compact mobile menu.
+- Close the mobile menu after selecting an item.
+- Make forms, tables, cards, dialogs and buttons fit phone screens.
+- Make primary buttons touch-friendly, preferably at least 44px high.
+- Do not hide major features to fit the screen.
 
 FUNCTIONALITY:
-- Every primary navigation item must open a real corresponding screen.
+- Every primary navigation item must open a real screen.
 - Every primary button must perform its advertised action.
 - Avoid dead buttons and "coming soon" placeholders for core features.
 - Keep all HTML, CSS and JavaScript in one standalone HTML file.
-- Do not use JavaScript import statements or ES modules in the HTML.
+- Do not use JavaScript import statements or ES modules.
 - Use semantic HTML and accessible labels.
 - Handle empty fields and invalid input gracefully.
-- Do not claim a backend feature works if it has not been implemented.
+- Do not claim backend features work if they are not implemented.
 
 OUTPUT:
-Return a complete runnable HTML document with <!DOCTYPE html>, <html>, <head>, <style>, <body> and JavaScript.
-The app must be suitable for loading inside an Android WebView.
-The generated HTML must be self-contained apart from explicitly needed external libraries.
+Return a complete runnable HTML document with <!DOCTYPE html>,
+<html>, <head>, <style>, <body> and JavaScript.
+The app must work inside an Android WebView.
+Keep CSS and JavaScript embedded in the HTML.
 Return ONLY valid JSON matching this schema:
 {
   "appName": "string",
@@ -120,7 +159,7 @@ Return ONLY valid JSON matching this schema:
   "features": ["string"]
 }
 The html property must contain the complete HTML source.
-The features array must only list features actually implemented.
+The features array must list only implemented features.
 No Markdown fences around the JSON.
 `;
 }
