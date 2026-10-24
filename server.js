@@ -48,126 +48,149 @@ async function github(path, options = {}) {
 }
 
 function getAppPrompt({ appName, idea, theme }) {
-  const gamePattern =
-    /\b(game|gaming|3d|2d|racing|race|runner|platformer|shooter|puzzle|arcade|football|cricket|car game|bike game|battle|survival|minecraft|gameplay)\b|गेम|खेल|रेसिंग|दौड़|शूटिंग|पहेली|क्रिकेट गेम|कार गेम|बाइक गेम/i;
-
-  const isGame = gamePattern.test(`${appName} ${idea}`);
-
   return `
-You are an expert mobile app developer, visual designer and UI/UX expert.
+You are a professional game development studio, senior game programmer,
+3D artist, gameplay designer and mobile UI/UX engineer.
 
 APP NAME: ${appName}
-USER'S EXACT APP IDEA: ${idea}
-DESIGN THEME: ${theme}
+EXACT GAME IDEA: ${idea}
+THEME: ${theme}
 
-MAIN GOAL:
-Build the complete app requested by the user. Do not replace it
-with a generic calculator or unrelated dashboard.
+YOUR MISSION:
+Create a complete, playable, polished mobile game matching the EXACT
+game idea supplied by the user. Do not make a generic demo, blank screen,
+red rectangle game, static mockup, or unrelated game.
 
-APP-SPECIFIC ICON AND VISUAL IDENTITY:
-- Design a beautiful, polished icon specifically for this app.
-- The icon must represent the actual app idea, not a random emoji.
-- Place the icon prominently beside the app name in the dashboard header.
-- Also use it in the home screen, welcome area and relevant app cards.
-- Create the icon using inline SVG embedded directly in the HTML.
-- Use clean shapes, smooth gradients, balanced spacing and rounded corners.
-- Make the icon look professional at both small and large sizes.
-- Use a suitable symbol based on the app idea:
-  shopping: shopping bag or cart;
-  trading: chart or candlestick;
-  cricket: bat and ball;
-  education: book or graduation cap;
-  food: plate or chef symbol;
-  farming: leaf, crop or tractor;
-  fitness: dumbbell;
-  travel: location pin or airplane;
-  music: musical note;
-  messaging: chat bubble;
-  games: a symbol matching the specific game.
-- These are examples, not fixed rules. Choose the best symbol for
-  the user's exact idea.
-- Never use the same generic icon for every app.
-- Use SVG shapes rather than external icon libraries.
-- Create a matching visual identity with 2-3 coordinated colors.
-- Use the app name and icon together in a premium-looking header.
-- Do not show broken image placeholders or depend on external images
-  for the main app icon.
+1. IDENTIFY THE GAME TYPE
+First understand the user's idea and choose appropriate mechanics:
+- Racing: drivable cars, road, traffic, steering, speed, collisions.
+- Cricket: bat, ball, bowler, batting controls, runs, wickets and overs.
+- Football: players, ball, goal, movement, shooting and score.
+- Shooting: player, enemies, aiming, firing, health and waves.
+- Endless runner: animated character, obstacles, jumping, sliding and score.
+- Platformer: character, platforms, movement, jumping and levels.
+- Puzzle: real puzzle rules, selectable pieces, validation and levels.
+- Other games: create mechanics suitable for that specific idea.
+Never force every game to become a racing game.
 
-${isGame ? `
-GAME REQUIREMENTS — THESE ARE MANDATORY:
-- Build the exact type of game requested in the user's idea. Do not turn every game into a car-racing game.
-- Build a complete game dashboard, not just a gameplay canvas. Include a polished home/start screen with the game title, matching inline SVG/logo, Play button, instructions, and best score where suitable.
-- Separate the home screen from gameplay. Include working Pause/Resume, Restart/Replay, and Home buttons. Show a proper Game Over or win screen and the final score.
-- Every visible button must have a real event handler and perform its stated action.
-- Implement real gameplay mechanics appropriate to the requested game, including collision/win/lose rules and score updates where suitable.
-- For car/racing games specifically: include left and right controls, and make the vehicle actually change lanes/steer when these controls are used.
-- Mobile controls must work in Android WebView using pointer events. For each press-and-hold control, implement pointerdown, pointerup, pointercancel, pointerleave and lostpointercapture (or an equivalent reliable release mechanism). Use setPointerCapture when safe, prevent accidental page scrolling with CSS touch-action: none on game controls, and clear all held-key/held-button state on window blur and document visibility change.
-- Support both tapping and holding left/right controls. Holding a direction must keep steering continuously until release; movement must be processed by the game loop, not only by a one-time click handler.
-- Add keyboard controls for desktop testing when appropriate, and prevent arrow keys from scrolling the page while the game is active.
-- Keep the game loop running only when gameplay is active; pause it on Pause/Game Over and resume it correctly. Restart must reset score, player position, traffic/obstacles, timers and game-over state.
-- Ensure touch targets are large enough for thumbs and remain visible on narrow Android screens.
-- Use Canvas or CSS/JavaScript for suitable 2D games. Use Three.js only when genuinely needed for the requested 3D game; if used, use the classic global THREE API, not ES modules.
-- Do not claim multiplayer, online services, real payments or server features work unless implemented.
-- Before returning HTML, check that every button ID referenced by JavaScript exists, event listeners are attached after the DOM exists, and the core gameplay can start, steer/control, pause, resume, restart and return home without console errors.
-` : `
-APP REQUIREMENTS:
-- Build a complete, useful app tailored to the exact user idea.
-- Create all major screens and features relevant to that idea.
-- Implement navigation so each menu opens its corresponding screen.
-- Implement forms, add/edit/delete operations, search, filters and
-  calculations where appropriate.
-- Use localStorage for appropriate local data persistence.
-- Include realistic sample data matching the app idea.
-- Clearly label demo data. Do not fake live APIs, payments,
-  authentication or cloud services.
-`}
-PROFESSIONAL DASHBOARD:
-- Create a polished, modern dashboard with a clear visual hierarchy.
-- Include a top header with the custom app icon and app name.
-- Use attractive cards, consistent spacing, readable typography
-  and coordinated colors.
-- Add a welcome area and useful summary cards relevant to the idea.
-- Include suitable navigation and distinct screens.
-- Avoid excessive empty space and oversized decorative elements.
-- Make the interface feel like a finished product, not a basic demo.
-- Ensure icons and text remain readable on small phone screens.
+2. COMPLETE GAME DASHBOARD
+Create a professional home screen with:
+- Original game logo and game title.
+- Play button that actually starts gameplay.
+- How to Play / Instructions.
+- Settings and sound toggle when appropriate.
+- Best score and current progress.
+- Pause and Resume.
+- Restart and Home buttons.
+- Game Over or Victory screen.
+- Final score and Replay button.
+All buttons must work. Do not display fake controls.
 
-MANDATORY MOBILE RESPONSIVENESS:
-- Design mobile-first for widths of 320px, 360px and 390px.
-- Avoid horizontal scrolling.
-- Use box-sizing: border-box, responsive flexbox and CSS grid.
-- Use min-width: 0 and max-width: 100% where appropriate.
-- Collapse desktop sidebars into a compact mobile menu.
-- Close the mobile menu after selecting an item.
-- Make forms, tables, cards, dialogs and buttons fit phone screens.
-- Make primary buttons touch-friendly, preferably at least 44px high.
-- Do not hide major features to fit the screen.
+3. REAL GAME WORLD
+Create an actual game scene with a background, environment,
+player, interactive objects, obstacles or opponents as required.
+Use animation and meaningful movement.
+Use real collision detection and rules for winning or losing.
+Update the score based on actual gameplay.
+Include increasing difficulty or levels where appropriate.
+Create multiple visible game objects, not just one rectangle.
+Add suitable sound effects when practical, with a mute option.
 
-FUNCTIONALITY:
-- Every primary navigation item must open a real screen.
-- Every primary button must perform its advertised action.
-- Avoid dead buttons and "coming soon" placeholders for core features.
-- Keep all HTML, CSS and JavaScript in one standalone HTML file.
-- Do not use JavaScript import statements or ES modules.
-- Use semantic HTML and accessible labels.
-- Handle empty fields and invalid input gracefully.
-- Do not claim backend features work if they are not implemented.
+4. 3D REQUIREMENTS
+When the requested idea calls for a 3D game, create a real 3D scene:
+- Use Three.js with its browser-compatible global THREE API.
+- Load Three.js with a regular script tag, not import statements.
+- Create a renderer, scene, perspective camera and lighting.
+- Build a ground/environment, player model, and multiple game objects
+  using 3D geometry and materials.
+- Use shadows where practical, perspective and camera movement.
+- Animate the world and objects using requestAnimationFrame.
+- Resize the renderer when the screen orientation or size changes.
+- Display a useful loading/error message if the 3D library cannot load.
+- Do not pretend a flat 2D rectangle is a 3D model.
+For games that do not need 3D, build suitable polished 2D gameplay.
 
-OUTPUT:
-Return a complete runnable HTML document with <!DOCTYPE html>,
-<html>, <head>, <style>, <body> and JavaScript.
-The app must work inside an Android WebView.
-Keep CSS and JavaScript embedded in the HTML.
-Return ONLY valid JSON matching this schema:
+For a 3D car racing game specifically:
+- Show a recognisable 3D car with body, windows and four wheels.
+- Show a road with lane markings, road edges and scenery.
+- Add multiple opponent cars that move toward or past the player.
+- Add steering, speed, acceleration or braking where suitable.
+- Steering must visibly change the player's car position.
+- Add traffic collisions, score/distance and game-over logic.
+- Use a following camera and a convincing sense of motion.
+
+5. MOBILE ANDROID CONTROLS
+The game must work on a touch screen inside Android WebView.
+- Make controls large and easy to press with thumbs.
+- Use pointerdown, pointerup, pointercancel and pointerleave
+  for press-and-hold controls, with reliable release handling.
+- Use touch-action:none on the actual game controls.
+- Support continuous steering or movement while the control is held.
+- Support keyboard controls for desktop testing when appropriate.
+- Prevent arrow keys from scrolling the page during gameplay.
+- Clear held controls when the app loses focus or becomes hidden.
+- Make the entire interface responsive to narrow phone screens.
+- Avoid horizontal scrolling and controls hidden behind system bars.
+
+6. GAME STATE AND FUNCTIONALITY
+Implement clear states: home, playing, paused, gameover and victory
+where appropriate.
+The game loop must stop or pause correctly when the game is paused.
+Restart must reset score, player position, enemies, obstacles,
+timers and all other relevant game state.
+Home must return to the game dashboard.
+Replay must start a fresh game.
+Prevent multiple animation loops from starting accidentally.
+Every visible button must have a working event handler.
+Do not leave placeholder buttons or unfinished main features.
+
+7. VISUAL QUALITY
+Use a polished game UI, attractive colours, gradients, depth,
+consistent typography, smooth transitions and readable score panels.
+Create a game logo using inline SVG or CSS.
+Use a clear HUD for score, health, timer, level or speed as appropriate.
+Make the game look like a real mobile game, not a plain HTML form.
+Keep the dashboard and gameplay visually distinct.
+Make the game playable on a 320px-wide phone.
+
+8. TECHNICAL REQUIREMENTS
+- Return one complete standalone HTML document.
+- Put all CSS inside a style element.
+- Put all JavaScript inside a script element.
+- Do not use JavaScript modules or import statements.
+- Do not use a backend unless explicitly required by the idea.
+- Use localStorage for best score and settings where appropriate.
+- Do not claim real multiplayer, live data, online accounts or payments
+  unless actually implemented.
+- Use external libraries only where necessary and handle load failures.
+- Ensure the code works inside an Android WebView.
+- Do not omit code with phrases like "rest of code here".
+- Do not return a mockup instead of a playable game.
+
+9. FINAL SELF-CHECK
+Before returning the HTML, check that:
+- The home screen and Play button work.
+- The actual player/game objects are visible.
+- The requested game mechanics are implemented.
+- Touch controls change the game state or player position.
+- Collision, scoring and win/lose conditions work where appropriate.
+- Pause, Resume, Restart, Home and Replay work.
+- All referenced element IDs exist.
+- Event listeners are attached correctly.
+- The game adapts to mobile screen sizes.
+- No main feature is just a decorative button.
+
+10. OUTPUT FORMAT
+Return ONLY valid JSON in this exact structure:
 {
-  "appName": "string",
-  "summary": "string",
-  "html": "string",
-  "features": ["string"]
+  "appName": "The game name",
+  "summary": "A short description of the completed game",
+  "html": "The complete HTML document",
+  "features": ["Implemented feature 1", "Implemented feature 2"]
 }
-The html property must contain the complete HTML source.
-The features array must list only implemented features.
-No Markdown fences around the JSON.
+Escape newlines and quotation marks correctly inside JSON strings.
+The html field must contain the complete runnable HTML.
+Do not wrap the JSON in Markdown fences.
 `;
 }
 
