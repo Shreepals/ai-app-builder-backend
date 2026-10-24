@@ -191,12 +191,15 @@ jobs:
           print("HTML saved. Length:", len(html))
           PY
 
+      
       - name: Add local Three.js for 3D games
         run: |
           set -euo pipefail
 
           if [ "$(cat is_game.txt)" = "yes" ]; then
             echo "Game detected. Downloading Three.js..."
+
+            mkdir -p app/src/main/assets
 
             curl --fail --location --silent --show-error --retry 2 \
               "https://cdn.jsdelivr.net/npm/three@0.149.0/build/three.min.js" \
@@ -210,15 +213,42 @@ jobs:
 
           path = Path("app/src/main/assets/index.html")
           html = path.read_text(encoding="utf-8")
-          pattern = r'https?://cdn\.jsdelivr\.net/npm/three@0\.149\.0/build/three\.min\.js'
 
-          html, count = re.subn(pattern, "three.min.js", html, flags=re.I)
+          cdn_pattern = (
+              r'https?://cdn\.jsdelivr\.net/npm/three@0\.149\.0/'
+              r'build/three\.min\.js'
+          )
 
-          if count == 0 and not re.search(r'three\.min\.js', html, re.I):
-              raise SystemExit(
-                  "ERROR: Game HTML has no Three.js script reference. "
-                  "Regenerate the game HTML with the required script URL."
-              )
+          html, count = re.subn(
+              cdn_pattern,
+              "three.min.js",
+              html,
+              flags=re.IGNORECASE
+          )
+
+          has_local_script = re.search(
+              r'<script[^>]+src=["\'](?:\./)?three\.min\.js["\']',
+              html,
+              flags=re.IGNORECASE
+          )
+
+          uses_three = re.search(
+              r'\bTHREE\s*\.|\bnew\s+THREE\b',
+              html
+          )
+
+          if count == 0 and not has_local_script and uses_three:
+              script = '<script src="three.min.js"></script>\n'
+              if re.search(r'</head\s*>', html, re.IGNORECASE):
+                  html = re.sub(
+                      r'</head\s*>',
+                      lambda m: script + m.group(0),
+                      html,
+                      count=1,
+                      flags=re.IGNORECASE
+                  )
+              else:
+                  html = script + html
 
           path.write_text(html, encoding="utf-8")
           print("Three.js local asset configured.")
