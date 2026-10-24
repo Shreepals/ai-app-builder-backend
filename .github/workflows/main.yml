@@ -384,7 +384,7 @@ jobs:
           def appId = System.getenv("APP_PACKAGE_ID") ?: "com.myapp"
 
           android {
-              namespace appId
+              namespace 'com.shreepals.aiapp'
               compileSdk 35
 
               defaultConfig {
