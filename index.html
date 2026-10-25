@@ -1,548 +1,697 @@
-
-<!DOCTYPE html>
+<!doctype html>
 <html lang="hi">
 <head>
-<meta charset="UTF-8">
+<meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="theme-color" content="#101827">
 <title>AI App Studio</title>
 <style>
-:root{--bg:#0b1020;--panel:#121a2d;--panel2:#19233a;--line:#293650;--text:#f3f6ff;--muted:#a4b0c8;--blue:#6485ff;--green:#3bd6a0}
+:root{
+--bg:#0b1120;--panel:#121c2f;--line:#2a3850;
+--text:#eef4ff;--muted:#a4b2c8;--accent:#68e0c0
+}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--text);font-family:Arial,sans-serif}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,sans-serif}
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
-.layout{display:flex;min-height:100vh}
-.sidebar{width:235px;flex-shrink:0;background:#0e1526;border-right:1px solid var(--line);padding:22px 14px}
-.brand{font-size:21px;font-weight:800;padding:8px 10px 25px}
-.brand span{color:#819aff}
-.nav{display:flex;flex-direction:column;gap:7px}
-.nav button{border:0;border-radius:10px;text-align:left;padding:13px 12px;background:transparent;color:var(--muted)}
-.nav button.active,.nav button:hover{background:#202c49;color:white}
-.side-note{margin-top:30px;padding:13px;background:var(--panel);border:1px solid var(--line);border-radius:12px;color:var(--muted);font-size:12px;line-height:1.6}
-.main{flex:1;min-width:0;padding:25px;width:calc(100% - 235px)}
-.top{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:25px}
-h1{font-size:27px;margin:0 0 8px}
-h2{font-size:18px;margin:0 0 14px}
-p{color:var(--muted);line-height:1.6}
-.pill{border:1px solid var(--line);border-radius:30px;padding:9px 13px;color:#c6d1e8;font-size:12px}
-.grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px;margin-bottom:22px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:19px;min-width:0}
-.stat{font-size:25px;font-weight:bold;margin:12px 0 5px}
-.muted{color:var(--muted);font-size:13px}
+button:disabled{opacity:.55;cursor:wait}
+.app{min-height:100vh;display:grid;grid-template-columns:225px 1fr}
+aside{background:#0d1626;border-right:1px solid var(--line);padding:18px;position:sticky;top:0;height:100vh}
+.brand{font-size:20px;font-weight:800;margin:5px 5px 22px}
+.brand span,.eyebrow{color:var(--accent)}
+.nav{display:block;width:100%;text-align:left;border:1px solid transparent;color:#c2cde0;background:transparent;padding:11px;border-radius:10px;margin:4px 0}
+.nav.active,.nav:hover{background:#1a2940;border-color:#30445f;color:white}
+main{padding:25px;max-width:1450px;width:100%;margin:auto}
+.top{display:flex;justify-content:space-between;gap:12px;margin-bottom:22px}
+.top h1{font-size:32px;margin:2px 0}
+.eyebrow{font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:1.4px}
+.status,.notice{font-size:13px;color:var(--muted);border:1px solid var(--line);padding:10px 12px;border-radius:11px;overflow-wrap:anywhere}
+.hero{padding:32px;background:radial-gradient(ellipse at 90% 0%,#263f5d,transparent 48%),linear-gradient(135deg,#172942,#121b2d);border:1px solid #344963;border-radius:20px;margin-bottom:18px}
+.hero h2{font-size:clamp(26px,4vw,40px);line-height:1.15;margin:10px 0}
+.muted,.hero p{color:var(--muted)}
+.grid{display:grid;gap:15px}
+.stats{grid-template-columns:repeat(3,1fr);margin:18px 0}
+.two{grid-template-columns:repeat(2,minmax(0,1fr))}
+.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.stat,.panel,.template,.project{background:linear-gradient(145deg,var(--panel),#101a2b);border:1px solid var(--line);border-radius:15px;padding:18px;min-width:0}
+.stat strong{font-size:25px;display:block}
+.stat span,.small{font-size:12px;color:var(--muted)}
 .section{display:none}
 .section.active{display:block}
-.workspace{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:16px}
-label{display:block;color:#d5def1;font-size:13px;margin:15px 0 8px}
-input,textarea,select{width:100%;padding:12px;background:#0b1222;color:white;border:1px solid var(--line);border-radius:9px;outline:none}
-textarea{min-height:155px;resize:vertical;line-height:1.5}
-input:focus,textarea:focus,select:focus{border-color:var(--blue)}
-.btn{border:0;border-radius:9px;padding:12px 16px;font-weight:bold;background:var(--blue);color:white}
-.btn:disabled{opacity:.55;cursor:wait}
-.btn.secondary{background:var(--panel2);border:1px solid var(--line)}
-.btn.green{background:#168a68}
-.actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}
-.preview{width:100%;height:490px;background:white;border:0;border-radius:10px}
-.status{white-space:pre-wrap;overflow-wrap:anywhere;background:#0b1222;border:1px solid var(--line);padding:12px;border-radius:9px;margin-top:14px;color:#c8d5ee;font-size:13px}
-.projects{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:13px}
-.project{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:15px}
-.project h3{margin:0 0 8px}
+.section-title{display:flex;justify-content:space-between;align-items:center;gap:12px;margin-bottom:16px}
+.section-title h2{margin:0}
+.section-title p{color:var(--muted);margin:4px 0 0}
+label{display:block;font-weight:700;margin:13px 0 6px;font-size:13px}
+input,textarea,select{width:100%;color:var(--text);background:#0a1322;border:1px solid #34445d;border-radius:10px;padding:12px;outline:none}
+textarea{min-height:135px;resize:vertical}
+.btn{border:1px solid #3a4c65;background:#1b2a40;color:white;padding:10px 14px;border-radius:10px;font-weight:750;display:inline-flex;align-items:center;justify-content:center;gap:7px}
+.primary{background:linear-gradient(135deg,#67dfbf,#8fe7ce);color:#09221e;border-color:transparent}
+.actions{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
 .template{cursor:pointer}
-.template:hover{border-color:var(--blue)}
-a{color:#a9bcff}
-.mobile-menu{display:none}
-.small{font-size:12px;color:var(--muted)}
+.template:hover{border-color:var(--accent)}
+.template h3{margin:7px 0 2px}
+.template p{color:var(--muted);font-size:13px;margin:0}
+.notice{margin-top:12px;background:#0b1525}
+.notice.good{border-color:#2d7968;color:#aaf2de}
+.notice.bad{border-color:#8b4451;color:#ffc0c7}
+.preview{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:#fff}
+.preview iframe{width:100%;height:65vh;min-height:400px;border:0;display:block}
+.previewbar{background:#18243a;color:white;padding:10px}
+.project-list{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:12px}
+.project h3{margin:0}
+.project p{color:var(--muted);font-size:13px;overflow-wrap:anywhere}
+.empty{text-align:center;padding:25px;border:1px dashed var(--line);border-radius:12px;color:var(--muted)}
+.hidden{display:none!important}
+footer{text-align:center;color:#71829c;font-size:12px;margin-top:28px}
 @media(max-width:850px){
- .sidebar{width:190px}
- .main{padding:17px}
- .grid{grid-template-columns:repeat(2,minmax(0,1fr))}
- .workspace{grid-template-columns:1fr}
+.app{grid-template-columns:1fr}
+aside{height:auto;position:relative;padding:10px;border-right:0;border-bottom:1px solid var(--line)}
+.brand{margin:2px 5px 8px}
+.navs{display:flex;overflow-x:auto;gap:4px}
+.nav{white-space:nowrap;width:auto;flex-shrink:0;padding:8px}
+.nav-label{display:none}
+main{padding:16px}
+.top h1{font-size:27px}
 }
-@media(max-width:600px){
- .layout{display:block}
- .sidebar{width:100%;padding:12px;border-right:0;border-bottom:1px solid var(--line)}
- .brand{padding:5px 7px 12px}
- .nav{display:grid;grid-template-columns:repeat(3,minmax(0,1fr))}
- .nav button{padding:10px 6px;text-align:center;font-size:12px}
- .side-note{display:none}
- .main{width:100%;padding:14px}
- h1{font-size:23px}
- .grid{grid-template-columns:1fr 1fr;gap:9px}
- .card{padding:13px}
- .preview{height:410px}
- .pill{display:none}
+@media(max-width:570px){
+.two,.three,.project-list{grid-template-columns:1fr}
+.stats{gap:7px}
+.stat{padding:11px}
+.stat strong{font-size:20px}
+.stat span{font-size:10px}
+.hero{padding:22px}
+.panel{padding:14px}
+.section-title{align-items:flex-start;flex-direction:column}
 }
 </style>
 </head>
 <body>
-<div class="layout">
- <aside class="sidebar">
-  <div class="brand">✦ AI <span>App Studio</span></div>
-  <div class="nav">
-   <button class="active" data-page="home">⌂ Dashboard</button>
-   <button data-page="builder">✦ App Generator</button>
-   <button data-page="editor">✎ AI Editor</button>
-   <button data-page="projects">▦ My Projects</button>
-   <button data-page="preview">▣ App Preview</button>
-   <button data-page="android">⬇ Android APK</button>
-  </div>
-  <div class="side-note">AI APP STUDIO<br><br>आइडिया लिखें → ऐप बनाएं → प्रीव्यू देखें → APK बनाएं।<br><br>APK के लिए इंटरनेट और सफल Android build जरूरी है।</div>
- </aside>
+<div class="app">
 
- <main class="main">
-  <header class="top">
-   <div>
-    <h1 id="pageTitle">Dashboard</h1>
-    <div class="muted">अपने आइडिया को ऐप में बदलें</div>
-   </div>
-   <span class="pill">● AI Studio</span>
-  </header>
+<aside>
+<div class="brand">✦ AI App <span>Studio</span></div>
+<div class="nav-label">WORKSPACE</div>
+<div class="navs">
+<button class="nav active" data-page="dashboard">⌂ Dashboard</button>
+<button class="nav" data-page="builder">＋ App Generator</button>
+<button class="nav" data-page="editor">✎ AI Editor</button>
+<button class="nav" data-page="projects">▦ My Projects</button>
+<button class="nav" data-page="preview">◉ Preview</button>
+<button class="nav" data-page="android">⇩ Android APK</button>
+</div>
+<div class="notice">
+1. Idea लिखें<br>
+2. App generate करें<br>
+3. Preview जाँचें<br>
+4. APK build करें
+</div>
+</aside>
 
-  <section id="home" class="section active">
-   <div class="card" style="margin-bottom:18px">
-    <h2>आपका अगला ऐप क्या होगा?</h2>
-    <p>अपना आइडिया लिखें। AI से ऐप बनवाएँ, फिर उसका प्रीव्यू और APK तैयार करें।</p>
-    <button class="btn" onclick="showPage('builder')">＋ नया ऐप बनाएं</button>
-   </div>
-   <div class="grid">
-    <div class="card"><div class="muted">मेरे प्रोजेक्ट</div><div class="stat" id="projectCount">0</div><div class="muted">सेव किए गए ऐप</div></div>
-    <div class="card"><div class="muted">वर्तमान ऐप</div><div class="stat" id="currentName">कोई नहीं</div><div class="muted">चुना गया प्रोजेक्ट</div></div>
-    <div class="card"><div class="muted">APK स्थिति</div><div class="stat" style="font-size:20px" id="apkState">तैयार नहीं</div><div class="muted">बिल्ड की स्थिति</div></div>
-   </div>
-   <h2>शुरू करने के लिए टेम्पलेट</h2>
-   <div class="grid">
-    <div class="card template" onclick="useTemplate('Business Manager','एक बिजनेस मैनेजमेंट ऐप बनाओ जिसमें डैशबोर्ड, बिक्री, खर्च, ग्राहक, प्रोडक्ट, रिपोर्ट और सेटिंग हों। हर सेक्शन में काम करने वाले इंटरैक्टिव फीचर हों।')"><h2>🏢 बिजनेस ऐप</h2><p>बिक्री, ग्राहक और रिपोर्ट</p></div>
-    <div class="card template" onclick="useTemplate('Online Shopping','एक ऑनलाइन शॉपिंग ऐप बनाओ जिसमें प्रोडक्ट कैटलॉग, सर्च, कैटेगरी, कार्ट, ऑर्डर हिस्ट्री और प्रोफाइल हो।')"><h2>🛍️ शॉपिंग ऐप</h2><p>प्रोडक्ट, कार्ट और ऑर्डर</p></div>
-    <div class="card template" onclick="useTemplate('School Manager','एक स्कूल मैनेजमेंट ऐप बनाओ जिसमें स्टूडेंट, टीचर, अटेंडेंस, टाइमटेबल, फीस और रिजल्ट के सेक्शन हों।')"><h2>🎓 स्कूल ऐप</h2><p>विद्यार्थी और स्कूल डैशबोर्ड</p></div>
-   </div>
-  </section>
+<main>
+<header class="top">
+<div>
+<div class="eyebrow">Your idea → Your app</div>
+<h1 id="pageTitle">Dashboard</h1>
+</div>
+<div class="status">AI Builder Workspace</div>
+</header>
 
-  <section id="builder" class="section">
-   <div class="workspace">
-    <div class="card">
-     <h2>✦ AI App Generator</h2>
-     <p>ऐप कैसा होना चाहिए, साफ-साफ लिखें।</p>
-     <label for="appName">ऐप का नाम</label>
-     <input id="appName" placeholder="जैसे Smart Business">
-     <label for="idea">आपका ऐप आइडिया</label>
-     <textarea id="idea" placeholder="उदाहरण: एक पूरा बिजनेस ऐप बनाओ जिसमें बिक्री, ग्राहक, स्टॉक, खर्च, रिपोर्ट, सर्च और सेटिंग हों। सभी बटन काम करें और मोबाइल पर सही दिखे।"></textarea>
-     <label for="theme">डिज़ाइन</label>
-     <select id="theme">
-      <option value="Modern">Modern</option>
-      <option value="Professional">Professional</option>
-      <option value="Simple">Simple</option>
-     </select>
-     <div class="actions">
-      <button class="btn" id="generateBtn" onclick="generateApp()">✦ ऐप बनाएं</button>
-      <button class="btn secondary" onclick="clearForm()">साफ करें</button>
-     </div>
-     <div class="status" id="generateStatus">अपना आइडिया लिखकर ऐप बनाएं।</div>
-    </div>
-    <div class="card">
-     <h2>Live App Preview</h2>
-     <p>AI से बना HTML ऐप यहाँ दिखेगा।</p>
-     <iframe id="previewFrame" class="preview" title="App Preview" sandbox="allow-scripts allow-forms allow-modals"></iframe>
-     <div class="actions">
-      <button class="btn secondary" onclick="showPage('preview')">बड़ा प्रीव्यू</button>
-      <button class="btn green" onclick="showPage('android')">APK बनाएं →</button>
-     </div>
-    </div>
-   </div>
-  </section>
-
-<section id="editor" class="section">
-  <h2>✏️ AI App Editor</h2>
-  <p>अपना ऐप खोलें और लिखें कि उसमें क्या बदलाव चाहिए।</p>
-
-  <label for="editInstruction">ऐप में क्या बदलाव करना है?</label>
-  <textarea
-    id="editInstruction"
-    rows="5"
-    placeholder="उदाहरण: Login page, पूरा Dashboard, Profile और Settings जोड़ो। मौजूदा फीचर्स मत हटाना।"
-    style="width:100%;box-sizing:border-box;padding:12px;margin:12px 0;"
-  ></textarea>
-
-  <p id="editProjectInfo">पहले My Projects से अपना ऐप खोलें।</p>
-
-  <button
-    id="editButton"
-    onclick="editCurrentApp()"
-    style="padding:12px 18px;margin:8px 0;"
-  >
-    AI से ऐप एडिट करें
-  </button>
-
-  <p id="editStatus">ऐप एडिट करने के लिए निर्देश लिखें।</p>
-
-  <h3>ऐप का Preview</h3>
-  <iframe
-    id="editPreview"
-    title="AI Editor Preview"
-    style="width:100%;height:500px;border:1px solid #888;border-radius:8px;background:white;"
-  ></iframe>
-</section>
- 
-<section id="projects" class="section">
-  <div class="card" style="margin-bottom:15px">
-    <h2>📱 My Projects</h2>
-    <p>अपने सेव किए गए ऐप खोलें, Preview देखें या AI से बदलाव करें।</p>
-    <button class="btn" onclick="showPage('builder')">＋ नया प्रोजेक्ट</button>
-  </div>
-  <div id="projectList" class="projects"></div>
-</section>
-
-<section id="preview" class="section">
-  <div class="card">
-    <h2 id="previewHeading">App Preview</h2>
-    <div class="actions" style="margin-bottom:14px">
-      <button class="btn secondary" onclick="showPage('builder')">वापस एडिट करें</button>
-      <button class="btn" onclick="showPage('android')">APK बनाएं</button>
-    </div>
-    <iframe id="bigPreview" class="preview" style="height:75vh" title="Full App Preview" sandbox="allow-scripts allow-forms allow-modals"></iframe>
-  </div>
-</section>
-
-  <section id="preview" class="section">
-   <div class="card">
-    <h2 id="previewHeading">App Preview</h2>
-    <div class="actions" style="margin-bottom:14px">
-     <button class="btn secondary" onclick="showPage('builder')">वापस एडिट करें</button>
-     <button class="btn" onclick="showPage('android')">APK बनाएं</button>
-    </div>
-    <iframe id="bigPreview" class="preview" style="height:75vh" title="Full App Preview" sandbox="allow-scripts allow-forms allow-modals"></iframe>
-   </div>
-  </section>
-
-  <section id="android" class="section">
-   <div class="card">
-    <h2>⬇ Android APK Builder</h2>
-    <p>चुने गए प्रोजेक्ट की HTML फाइल Android APK बनाने वाले बैकएंड को भेजी जाएगी।</p>
-    <div class="status" id="buildInfo">पहले ऐप बनाएं और फिर APK बिल्ड शुरू करें।</div>
-    <div class="actions">
-     <button class="btn" id="buildBtn" onclick="buildApk()">APK बनाएं</button>
-     <button class="btn secondary" onclick="showPage('builder')">ऐप एडिट करें</button>
-    </div>
-    <div id="downloadArea" style="margin-top:18px"></div>
-   </div>
-  </section>
- </main>
+<section class="section active" id="page-dashboard">
+<div class="hero">
+<div class="eyebrow">Build something useful</div>
+<h2>अपने आइडिया को ऐप में बदलें।</h2>
+<p>App का नाम और idea लिखें। AI app generate करेगा, आप preview जाँचेंगे और Android APK build कर सकेंगे।</p>
+<div class="actions">
+<button class="btn primary" data-goto="builder">＋ नया ऐप बनाएँ</button>
+<button class="btn" data-goto="projects">मेरे ऐप देखें</button>
+</div>
 </div>
 
-<script>
+<div class="grid stats">
+<div class="stat"><strong id="statProjects">0</strong><span>Saved projects</span></div>
+<div class="stat"><strong id="statCurrent">No</strong><span>Current app</span></div>
+<div class="stat"><strong id="statHtml">—</strong><span>HTML ready</span></div>
+</div>
+
+<h2>शुरू करने के लिए</h2>
+<p class="muted">किस तरह का ऐप बनाना चाहते हैं?</p>
+
+<div class="grid three">
+<div class="template" data-idea="A personal expense tracker with dashboard, add income and expense forms, categories, monthly totals, transaction list, filters, charts, and locally saved data.">
+<div>💰</div><h3>Expense Tracker</h3><p>आमदनी और खर्च का हिसाब</p>
+</div>
+<div class="template" data-idea="A study planner app with subject dashboard, daily timetable, task checklist, study timer, progress summary, and locally saved notes.">
+<div>📚</div><h3>Study Planner</h3><p>पढ़ाई का प्लान</p>
+</div>
+<div class="template" data-idea="A playable 3D car driving game using Three.js with road, player car, obstacles, score, collision detection, restart button, and mobile touch controls.">
+<div>🏎️</div><h3>3D Racing Game</h3><p>चलने वाला 3D गेम</p>
+</div>
+</div>
+</section>
+<section class="section" id="page-builder">
+  <div class="section-title">
+    <div>
+      <h2>＋ App Generator</h2>
+      <p>अपना आइडिया बताइए और पूरा ऐप बनाइए।</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <form id="generateForm">
+      <label for="appName">ऐप का नाम</label>
+      <input id="appName" name="appName" placeholder="जैसे My Business App" required>
+
+      <label for="idea">आप किस तरह का ऐप बनाना चाहते हैं?</label>
+      <textarea id="idea" name="idea" placeholder="ऐप का पूरा आइडिया लिखें। उदाहरण: एक ऑनलाइन शॉपिंग ऐप जिसमें प्रोडक्ट लिस्ट, सर्च, कैटेगरी, कार्ट, ऑर्डर, प्रोफाइल और डैशबोर्ड हो। हर बटन काम करना चाहिए।" required></textarea>
+
+      <label for="theme">डिजाइन</label>
+      <select id="theme" name="theme">
+        <option value="Modern">Modern — आधुनिक</option>
+        <option value="Professional">Professional — प्रोफेशनल</option>
+        <option value="Simple">Simple — सरल</option>
+      </select>
+
+      <div class="actions">
+        <button class="btn primary" id="generateBtn" type="submit">✦ ऐप बनाएँ</button>
+        <button class="btn" type="reset">साफ करें</button>
+      </div>
+    </form>
+
+    <div id="generateStatus" class="notice" role="status">
+      अपना ऐप नाम और आइडिया लिखकर Generate दबाएँ।
+    </div>
+  </div>
+</section>
+
+<section class="section" id="page-editor">
+  <div class="section-title">
+    <div>
+      <h2>✎ AI Editor</h2>
+      <p>बने हुए ऐप में बदलाव करने के लिए निर्देश लिखें।</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <label for="editInstruction">क्या बदलाव करना है?</label>
+    <textarea id="editInstruction" placeholder="जैसे: डैशबोर्ड में सर्च बार जोड़ें, सभी बटन चालू करें और मोबाइल डिजाइन बेहतर करें।"></textarea>
+
+    <div class="actions">
+      <button class="btn primary" id="editBtn" type="button">✦ ऐप में बदलाव करें</button>
+      <button class="btn" data-goto="preview" type="button">Preview देखें</button>
+    </div>
+
+    <div id="editStatus" class="notice" role="status">
+      पहले App Generator से ऐप बनाएँ।
+    </div>
+  </div>
+</section>
+
+<section class="section" id="page-projects">
+  <div class="section-title">
+    <div>
+      <h2>▦ My Projects</h2>
+      <p>इस ब्राउज़र में सेव किए गए ऐप।</p>
+    </div>
+    <button class="btn" id="refreshProjects" type="button">↻ Refresh</button>
+  </div>
+
+  <div id="projectList" class="project-list">
+    <div class="empty">अभी कोई ऐप सेव नहीं है। App Generator से शुरुआत करें।</div>
+  </div>
+</section>
+
+<section class="section" id="page-preview">
+  <div class="section-title">
+    <div>
+      <h2>◉ App Preview</h2>
+      <p>अपने बनाए हुए ऐप का प्रीव्यू देखें।</p>
+    </div>
+    <button class="btn" data-goto="builder" type="button">＋ नया ऐप</button>
+  </div>
+
+  <div class="preview">
+    <div class="previewbar">
+      <span id="previewName">आपके ऐप का Preview</span>
+    </div>
+    <iframe id="appPreview" title="Generated app preview"
+      sandbox="allow-scripts allow-forms allow-modals allow-downloads"
+      referrerpolicy="no-referrer"></iframe>
+  </div>
+
+  <div class="actions">
+    <button class="btn" id="reloadPreview" type="button">↻ Preview Refresh</button>
+    <button class="btn primary" data-goto="android" type="button">Android APK बनाएँ →</button>
+  </div>
+
+  <div id="previewStatus" class="notice" role="status">
+    ऐप Generate होने के बाद यहाँ दिखाई देगा।
+  </div>
+</section>
+
+<section class="section" id="page-android">
+  <div class="section-title">
+    <div>
+      <h2>⇩ Android APK Builder</h2>
+      <p>अपने ऐप की Android APK बिल्ड शुरू करें।</p>
+    </div>
+  </div>
+
+  <div class="panel">
+    <h3 id="buildAppName">कोई ऐप चुना नहीं गया</h3>
+    <p class="muted">पहले ऐप Generate करें। फिर APK Build दबाएँ।</p>
+
+    <div class="actions">
+      <button class="btn primary" id="buildBtn" type="button">⚙ APK Build शुरू करें</button>
+      <button class="btn" id="checkBuildBtn" type="button">↻ Build Status जाँचें</button>
+    </div>
+
+    <div id="buildStatus" class="notice" role="status">
+      अभी कोई APK बिल्ड शुरू नहीं हुई है।
+    </div>
+
+    <div id="downloadArea" class="actions hidden">
+      <a id="downloadLink" class="btn primary" href="#" target="_blank" rel="noopener">
+        ⇩ APK डाउनलोड करें
+      </a>
+    </div>
+  </div>
+</section>
+
+<footer>
+AI App Studio · अपना ऐप बनाएँ, Preview करें और Android APK Build करें।
+</footer>
+</main>
+ </div>
+ <script>
+"use strict";
+
 const API = "https://ai-app-builder-backend-1.onrender.com";
 const STORAGE_KEY = "aiAppStudioProjectsV3";
-let projects = [];
-let currentId = null;
-let appHtml = "";
-let buildBusy = false;
 
-try { projects = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]"); }
-catch(e) { projects = []; }
+let currentApp = null;
+let buildTimer = null;
 
-function saveProjects(){
+const $ = id => document.getElementById(id);
+
+function readProjects() {
+  try {
+    const data = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
+    return Array.isArray(data) ? data : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveProjects(projects) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-  } catch(e) {
-    setText("generateStatus", "प्रोजेक्ट सेव नहीं हो पाया।");
+    return true;
+  } catch {
+    alert("Browser storage भर गया है। पुराने projects हटाकर फिर कोशिश करें।");
+    return false;
   }
-  updateDashboard();
+}
+
+function setStatus(id, message, type = "") {
+  const el = $(id);
+  if (!el) return;
+  el.textContent = message;
+  el.className = "notice" + (type ? " " + type : "");
+}
+
+function showPage(page) {
+  document.querySelectorAll(".section").forEach(section => {
+    section.classList.toggle("active", section.id === "page-" + page);
+  });
+
+  document.querySelectorAll(".nav").forEach(button => {
+    button.classList.toggle("active", button.dataset.page === page);
+  });
+
+  const titles = {
+    dashboard: "Dashboard",
+    builder: "App Generator",
+    editor: "AI Editor",
+    projects: "My Projects",
+    preview: "App Preview",
+    android: "Android APK"
+  };
+
+  $("pageTitle").textContent = titles[page] || "AI App Studio";
+
+  if (page === "projects") renderProjects();
+  if (page === "android") updateAppInfo();
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+document.querySelectorAll("[data-page]").forEach(button => {
+  button.addEventListener("click", () => showPage(button.dataset.page));
+});
+
+document.querySelectorAll("[data-goto]").forEach(button => {
+  button.addEventListener("click", () => showPage(button.dataset.goto));
+});
+
+document.querySelectorAll(".template").forEach(template => {
+  template.addEventListener("click", () => {
+    $("idea").value = template.dataset.idea || "";
+    const name = template.querySelector("h3")?.textContent || "My App";
+    $("appName").value = name;
+    showPage("builder");
+  });
+});
+
+function extractHtml(data) {
+  if (typeof data === "string") {
+    const trimmed = data.trim();
+    if (trimmed.startsWith("<!doctype") ||
+        trimmed.startsWith("<html") ||
+        trimmed.startsWith("<")) {
+      return trimmed;
+    }
+
+    try {
+      return extractHtml(JSON.parse(trimmed));
+    } catch {
+      return "";
+    }
+  }
+
+  if (!data || typeof data !== "object") return "";
+
+  const candidates = [
+    data.html,
+    data.appHtml,
+    data.app_html,
+    data.htmlContent,
+    data.html_content,
+    data.code,
+    data.result?.html,
+    data.app?.html,
+    data.data?.html
+  ];
+
+  for (const candidate of candidates) {
+    if (typeof candidate === "string" &&
+        /<html|<!doctype|<body/i.test(candidate)) {
+      return candidate;
+    }
+  }
+
+  return "";
+}
+
+async function apiRequest(path, body) {
+  const response = await fetch(API + path, {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(body)
+  });
+
+  const raw = await response.text();
+  let data;
+
+  try {
+    data = JSON.parse(raw);
+  } catch {
+    throw new Error(
+      "Backend ने सही JSON जवाब नहीं दिया। HTTP " + response.status
+    );
+  }
+
+  if (!response.ok) {
+    throw new Error(data.error || data.message ||
+      "Request असफल रही। HTTP " + response.status);
+  }
+
+  return data;
+}
+
+function updateAppInfo() {
+  $("statProjects").textContent = readProjects().length;
+  $("statCurrent").textContent = currentApp ? "Yes" : "No";
+  $("statHtml").textContent = currentApp ? "Ready" : "—";
+  $("buildAppName").textContent =
+    currentApp?.appName || "कोई ऐप चुना नहीं गया";
+}
+
+function setCurrentApp(app, shouldSave = true) {
+  currentApp = {
+    appName: app.appName || "My App",
+    idea: app.idea || "",
+    theme: app.theme || "Modern",
+    html: app.html || "",
+    updatedAt: new Date().toISOString(),
+    id: app.id || (Date.now().toString() + Math.random().toString(16).slice(2))
+  };
+
+  if (shouldSave) {
+    const projects = readProjects();
+    const index = projects.findIndex(p => p.id === currentApp.id);
+
+    if (index >= 0) projects[index] = currentApp;
+    else projects.unshift(currentApp);
+
+    saveProjects(projects.slice(0, 30));
+  }
+
+  $("previewName").textContent = currentApp.appName;
+  $("appPreview").srcdoc = currentApp.html;
+  $("previewStatus").textContent = "Preview तैयार है: " + currentApp.appName;
+
+  updateAppInfo();
   renderProjects();
 }
 
-function setText(id,text){
- const el=document.getElementById(id);
- if(el) el.textContent=text;
-}
+$("generateForm").addEventListener("submit", async event => {
+  event.preventDefault();
 
-function showPage(page){
- document.querySelectorAll(".section").forEach(s=>s.classList.remove("active"));
- document.getElementById(page).classList.add("active");
- document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.page===page));
- const titles={home:"Dashboard",builder:"AI App Generator",projects:"My Projects",preview:"App Preview",android:"Android APK"};
- setText("pageTitle",titles[page]||"AI App Studio");
- if(page==="preview"){
-  document.getElementById("bigPreview").srcdoc=appHtml||emptyPreview();
-  setText("previewHeading",document.getElementById("appName").value||"App Preview");
- }
- if(page==="android") updateBuildInfo();
-}
+  const appName = $("appName").value.trim();
+  const idea = $("idea").value.trim();
+  const theme = $("theme").value;
 
-document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>showPage(b.dataset.page)));
-
-function emptyPreview(){
- return '<!doctype html><html><body style="font-family:Arial;padding:25px"><h2>आपका ऐप यहाँ दिखेगा</h2><p>पहले AI App Generator से ऐप बनाएं।</p></body></html>';
-}
-
-function updateDashboard(){
- setText("projectCount",projects.length);
- const p=projects.find(x=>x.id===currentId);
- setText("currentName",p?p.name:"कोई नहीं");
- setText("apkState",appHtml?"ऐप तैयार":"तैयार नहीं");
-}
-
-function useTemplate(name,idea){
- document.getElementById("appName").value=name;
- document.getElementById("idea").value=idea;
- showPage("builder");
-}
-
-function clearForm(){
- document.getElementById("appName").value="";
- document.getElementById("idea").value="";
- document.getElementById("generateStatus").textContent="अपना आइडिया लिखकर ऐप बनाएं।";
-}
-
-function extractHtml(data){
- const candidates=[
-  data?.html,
-  data?.result?.html,
-  data?.result,
-  data?.appHtml,
-  data?.generatedHtml,
-  data?.code,
-  data?.content
- ];
- for(const c of candidates){
-  if(typeof c==="string" && /<(?:!doctype|html|head|body|div|main|section|style|script)\b/i.test(c)){
-   const match=c.match(/```(?:html)?\s*([\s\S]*?)```/i);
-   return (match?match[1]:c).trim();
-  }
- }
- return "";
-}
-
-async function generateApp(){
- const name=document.getElementById("appName").value.trim();
- const idea=document.getElementById("idea").value.trim();
- const theme=document.getElementById("theme").value;
- if(!name||!idea){setText("generateStatus","ऐप का नाम और आइडिया दोनों लिखें।");return;}
- const btn=document.getElementById("generateBtn");
- btn.disabled=true; btn.textContent="ऐप बन रहा है...";
- setText("generateStatus","AI से संपर्क हो रहा है। कृपया प्रतीक्षा करें...");
- try{
-  const res=await fetch(API+"/api/generate",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({appName:name,idea,theme})
-  });
-  const raw=await res.text();
-  let data;
-  try{data=JSON.parse(raw)}catch{throw new Error("Backend ने JSON जवाब नहीं दिया: "+raw.slice(0,180))}
-  if(!res.ok) throw new Error(data.error||data.message||"Generation failed ("+res.status+")");
-  const html=extractHtml(data);
-  if(!html) throw new Error(data.error||data.message||"AI जवाब में HTML नहीं मिला। Backend के /api/generate का response format जाँचना होगा।");
-  appHtml=html;
-  currentId=String(Date.now());
-  const project={id:currentId,name,idea,theme,html,updatedAt:new Date().toISOString()};
-  projects.unshift(project);
-  projects=projects.slice(0,30);
-  document.getElementById("previewFrame").srcdoc=appHtml;
-  document.getElementById("bigPreview").srcdoc=appHtml;
-  setText("generateStatus","ऐप का HTML बन गया और प्रीव्यू में दिख रहा है। APK के लिए Android APK सेक्शन खोलें।");
-  saveProjects();
- }catch(err){
-  setText("generateStatus","ऐप नहीं बन पाया: "+err.message+"\nRender backend और /api/generate की जाँच जरूरी है।");
- }finally{
-  btn.disabled=false;btn.textContent="✦ ऐप बनाएं";
- }
-}
-
-function renderProjects(){
- const list=document.getElementById("projectList");
- list.innerHTML="";
- if(!projects.length){
-  list.innerHTML='<div class="card"><h2>अभी कोई प्रोजेक्ट नहीं</h2><p>App Generator से पहला ऐप बनाएं।</p></div>';
-  return;
- }
- projects.forEach(p=>{
-  const card=document.createElement("div");
-  card.className="project";
-  const title=document.createElement("h3");title.textContent=p.name;
-  const desc=document.createElement("p");desc.textContent=p.idea;
-  const date=document.createElement("div");date.className="small";date.textContent=p.updatedAt?new Date(p.updatedAt).toLocaleString():"Saved project";
-  const open=document.createElement("button");open.className="btn";open.textContent="प्रोजेक्ट खोलें";
-  open.onclick=()=>loadProject(p.id);
-  const edit = document.createElement("button");
-edit.className = "btn secondary";
-edit.style.marginLeft = "7px";
-edit.style.marginTop = "7px";
-edit.textContent = "AI से एडिट करें";
-edit.onclick = () => {
-  loadProject(p.id);
-  openEditor();
-};
-  const del=document.createElement("button");del.className="btn secondary";del.style.marginLeft="7px";del.textContent="हटाएं";
-  del.onclick=()=>{projects=projects.filter(x=>x.id!==p.id);if(currentId===p.id){currentId=null;appHtml="";}saveProjects();};
-  card.append(title,desc,date,document.createElement("br"),open,edit,del);
-  list.appendChild(card);
- });
-}
-
-function loadProject(id){
- const p=projects.find(x=>x.id===id);
- if(!p)return;
- currentId=p.id;appHtml=p.html||"";
- document.getElementById("appName").value=p.name||"";
- document.getElementById("idea").value=p.idea||"";
- document.getElementById("theme").value=p.theme||"Modern";
- document.getElementById("previewFrame").srcdoc=appHtml||emptyPreview();
- document.getElementById("bigPreview").srcdoc=appHtml||emptyPreview();
- setText("generateStatus","सेव किया गया प्रोजेक्ट खुल गया।");
- updateDashboard();showPage("builder");
-}
-
-function openEditor() {
-  if (!appHtml) {
-    alert("पहले App Generator से एक ऐप बनाइए या My Projects से अपना ऐप खोलिए।");
-    showPage("builder");
+  if (!appName || !idea) {
+    setStatus("generateStatus", "ऐप का नाम और पूरा आइडिया लिखें।", "bad");
     return;
   }
 
-  showPage("editor");
-
-  const frame = document.getElementById("editPreview");
-  const info = document.getElementById("editProjectInfo");
-  const status = document.getElementById("editStatus");
-
-  if (frame) frame.srcdoc = appHtml;
-  if (info) {
-    info.textContent = "एडिट होने वाला ऐप: " +
-      (document.getElementById("appName")?.value || "My App");
-  }
-  if (status) status.textContent = "आपके निर्देश का इंतज़ार है।";
-}
-
-async function editCurrentApp() {
-  const instruction = document.getElementById("editInstruction").value.trim();
-  const status = document.getElementById("editStatus");
-  const button = document.getElementById("editButton");
-
-  const project = projects.find(p => String(p.id) === String(currentId));
-
-  const oldHtml = project?.html || appHtml;
-  const appName = project?.name || document.getElementById("appName").value.trim() || "My App";
-  const idea = project?.idea || document.getElementById("idea").value.trim() || appName;
-  const theme = project?.theme || document.getElementById("theme").value || "Modern";
-
-  if (!project || !oldHtml) {
-    status.textContent = "पहले My Projects से अपना ऐप खोलें।";
-    return;
-  }
-
-  if (!instruction) {
-    status.textContent = "पहले बदलाव का निर्देश लिखें।";
-    return;
-  }
-
-  button.disabled = true;
-  status.textContent = "AI आपके ऐप में बदलाव कर रहा है…";
+  $("generateBtn").disabled = true;
+  setStatus("generateStatus", "AI आपके आइडिया के अनुसार ऐप बना रहा है। कृपया प्रतीक्षा करें…");
 
   try {
-    const response = await fetch(API + "/api/edit-app", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ appName, idea, theme, instruction, html: oldHtml })
+    const data = await apiRequest("/api/generate", {
+      appName,
+      idea,
+      theme
     });
 
-    const raw = await response.text();
-    let data;
+    const html = extractHtml(data);
 
-    try {
-      data = JSON.parse(raw);
-    } catch {
-      throw new Error("Backend का जवाब सही JSON में नहीं है।");
+    if (!html) {
+      throw new Error(
+        "AI का जवाब मिला, लेकिन उसमें पूरा HTML ऐप नहीं मिला। Backend के जवाब की जाँच करनी होगी।"
+      );
     }
 
-    if (!response.ok || data.ok === false) {
-      throw new Error(data.error || data.message || "ऐप एडिट नहीं हो पाया।");
-    }
+    setCurrentApp({ appName, idea, theme, html });
 
-    const newHtml = extractHtml(data);
+    setStatus(
+      "generateStatus",
+      "ऐप तैयार है! Preview खोलकर जाँचें।",
+      "good"
+    );
 
-    if (!newHtml) {
-      throw new Error("AI के जवाब में HTML नहीं मिला।");
-    }
-
-    project.html = newHtml;
-    project.name = data.result?.appName || project.name;
-    project.updatedAt = new Date().toISOString();
-
-    appHtml = newHtml;
-    document.getElementById("appName").value = project.name;
-    document.getElementById("previewFrame").srcdoc = newHtml;
-    document.getElementById("bigPreview").srcdoc = newHtml;
-    document.getElementById("editPreview").srcdoc = newHtml;
-    document.getElementById("editInstruction").value = "";
-
-    saveProjects();
-
-    status.textContent = "ऐप में बदलाव सेव हो गए। अब APK सेक्शन खोलकर नया APK बनाएं।";
-    setText("apkState", "ऐप अपडेट हुआ");
+    showPage("preview");
   } catch (error) {
-    status.textContent = "समस्या: " + error.message;
+    setStatus(
+      "generateStatus",
+      "ऐप नहीं बन पाया: " + error.message,
+      "bad"
+    );
   } finally {
-    button.disabled = false;
+    $("generateBtn").disabled = false;
   }
-}
- 
-function updateBuildInfo(){
- const p=projects.find(x=>x.id===currentId);
- setText("buildInfo",p?"चुना गया ऐप: "+p.name+"\nAPK बनाने से पहले सुनिश्चित करें कि प्रीव्यू सही है।":"कोई ऐप चुना नहीं गया। पहले ऐप बनाएं या My Projects से खोलें।");
-}
+});
 
-async function buildApk(){
- if(buildBusy)return;
- const p=projects.find(x=>x.id===currentId);
- const html=p?.html||appHtml;
- if(!html){setText("buildInfo","पहले AI App Generator से ऐप बनाएं या सेव किया गया प्रोजेक्ट खोलें।");return;}
- const btn=document.getElementById("buildBtn");
- buildBusy=true;btn.disabled=true;btn.textContent="APK बिल्ड हो रहा है...";
- document.getElementById("downloadArea").innerHTML="";
- setText("buildInfo","Android build शुरू हो रहा है...\nइसमें कई मिनट लग सकते हैं।");
- try{
-  const res=await fetch(API+"/api/build",{
-   method:"POST",
-   headers:{"Content-Type":"application/json"},
-   body:JSON.stringify({idea:p?.idea||document.getElementById("idea").value,appName:p?.name||document.getElementById("appName").value,theme:p?.theme||document.getElementById("theme").value,html})
-  });
-  const raw=await res.text();
-  let data;try{data=JSON.parse(raw)}catch{throw new Error("Backend का जवाब पढ़ा नहीं जा सका: "+raw.slice(0,150))}
-  if(!res.ok)throw new Error(data.error||data.message||"Build request failed ("+res.status+")");
-  setText("buildInfo","Build request भेज दी गई। GitHub Actions की स्थिति जाँची जा रही है...");
-  for(let i=0;i<100;i++){
-   await new Promise(r=>setTimeout(r,6000));
-   const sr=await fetch(API+"/api/build-status",{cache:"no-store"});
-   const stRaw=await sr.text();
-   let st;try{st=JSON.parse(stRaw)}catch{throw new Error("Build status जवाब अमान्य है।")}
-   if(!sr.ok)throw new Error(st.error||"Build status check failed");
-   const status=String(st.status||st.workflow_status||"").toLowerCase();
-   const conclusion=String(st.conclusion||st.workflow_conclusion||"").toLowerCase();
-   setText("buildInfo","APK बिल्ड स्थिति: "+(status||"जाँच जारी")+(conclusion?" / "+conclusion:"")+"\nकृपया पेज बंद न करें।");
-   const url=st.downloadUrl||st.download_url||st.apkUrl;
-   if(url && (conclusion==="success"||status==="completed"||st.success===true)){
-    const link=document.createElement("a");
-    link.href=url;link.textContent="⬇ APK डाउनलोड करें";link.className="btn green";
-    link.target="_blank";link.rel="noopener";
-    document.getElementById("downloadArea").appendChild(link);
-    setText("buildInfo","APK बिल्ड सफल हुआ। डाउनलोड लिंक नीचे है।");
-    setText("apkState","APK तैयार");
+$("editBtn").addEventListener("click", async () => {
+  if (!currentApp?.html) {
+    setStatus("editStatus", "पहले App Generator से ऐप बनाएँ।", "bad");
     return;
-   }
-   if(status==="completed"||status==="failure"||conclusion==="failure"||conclusion==="cancelled"){
-    throw new Error("GitHub Actions बिल्ड सफल नहीं हुआ। GitHub Actions में build logs देखें।");
-   }
   }
-  setText("buildInfo","बिल्ड में 10 मिनट से अधिक समय लगा। GitHub Actions में स्थिति देखें; दोबारा बटन दबाने से पहले पुराने रन की जाँच करें।");
- }catch(err){
-  setText("buildInfo","APK नहीं बन पाई: "+err.message);
- }finally{
-  buildBusy=false;btn.disabled=false;btn.textContent="APK बनाएं";
- }
+
+  const instruction = $("editInstruction").value.trim();
+
+  if (!instruction) {
+    setStatus("editStatus", "कौन सा बदलाव चाहिए, वह लिखें।", "bad");
+    return;
+  }
+
+  $("editBtn").disabled = true;
+  setStatus("editStatus", "AI आपके निर्देश के अनुसार ऐप अपडेट कर रहा है…");
+
+  try {
+    const data = await apiRequest("/api/edit-app", {
+      appName: currentApp.appName,
+      idea: currentApp.idea,
+      theme: currentApp.theme,
+      instruction,
+      html: currentApp.html
+    });
+
+    const html = extractHtml(data);
+
+    if (!html) {
+      throw new Error("Updated HTML नहीं मिला। Backend response जाँचें।");
+    }
+
+    setCurrentApp({ ...currentApp, html });
+
+    $("editInstruction").value = "";
+    setStatus("editStatus", "बदलाव सेव हो गए। Preview में जाँचें।", "good");
+  } catch (error) {
+    setStatus("editStatus", "बदलाव नहीं हो पाए: " + error.message, "bad");
+  } finally {
+    $("editBtn").disabled = false;
+  }
+});
+
+function renderProjects() {
+  const projects = readProjects();
+  const list = $("projectList");
+
+  if (!projects.length) {
+    list.innerHTML = '<div class="empty">अभी कोई ऐप सेव नहीं है। App Generator से शुरुआत करें।</div>';
+    updateAppInfo();
+    return;
+  }
+
+  list.replaceChildren();
+
+  projects.forEach(project => {
+    const card = document.createElement("article");
+    card.className = "project";
+
+    const heading = document.createElement("h3");
+    heading.textContent = project.appName || "My App";
+
+    const description = document.createElement("p");
+    description.textContent = project.idea || "कोई विवरण नहीं";
+
+    const openButton = document.createElement("button");
+    openButton.className = "btn primary";
+    openButton.textContent = "Open";
+    openButton.addEventListener("click", () => {
+      setCurrentApp(project, false);
+      showPage("preview");
+    });
+
+    const deleteButton = document.createElement("button");
+    deleteButton.className = "btn";
+    deleteButton.textContent = "Delete";
+    deleteButton.addEventListener("click", () => {
+      if (!confirm("इस project को हटाना चाहते हैं?")) return;
+
+      saveProjects(readProjects().filter(p => p.id !== project.id));
+      renderProjects();
+    });
+
+    const actions = document.createElement("div");
+    actions.className = "actions";
+    actions.append(openButton, deleteButton);
+    card.append(heading, description, actions);
+    list.append(card);
+  });
+
+  updateAppInfo();
 }
 
-updateDashboard();
+$("refreshProjects").addEventListener("click", renderProjects);
+
+$("reloadPreview").addEventListener("click", () => {
+  if (!currentApp?.html) {
+    setStatus("previewStatus", "पहले ऐप Generate करें।", "bad");
+    return;
+  }
+
+  $("appPreview").srcdoc = currentApp.html;
+  setStatus("previewStatus", "Preview refresh कर दिया गया।", "good");
+});
+
+async function checkBuildStatus() {
+  setStatus("buildStatus", "Build status जाँचा जा रहा है…");
+
+  try {
+    const response = await fetch(API + "/api/build-status");
+    const data = await response.json();
+
+    if (!response.ok) {
+      throw new Error(data.error || "Status नहीं मिल पाया।");
+    }
+
+    const url = data.downloadUrl || data.download_url ||
+      data.apkUrl || data.apk_url;
+
+    if (url) {
+      $("downloadLink").href = url;
+      $("downloadArea").classList.remove("hidden");
+      setStatus("buildStatus", "APK तैयार है। डाउनलोड बटन दबाएँ।", "good");
+
+      if (buildTimer) {
+        clearInterval(buildTimer);
+        buildTimer = null;
+      }
+      return;
+    }
+
+    const status = data.status || data.message || "Build अभी चल रही है।";
+    setStatus("buildStatus", status);
+
+  } catch (error) {
+    setStatus("buildStatus", "Status error: " + error.message, "bad");
+  }
+}
+
+$("buildBtn").addEventListener("click", async () => {
+  if (!currentApp?.html) {
+    setStatus("buildStatus", "पहले ऐप Generate करें और Preview जाँचें।", "bad");
+    return;
+  }
+
+  $("buildBtn").disabled = true;
+  $("downloadArea").classList.add("hidden");
+  setStatus("buildStatus", "GitHub Actions में APK Build शुरू की जा रही है…");
+
+  try {
+    const data = await apiRequest("/api/build", {
+      idea: currentApp.idea,
+      appName: currentApp.appName,
+      theme: currentApp.theme,
+      html: currentApp.html
+    });
+
+    setStatus(
+      "buildStatus",
+      data.message || "Build request भेज दी गई। कुछ समय बाद status जाँचें।",
+      "good"
+    );
+
+    if (buildTimer) clearInterval(buildTimer);
+
+    await checkBuildStatus();
+    buildTimer = setInterval(checkBuildStatus, 15000);
+
+  } catch (error) {
+    setStatus("buildStatus", "Build शुरू नहीं हुई: " + error.message, "bad");
+  } finally {
+    $("buildBtn").disabled = false;
+  }
+});
+
+$("checkBuildBtn").addEventListener("click", checkBuildStatus);
+
 renderProjects();
-document.getElementById("previewFrame").srcdoc=emptyPreview();
-document.getElementById("bigPreview").srcdoc=emptyPreview();
+updateAppInfo();
 </script>
 </body>
-</html>
+       </html>
