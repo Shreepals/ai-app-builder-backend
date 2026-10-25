@@ -65,16 +65,15 @@ function cleanHtml(value) {
     .trim();
 }
 
-
 function makePrompt({ appName, idea, theme, engine }) {
   const gameRequest =
-    /\b(game|gaming|racing|race|car game|shooting|shooter|football|soccer|cricket|running|runner|adventure|platformer|minecraft|survival|fighting|combat|puzzle|sports game|3d game|video game|gameplay)\b|गेम|खेल|रेसिंग|शूटिंग|फुटबॉल|क्रिकेट|दौड़/i.test(idea);
+    /\b(game|gaming|racing|race|car game|football|soccer|cricket|shooting|shooter|runner|running|adventure|platformer|minecraft|survival|fighting|combat|puzzle|sports|3d game|video game|fps|battle royale)\b|गेम|खेल|रेसिंग|शूटिंग|फुटबॉल|क्रिकेट|दौड़|लड़ाई/i.test(idea);
 
   const selectedEngine = gameRequest ? "threejs" : engine;
 
   return `
-You are a senior game and application developer.
-Create a functional app matching the user's exact idea.
+You are an expert professional 3D game developer and application developer.
+Build the actual requested product, not a mockup.
 
 APP NAME: ${appName}
 USER IDEA: ${idea}
@@ -82,95 +81,129 @@ THEME: ${theme}
 ENGINE: ${selectedEngine}
 IS GAME: ${gameRequest}
 
-IMPORTANT:
-Return a complete standalone HTML document, not an explanation,
-mockup, empty dashboard, or a picture pretending to be an app.
+CORE RULE:
+Understand the user's exact idea before creating anything.
+Do not substitute another game type.
+Every game must have its own appropriate world, objects,
+gameplay, controls, animations, scoring and restart logic.
 
-IF IS GAME IS TRUE:
-Build an actual playable 3D game using Three.js.
-Do not build an unrelated game. Match gameplay to this exact idea.
+${gameRequest ? `
+BUILD A REAL PLAYABLE 3D GAME WITH THREE.JS.
 
-GAME TYPE REQUIREMENTS:
-- Racing: visible road, player car, opponent cars, lanes,
-  steering, acceleration, braking, collisions, speed and distance.
-- Football: 3D pitch, player, ball, goals, movement, shooting,
-  opponent or target logic, goals counter and reset.
-- Cricket: pitch, batter, bat, ball, bowling, batting controls,
-  wickets, runs and restart.
-- Shooting: 3D arena, player, targets or enemies, aiming,
-  firing, hit detection, health and score.
-- Runner: 3D path, character, obstacles, jump/dodge controls,
-  collision detection and distance.
-- Adventure/survival: 3D environment, character movement,
-  objectives, interaction, health or inventory where appropriate.
-- Fighting: 3D arena, visible fighters, movement, attack controls,
-  health bars and win/lose conditions.
-- Puzzle: interactive 3D puzzle with real rules, selection,
-  success detection and reset.
-- Other ideas: implement mechanics specific to the user's idea.
-  Never substitute racing for a different game.
+QUALITY TARGET:
+Aim for the quality of a polished mobile 3D racing game:
+a visible environment, recognizable 3D models, good lighting,
+materials, shadows where practical, animations, responsive controls
+and a clear game interface.
+Apply this quality to the requested genre, not racing visuals
+to every genre.
 
-3D SCENE:
-- Load Three.js and create a perspective camera, renderer,
-  lights, ground, environment and recognizable 3D objects.
-- Show the actual game scene immediately after pressing Play.
-- Create recognizable cars, people, balls, buildings or objects
-  using geometry and materials if external models are unavailable.
-- Animate objects and update gameplay in a real animation loop.
-- Resize the renderer when the screen orientation or size changes.
-- Display a readable error if Three.js fails to load.
+RACING:
+Build a road or race track, recognizable car with wheels,
+opponent cars, roadside scenery, steering, acceleration,
+braking, collisions, speed, distance and race results.
+
+FOOTBALL / SOCCER:
+Build a green 3D pitch, recognizable player characters,
+football, proper goalposts and net, goalkeeper, opponents,
+movement, kicking, passing, goal detection, score and match timer.
+
+CRICKET:
+Build a cricket ground, pitch, batter, bat, ball, wickets,
+bowling and batting interaction, runs, wickets and overs.
+
+SHOOTING:
+Build a 3D environment, recognizable player view or character,
+targets or opponents, aiming, shooting, hit detection,
+ammunition, health and score.
+
+RUNNING / ENDLESS RUNNER:
+Build a 3D path, animated runner, obstacles, jumping,
+dodging, collisions and distance score.
+
+ADVENTURE / SURVIVAL:
+Build a 3D world, controllable character, exploration,
+interactions, objectives and health or inventory as appropriate.
+
+FIGHTING:
+Build an arena, recognizable fighters, movement, attacks,
+health bars, hit detection and victory or defeat.
+
+PUZZLE:
+Build a genuine interactive puzzle with visible 3D pieces,
+valid moves, win detection and reset.
+
+OTHER GAME IDEAS:
+Create gameplay and objects that specifically fit the requested idea.
+Never turn football, cricket, shooting or adventure into racing.
+
+3D WORLD REQUIREMENTS:
+- Use a perspective camera, renderer, lighting, ground and environment.
+- Use recognizable shapes and assembled geometry for characters,
+  cars, balls, buildings and other objects.
+- Avoid using plain colored cubes as substitutes for the main
+  character, car, ball or goal when a recognizable model can be built.
+- Use animation and a continuously updating game loop.
+- Update the camera to follow the player when appropriate.
+- Resize correctly on mobile and desktop.
+- Add collision detection, gameplay state and real scoring.
+- Load required libraries reliably and display a useful error
+  if Three.js cannot load.
+- Do not pretend that a missing model or feature exists.
 
 CONTROLS:
-- Add working touch controls for Android.
-- Add keyboard controls for computers.
-- Buttons must control the actual player or game.
-- Pause must stop gameplay updates.
-- Resume must continue the paused game.
-- Restart must reset position, score, health, obstacles and state.
-- Start must begin the game.
-- Detect collisions and implement scoring or progress.
-- Add a game-over or victory screen when appropriate.
-- Prevent touch controls from accidentally scrolling the page.
+- Provide large mobile touch controls.
+- Provide suitable keyboard and mouse controls on computers.
+- Start begins gameplay.
+- Pause stops gameplay updates.
+- Resume continues gameplay.
+- Restart resets the game to its initial state.
+- Movement, kick, shoot, steering and jump controls must actually
+  affect the appropriate game objects.
+- Display instructions and game-over or victory screens as needed.
+- Avoid page scrolling when the user operates game controls.
 
-MANDATORY APP DASHBOARD:
+DASHBOARD:
 - Desktop: collapsible left sidebar.
-- Mobile: sidebar hidden by default and a working three-dot
-  menu button at the top-right.
-- Menu must open and close.
-- Include Dashboard, Home and sections suitable for the idea.
-- Games should include Play, Instructions, Score/Statistics,
-  Progress, Levels and Settings where relevant.
-- Every navigation item must open its correct screen or section.
-- All visible buttons must perform their stated action.
-- Do not include decorative buttons that do nothing.
-- Keep layout readable on mobile and desktop.
+- Mobile: sidebar hidden initially with a working three-dot
+  menu button in the top-right.
+- The three-dot menu must open and close.
+- Include Dashboard, Home and relevant sections.
+- For games, include Play, Instructions, Score, Progress,
+  Levels and Settings when appropriate.
+- Each navigation item must open the correct section.
+- Every visible button must work.
+- Use a polished responsive interface, not an empty dashboard.
+- Save progress locally when appropriate.
 
-FOR NON-GAME APPS:
-Create a complete idea-specific app with a useful dashboard,
-working navigation, forms and functional features.
-Do not force a game into an ordinary app.
+IF THIS IS NOT A GAME:
+Build a complete, idea-specific application with a working
+dashboard, navigation, forms and useful features.
+Do not force a non-game app into Three.js.
 
-TECHNICAL RULES:
-- Return one complete index.html document.
+TECHNICAL REQUIREMENTS:
+- Return one complete standalone index.html document.
 - Embed CSS and JavaScript in the HTML.
-- Use Three.js for games and HTML/CSS/JavaScript for ordinary apps.
-- Do not expose API keys or invent live data.
-- Do not claim native Unity, Unreal or Godot output if you only
-  generated an HTML app.
-- Ensure every referenced JavaScript variable and function exists.
-- Do not leave placeholder sections for core requested features.
-- Keep the code as self-contained as possible.
+- Use Three.js for browser 3D games.
+- Use HTML, CSS and JavaScript for ordinary apps.
+- Do not include secret keys or fabricate live API integrations.
+- Ensure functions and event handlers exist before using them.
+- Check for missing DOM elements and runtime errors.
+- Keep core gameplay functional without external 3D model downloads.
+- Do not claim native Unity, Unreal or Godot project output
+  when only HTML has been generated.
+- Be honest in the summary about any limitations.
 
 Return ONLY valid JSON with these keys:
 {
   "appName": "name",
-  "summary": "features and honest limitations",
+  "summary": "features and limitations",
   "engine": "actual engine used",
   "html": "<!DOCTYPE html> ...",
   "features": ["feature 1", "feature 2"]
 }
 
-The html field must contain a complete HTML document.
+The html value must contain a complete valid HTML document.
 `;
   }
 
@@ -193,7 +226,7 @@ app.post("/api/generate", async (req, res) => {
         ok: false,
         error: "GEMINI_API_KEY is missing in Render environment."
       });
-    }
+    
 
     if (!ENGINE_CATALOG[engine]) {
       return res.status(400).json({
