@@ -17,207 +17,277 @@ const GEMINI_MODEL =
 const OWNER = "Shreepals";
 const REPO = "ai-app-builder-backend";
 const WORKFLOW = "main.yml";
+
 const BACKEND_URL =
   "https://ai-app-builder-backend-1.onrender.com";
 
+const GH_API = "https://api.github.com";
 const GH_HEADERS = {
   Accept: "application/vnd.github+json",
   Authorization: `Bearer ${GH_ACTIONS_TOKEN}`,
-  "X-GitHub-Api-Version": "2022-11-28"
-};
-
-const ENGINE_CATALOG = {
-  auto: "AI choose the most suitable engine",
-  html: "HTML, CSS and JavaScript web apps",
-  phaser: "Phaser HTML5 2D browser games",
-  threejs: "Three.js browser-based 3D games",
-  godot: "Godot Engine 2D and 3D games",
-  unity: "Unity 2D and 3D games",
-  unreal: "Unreal Engine high-end 3D games"
+  "X-GitHub-Api-Version": "2022-11-28",
+  "Content-Type": "application/json"
 };
 
 let lastBuildRequestedAt = 0;
+let lastBuildRunId = null;
 
-app.get("/", (req, res) => {
-  res.json({
-    ok: true,
-    service: "AI App Builder Multi-Engine Backend",
-    message: "Backend is running"
-  });
-});
-
-app.get("/health", (req, res) => {
-  res.json({
-    ok: true,
-    geminiKeyConfigured: Boolean(GEMINI_API_KEY),
-    githubTokenConfigured: Boolean(GH_ACTIONS_TOKEN),
-    model: GEMINI_MODEL,
-    engines: Object.keys(ENGINE_CATALOG)
-  });
-});
+const ENGINE_CATALOG = {
+  auto: "Choose the most suitable engine for the idea.",
+  html: "Create a complete interactive HTML app.",
+  phaser: "Use browser-based 2D game design concepts.",
+  threejs: "Create a playable 3D game using Three.js.",
+  godot: "Explain Godot compatibility honestly; this pipeline builds HTML WebView apps.",
+  unity: "Explain Unity compatibility honestly; this pipeline builds HTML WebView apps.",
+  unreal: "Explain Unreal compatibility honestly; this pipeline builds HTML WebView apps."
+};
 
 function cleanHtml(value) {
-  if (typeof value !== "string") return "";
-  return value
+  let html = String(value || "").trim();
+
+  html = html
     .replace(/^```html\s*/i, "")
     .replace(/^```\s*/i, "")
-    .replace(/\s*```$/, "")
+    .replace(/\s*```$/i, "")
     .trim();
+
+  return html;
 }
 
-function makePrompt({ appName, idea, theme, engine }) {
-  const gameRequest =
-    /\b(game|gaming|racing|race|car game|football|soccer|cricket|shooting|shooter|runner|running|adventure|platformer|minecraft|survival|fighting|combat|puzzle|sports|3d game|video game|fps|battle royale)\b|गेम|खेल|रेसिंग|शूटिंग|फुटबॉल|क्रिकेट|दौड़|लड़ाई/i.test(idea);
+function isCompleteHtml(html) {
+  return (
+    typeof html === "string" &&
+    /<!doctype html/i.test(html) &&
+    /<html[\s>]/i.test(html) &&
+    /<\/html>/i.test(html)
+  );
+}
 
-  const selectedEngine = gameRequest ? "threejs" : engine;
+function isGameIdea(idea) {
+  return /\b(game|gaming|3d|2d|racing|car race|football|soccer|cricket|shooting|shooter|runner|platformer|basketball|bike race|driving|fight|fighting|adventure|arcade|गेम|खेल|रेसिंग|क्रिकेट|फुटबॉल)\b/i.test(
+    String(idea || "")
+  );
+}
+
+function selectedEngine(idea, engine) {
+  if (isGameIdea(idea)) return "threejs";
+  if (engine === "auto") return "html";
+  return engine;
+}
+
+function makePrompt({ idea, appName, theme, engine }) {
+  const game = isGameIdea(idea);
+  const chosenEngine = selectedEngine(idea, engine);
 
   return `
-You are an expert professional 3D game developer and application developer.
-Build the actual requested product, not a mockup.
+You are a senior app designer and frontend developer.
+
+Create a complete, usable, polished application based on the user's
+exact idea. Do not replace the idea with a calculator, generic dashboard,
+Kisan app, or unrelated demo.
 
 APP NAME: ${appName}
 USER IDEA: ${idea}
 THEME: ${theme}
-ENGINE: ${selectedEngine}
-IS GAME: ${gameRequest}
+ENGINE: ${chosenEngine}
+IS_GAME: ${game}
 
-CORE RULE:
-Understand the user's exact idea before creating anything.
-Do not substitute another game type.
-Every game must have its own appropriate world, objects,
-gameplay, controls, animations, scoring and restart logic.
-
-${gameRequest ? `
-BUILD A REAL PLAYABLE 3D GAME WITH THREE.JS.
-
-QUALITY TARGET:
-Aim for the quality of a polished mobile 3D racing game:
-a visible environment, recognizable 3D models, good lighting,
-materials, shadows where practical, animations, responsive controls
-and a clear game interface.
-Apply this quality to the requested genre, not racing visuals
-to every genre.
-
-RACING:
-Build a road or race track, recognizable car with wheels,
-opponent cars, roadside scenery, steering, acceleration,
-braking, collisions, speed, distance and race results.
-
-FOOTBALL / SOCCER:
-Build a green 3D pitch, recognizable player characters,
-football, proper goalposts and net, goalkeeper, opponents,
-movement, kicking, passing, goal detection, score and match timer.
-
-CRICKET:
-Build a cricket ground, pitch, batter, bat, ball, wickets,
-bowling and batting interaction, runs, wickets and overs.
-
-SHOOTING:
-Build a 3D environment, recognizable player view or character,
-targets or opponents, aiming, shooting, hit detection,
-ammunition, health and score.
-
-RUNNING / ENDLESS RUNNER:
-Build a 3D path, animated runner, obstacles, jumping,
-dodging, collisions and distance score.
-
-ADVENTURE / SURVIVAL:
-Build a 3D world, controllable character, exploration,
-interactions, objectives and health or inventory as appropriate.
-
-FIGHTING:
-Build an arena, recognizable fighters, movement, attacks,
-health bars, hit detection and victory or defeat.
-
-PUZZLE:
-Build a genuine interactive puzzle with visible 3D pieces,
-valid moves, win detection and reset.
-
-OTHER GAME IDEAS:
-Create gameplay and objects that specifically fit the requested idea.
-Never turn football, cricket, shooting or adventure into racing.
-
-3D WORLD REQUIREMENTS:
-- Use a perspective camera, renderer, lighting, ground and environment.
-- Use recognizable shapes and assembled geometry for characters,
-  cars, balls, buildings and other objects.
-- Avoid using plain colored cubes as substitutes for the main
-  character, car, ball or goal when a recognizable model can be built.
-- Use animation and a continuously updating game loop.
-- Update the camera to follow the player when appropriate.
-- Resize correctly on mobile and desktop.
-- Add collision detection, gameplay state and real scoring.
-- Load required libraries reliably and display a useful error
-  if Three.js cannot load.
-- Do not pretend that a missing model or feature exists.
-
-CONTROLS:
-- Provide large mobile touch controls.
-- Provide suitable keyboard and mouse controls on computers.
-- Start begins gameplay.
-- Pause stops gameplay updates.
-- Resume continues gameplay.
-- Restart resets the game to its initial state.
-- Movement, kick, shoot, steering and jump controls must actually
-  affect the appropriate game objects.
-- Display instructions and game-over or victory screens as needed.
-- Avoid page scrolling when the user operates game controls.
-
-DASHBOARD:
-- Desktop: collapsible left sidebar.
-- Mobile: sidebar hidden initially with a working three-dot
-  menu button in the top-right.
-- The three-dot menu must open and close.
-- Include Dashboard, Home and relevant sections.
-- For games, include Play, Instructions, Score, Progress,
-  Levels and Settings when appropriate.
-- Each navigation item must open the correct section.
-- Every visible button must work.
-- Use a polished responsive interface, not an empty dashboard.
-- Save progress locally when appropriate.
-
-IF THIS IS NOT A GAME:
-Build a complete, idea-specific application with a working
-dashboard, navigation, forms and useful features.
-Do not force a non-game app into Three.js.
-
-TECHNICAL REQUIREMENTS:
-- Return one complete standalone index.html document.
-- Embed CSS and JavaScript in the HTML.
-- Use Three.js for browser 3D games.
-- Use HTML, CSS and JavaScript for ordinary apps.
-- Do not include secret keys or fabricate live API integrations.
-- Ensure functions and event handlers exist before using them.
-- Check for missing DOM elements and runtime errors.
-- Keep core gameplay functional without external 3D model downloads.
-- Do not claim native Unity, Unreal or Godot project output
-  when only HTML has been generated.
-- Be honest in the summary about any limitations.
-
+OUTPUT REQUIREMENTS:
 Return ONLY valid JSON with these keys:
 {
-  "appName": "name",
-  "summary": "features and limitations",
-  "engine": "actual engine used",
-  "html": "<!DOCTYPE html> ...",
-  "features": ["feature 1", "feature 2"]
+  "appName": "string",
+  "summary": "string",
+  "html": "complete standalone HTML document",
+  "features": ["string"],
+  "engine": "string"
 }
 
-The html value must contain a complete valid HTML document.
+GENERAL REQUIREMENTS:
+1. Generate the actual app requested by the user.
+2. Include a complete responsive interface for mobile and desktop.
+3. Include a useful header, navigation, main content, and footer when appropriate.
+4. Include all major sections needed by the specific idea.
+5. Buttons, forms, navigation, tabs, filters, and settings must work.
+6. Do not leave empty sections, placeholder buttons, TODO comments,
+   or text such as "coming soon".
+7. Use a professional, consistent ${theme} visual design.
+8. Use inline CSS and JavaScript inside the HTML.
+9. Do not require a server or secret API key for the core demo.
+10. If an external live service needs credentials, explain its limitation
+    inside the app and provide a working local demonstration.
+11. Do not claim fake live data is real.
+12. Do not use external images or libraries as a requirement for basic use.
+13. The result must be a complete HTML file with <!DOCTYPE html>,
+    <html>, <head>, <body>, and closing </html>.
+14. Return valid JSON only. Escape quotes and newlines correctly.
+
+IF THIS IS A GAME:
+Create an actual playable browser game, not a static game-themed dashboard.
+Use Three.js from a CDN for 3D rendering when network access permits.
+Include a fallback message if the 3D library cannot load.
+
+GAME-SPECIFIC REQUIREMENTS:
+- Create a scene, camera, renderer, lighting, ground and player.
+- Make the requested genre recognizable.
+- Build game objects and obstacles appropriate to the idea.
+- Provide keyboard controls and touch controls for mobile.
+- Add start, pause, resume, restart and game-over states.
+- Add scoring, collisions and a clear objective.
+- Add a visible HUD with score and status.
+- Add a short control guide.
+- Make the game loop and animation work.
+- Avoid representing every object as a plain colored cube.
+- Use suitable shapes, colors, proportions and environment details.
+- Make the game playable on a mobile screen.
+- Do not merely draw a field with a ball if the user asks for football.
+  Implement movement and a goal/shooting mechanic.
+- For racing, implement steering, acceleration, obstacles and collision.
+- For runners, implement jumping, obstacles and distance/score.
+- For shooting games, implement aiming, firing, targets and hit detection.
+- Match the gameplay mechanics to the actual user's idea.
+- Do not claim professional-quality assets or native game-engine output.
+
+IF THIS IS A NORMAL APP:
+Build the actual requested workflow and all essential screens.
+Use realistic sample data only when necessary and label it as demo data.
+Implement forms, add/edit/delete actions and navigation where relevant.
+Include useful empty states, validation and feedback messages.
+
+IMPORTANT:
+This pipeline packages the generated HTML inside an Android WebView.
+Do not claim that this produces a native Unity, Unreal or Godot project.
 `;
-}  
+}
+
+async function callGemini(prompt) {
+  if (!GEMINI_API_KEY) {
+    throw new Error(
+      "GEMINI_API_KEY is missing in Render environment."
+    );
+  }
+
+  const url =
+    `https://generativelanguage.googleapis.com/v1beta/models/` +
+    `${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+
+  const response = await fetch(url, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      contents: [
+        {
+          role: "user",
+          parts: [{ text: prompt }]
+        }
+      ],
+      generationConfig: {
+        responseMimeType: "application/json",
+        temperature: 0.35,
+        maxOutputTokens: 16000
+      }
+    })
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    const message =
+      data?.error?.message ||
+      `Gemini request failed with HTTP ${response.status}`;
+
+    throw new Error(message);
+  }
+
+  const output =
+    data?.candidates?.[0]?.content?.parts
+      ?.map((part) => part.text || "")
+      .join("") || "";
+
+  if (!output.trim()) {
+    throw new Error(
+      "Gemini returned an empty response. Please try again."
+    );
+  }
+
+  try {
+    return JSON.parse(output);
+  } catch {
+    throw new Error(
+      "Gemini returned invalid JSON. Please try generating again."
+    );
+  }
+}
+
+async function githubRequest(path, options = {}) {
+  if (!GH_ACTIONS_TOKEN) {
+    throw new Error(
+      "GH_ACTIONS_TOKEN is missing in Render environment."
+    );
+  }
+
+  const response = await fetch(`${GH_API}${path}`, {
+    ...options,
+    headers: {
+      ...GH_HEADERS,
+      ...(options.headers || {})
+    }
+  });
+
+  const text = await response.text();
+  let data = {};
+
+  try {
+    data = text ? JSON.parse(text) : {};
+  } catch {
+    data = { message: text };
+  }
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+      `GitHub request failed with HTTP ${response.status}`
+    );
+  }
+
+  return { response, data };
+}
+
+app.get("/", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "AI App Builder Gemini Backend"
+  });
+});
+
+app.get("/health", (_req, res) => {
+  res.json({
+    ok: true,
+    service: "AI App Builder Gemini Backend",
+    geminiKeyConfigured: Boolean(GEMINI_API_KEY),
+    githubTokenConfigured: Boolean(GH_ACTIONS_TOKEN),
+    model: GEMINI_MODEL
+  });
+});
 
 app.post("/api/generate", async (req, res) => {
   try {
     const idea = String(req.body?.idea || "").trim();
-    const appName = String(req.body?.appName || "My AI App").trim();
-    const theme = String(req.body?.theme || "Modern").trim();
-    const engine = String(req.body?.engine || "auto").trim();
+    const appName = String(
+      req.body?.appName || "My AI App"
+    ).trim();
+    const theme = String(
+      req.body?.theme || "Modern"
+    ).trim();
+    const engine = String(
+      req.body?.engine || "auto"
+    ).trim().toLowerCase();
 
     if (!idea) {
       return res.status(400).json({
         ok: false,
-        error: "Please enter an app or game idea."
+        error: "Please enter your app idea."
       });
     }
 
@@ -226,202 +296,134 @@ app.post("/api/generate", async (req, res) => {
         ok: false,
         error: "GEMINI_API_KEY is missing in Render environment."
       });
-    
+    }
 
-    if (!ENGINE_CATALOG[engine]) {
+    if (!Object.hasOwn(ENGINE_CATALOG, engine)) {
       return res.status(400).json({
         ok: false,
         error: "Unsupported engine selection."
       });
     }
 
-    const endpoint =
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+    const actualEngine = selectedEngine(idea, engine);
 
-    const response = await fetch(endpoint, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({
-        systemInstruction: {
-          parts: [{
-            text: "You generate working applications. Follow the requested JSON schema exactly."
-          }]
-        },
-        contents: [{
-          role: "user",
-          parts: [{
-            text: makePrompt({ appName, idea, theme, engine })
-          }]
-        }],
-        generationConfig: {
-          responseMimeType: "application/json",
-          temperature: 0.25,
-          maxOutputTokens: 16000
-        }
+    const generated = await callGemini(
+      makePrompt({
+        idea,
+        appName,
+        theme,
+        engine: actualEngine
       })
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      console.error("Gemini error:", data);
-      return res.status(502).json({
-        ok: false,
-        error: data?.error?.message || "AI generation failed."
-      });
-    }
-
-    const output =
-      data?.candidates?.[0]?.content?.parts
-        ?.map(part => part.text || "")
-        .join("")
-        .trim();
-
-    if (!output) {
-      return res.status(502).json({
-        ok: false,
-        error: "AI returned an empty response. Please try again."
-      });
-    }
-
-    let generated;
-
-    try {
-      generated = JSON.parse(output);
-    } catch {
-      console.error("Invalid Gemini JSON:", output.slice(0, 500));
-      return res.status(502).json({
-        ok: false,
-        error: "AI returned invalid JSON. Please retry."
-      });
-    }
+    );
 
     const html = cleanHtml(generated.html);
 
-    if (!html.toLowerCase().includes("<html") ||
-        !html.toLowerCase().includes("</html>")) {
+    if (!isCompleteHtml(html)) {
       return res.status(502).json({
         ok: false,
-        error: "AI did not return a complete HTML document."
+        error:
+          "AI did not return a complete HTML app. Please try again."
       });
     }
 
     return res.json({
       ok: true,
       appName: generated.appName || appName,
-      summary: generated.summary || "Application generated.",
-      engine: generated.engine || engine,
-      html,
+      summary: generated.summary || "",
       features: Array.isArray(generated.features)
         ? generated.features
-        : []
+        : [],
+      engine: actualEngine,
+      html
     });
   } catch (error) {
     console.error("Generate error:", error);
+
     return res.status(500).json({
       ok: false,
-      error: "Application generation failed. Please try again."
+      error: error.message || "Failed to generate app."
     });
   }
 });
 
 app.post("/api/edit-app", async (req, res) => {
   try {
-    const {
-      appName = "My AI App",
-      idea = "",
-      theme = "Modern",
-      instruction = "",
-      html = ""
-    } = req.body || {};
+    const idea = String(req.body?.idea || "").trim();
+    const appName = String(
+      req.body?.appName || "My AI App"
+    ).trim();
+    const html = cleanHtml(req.body?.html);
+    const editRequest = String(
+      req.body?.editRequest || req.body?.instruction || ""
+    ).trim();
 
-    if (!String(idea).trim() ||
-        !String(instruction).trim() ||
-        !String(html).trim()) {
-      return res.status(400).json({
+    if (!GEMINI_API_KEY) {
+      return res.status(500).json({
         ok: false,
-        error: "Idea, edit instruction and existing HTML are required."
+        error: "GEMINI_API_KEY is missing in Render environment."
       });
     }
 
-    if (!GEMINI_API_KEY) {
-  return res.status(500).json({
-    ok: false,
-    error: "GEMINI_API_KEY is missing in Render environment."
-  });
-}
+    if (!html || !isCompleteHtml(html)) {
+      return res.status(400).json({
+        ok: false,
+        error: "Please provide the complete existing HTML app."
+      });
+    }
 
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          contents: [{
-            role: "user",
-            parts: [{
-              text: `
-Edit the existing application according to the user's instruction.
-Keep all unrelated working features.
-Return ONLY valid JSON with keys: appName, summary, html, features.
-The html value must be a complete standalone HTML document.
+    if (!editRequest) {
+      return res.status(400).json({
+        ok: false,
+        error: "Please describe the changes you want."
+      });
+    }
+
+    const prompt = `
+You are editing an existing application.
 
 App name: ${appName}
 Original idea: ${idea}
-Theme: ${theme}
-Requested edit: ${instruction}
+User's requested changes: ${editRequest}
+
+Update the supplied HTML app. Keep all existing working features
+unless the user asks to change them. Implement the requested changes.
+Return ONLY valid JSON:
+{
+  "appName": "string",
+  "summary": "string",
+  "html": "complete standalone HTML document",
+  "features": ["string"]
+}
 
 Existing HTML:
-${String(html).slice(0, 100000)}
-`
-            }]
-          }],
-          generationConfig: {
-            responseMimeType: "application/json",
-            temperature: 0.2,
-            maxOutputTokens: 16000
-          }
-        })
-      }
-    );
+${html}
+`;
 
-    const data = await response.json();
+    const generated = await callGemini(prompt);
+    const updatedHtml = cleanHtml(generated.html);
 
-    if (!response.ok) {
+    if (!isCompleteHtml(updatedHtml)) {
       return res.status(502).json({
         ok: false,
-        error: data?.error?.message || "AI edit failed."
+        error: "AI did not return a complete edited app."
       });
-    }
-
-    const output =
-      data?.candidates?.[0]?.content?.parts
-        ?.map(part => part.text || "")
-        .join("")
-        .trim();
-
-    const result = JSON.parse(output || "{}");
-    const updatedHtml = cleanHtml(result.html);
-
-    if (!updatedHtml.toLowerCase().includes("<html") ||
-        !updatedHtml.toLowerCase().includes("</html>")) {
-      throw new Error("AI did not return complete HTML.");
     }
 
     return res.json({
       ok: true,
-      appName: result.appName || appName,
-      summary: result.summary || "Application updated.",
-      html: updatedHtml,
-      features: Array.isArray(result.features)
-        ? result.features
-        : []
+      appName: generated.appName || appName,
+      summary: generated.summary || "",
+      features: Array.isArray(generated.features)
+        ? generated.features
+        : [],
+      html: updatedHtml
     });
   } catch (error) {
-    console.error("Edit error:", error);
+    console.error("Edit app error:", error);
+
     return res.status(500).json({
       ok: false,
-      error: error.message || "Could not edit the application."
+      error: error.message || "Failed to edit app."
     });
   }
 });
@@ -429,126 +431,130 @@ ${String(html).slice(0, 100000)}
 app.post("/api/build", async (req, res) => {
   try {
     const idea = String(req.body?.idea || "").trim();
-    const appName = String(req.body?.appName || "My AI App").trim();
-    const html = String(req.body?.html || "").trim();
+    const appName = String(
+      req.body?.appName || req.body?.app_name || "My AI App"
+    ).trim();
+    const html = cleanHtml(req.body?.html);
 
     if (!idea) {
       return res.status(400).json({
         ok: false,
-        error: "App idea is required."
+        error: "Please provide the app idea."
       });
     }
 
     if (!GH_ACTIONS_TOKEN) {
       return res.status(500).json({
         ok: false,
-        error: "GH_ACTIONS_TOKEN is missing in Render."
+        error: "GH_ACTIONS_TOKEN is missing in Render environment."
       });
     }
 
-    if (!html || !html.toLowerCase().includes("</html>")) {
+    if (!html || !isCompleteHtml(html)) {
       return res.status(400).json({
         ok: false,
-        error: "Generate the application before building its APK."
+        error:
+          "Complete HTML is required. Generate the app before building APK."
       });
     }
 
-    // Compress the generated HTML so it can be passed to a
-    // compatible GitHub Actions workflow input.
-    const appHtmlGzipB64 =
-      gzipSync(Buffer.from(html, "utf8")).toString("base64");
+    const appHtmlGzipB64 = gzipSync(
+      Buffer.from(html, "utf8")
+    ).toString("base64");
 
-    const dispatchUrl =
-      `https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/dispatches`;
+    const dispatchPath =
+      `/repos/${OWNER}/${REPO}/actions/workflows/` +
+      `${WORKFLOW}/dispatches`;
 
-    const response = await fetch(dispatchUrl, {
-      method: "POST",
-      headers: {
-        ...GH_HEADERS,
-        "Content-Type": "application/json"
-      },
-      body: JSON.stringify({
-        ref: "main",
-        inputs: {
-          idea,
-          app_name: appName,
-          app_html_gzip_b64: appHtmlGzipB64
-        }
-      })
-    });
+    const dispatchResponse = await fetch(
+      `${GH_API}${dispatchPath}`,
+      {
+        method: "POST",
+        headers: GH_HEADERS,
+        body: JSON.stringify({
+          ref: "main",
+          inputs: {
+            idea,
+            app_name: appName,
+            app_html_gzip_b64: appHtmlGzipB64
+          }
+        })
+      }
+    );
 
-    if (!response.ok) {
-      const details = await response.text();
-      console.error("GitHub dispatch error:", details);
+    if (!dispatchResponse.ok) {
+      const errorText = await dispatchResponse.text();
 
-      return res.status(502).json({
-        ok: false,
-        error:
-          "GitHub Actions build could not start. Check main.yml inputs.",
-        details: details.slice(0, 1000)
-      });
+      throw new Error(
+        `GitHub could not start APK build: ${errorText}`
+      );
     }
 
     lastBuildRequestedAt = Date.now();
+    lastBuildRunId = null;
 
     return res.json({
       ok: true,
       message: "APK build started.",
-      appName
+      appName,
+      statusUrl: `${BACKEND_URL}/api/build-status`
     });
   } catch (error) {
     console.error("Build error:", error);
+
     return res.status(500).json({
       ok: false,
-      error: "Could not start the APK build."
+      error: error.message || "Could not start APK build."
     });
   }
 });
 
-app.get("/api/build-status", async (req, res) => {
+app.get("/api/build-status", async (_req, res) => {
   try {
-    if (!GH_ACTIONS_TOKEN) {
-      return res.status(500).json({
-        ok: false,
-        error: "GH_ACTIONS_TOKEN is missing."
-      });
+    const path =
+      `/repos/${OWNER}/${REPO}/actions/workflows/` +
+      `${WORKFLOW}/runs?per_page=10`;
+
+    const { data } = await githubRequest(path);
+
+    const runs = Array.isArray(data.workflow_runs)
+      ? data.workflow_runs
+      : [];
+
+    let run = null;
+
+    if (lastBuildRunId) {
+      run = runs.find(
+        (item) => item.id === lastBuildRunId
+      ) || null;
     }
 
-    const url =
-      `https://api.github.com/repos/${OWNER}/${REPO}/actions/workflows/${WORKFLOW}/runs?branch=main&per_page=10`;
+    if (!run && lastBuildRequestedAt > 0) {
+      const earliestTime = lastBuildRequestedAt - 15000;
 
-    const response = await fetch(url, {
-      headers: GH_HEADERS
-    });
-
-    const data = await response.json();
-
-    if (!response.ok) {
-      return res.status(502).json({
-        ok: false,
-        error: "Could not check GitHub build status."
-      });
+      run = runs.find((item) => {
+        return (
+          new Date(item.created_at).getTime() >= earliestTime
+        );
+      }) || null;
     }
-
-    const runs = data.workflow_runs || [];
-    const run = runs.find(item =>
-      new Date(item.created_at).getTime() >=
-      lastBuildRequestedAt - 15000
-    );
 
     if (!run) {
       return res.json({
         ok: true,
         status: "waiting",
-        message: "Waiting for the APK build to start."
+        message: "Waiting for GitHub Actions to start the build."
       });
     }
+
+    lastBuildRunId = run.id;
 
     if (run.status !== "completed") {
       return res.json({
         ok: true,
-        status: run.status,
-        message: "APK is building."
+        status: run.status || "in_progress",
+        runId: run.id,
+        message: "APK is being built."
       });
     }
 
@@ -556,107 +562,125 @@ app.get("/api/build-status", async (req, res) => {
       return res.json({
         ok: true,
         status: "failed",
-        message: "APK build failed. Open GitHub Actions logs.",
-        runUrl: run.html_url
+        runId: run.id,
+        message: "APK build failed. Check GitHub Actions logs."
       });
     }
 
-    const artifactResponse = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/actions/runs/${run.id}/artifacts`,
-      { headers: GH_HEADERS }
-    );
+    const artifactsPath =
+      `/repos/${OWNER}/${REPO}/actions/runs/` +
+      `${run.id}/artifacts`;
 
-    const artifactData = await artifactResponse.json();
+    const { data: artifactData } =
+      await githubRequest(artifactsPath);
 
-    const artifact = (artifactData.artifacts || []).find(item =>
-      item.name.toLowerCase() === "myapp-apk" &&
-      !item.expired
-    );
+    const artifacts = Array.isArray(artifactData.artifacts)
+      ? artifactData.artifacts
+      : [];
+
+    const artifact = artifacts.find((item) => {
+      return (
+        item.name.toLowerCase() === "myapp-apk" &&
+        !item.expired
+      );
+    });
 
     if (!artifact) {
       return res.json({
         ok: true,
         status: "completed",
-        message: "Build succeeded, but APK artifact was not found.",
-        runUrl: run.html_url
+        runId: run.id,
+        message:
+          "Build succeeded, but the Myapp-APK artifact was not found."
       });
     }
 
     return res.json({
       ok: true,
       status: "success",
+      runId: run.id,
       message: "APK build completed.",
       downloadUrl:
         `${BACKEND_URL}/api/apk-download?run_id=${run.id}`,
-      runUrl: run.html_url
+      artifactName: artifact.name
     });
   } catch (error) {
-    console.error("Status error:", error);
+    console.error("Build status error:", error);
+
     return res.status(500).json({
       ok: false,
-      error: "Could not check APK status."
+      error: error.message || "Could not check build status."
     });
   }
 });
 
 app.get("/api/apk-download", async (req, res) => {
   try {
-    if (!GH_ACTIONS_TOKEN) {
-      return res.status(500).send("GitHub token is missing.");
-    }
-
-    const runId = String(req.query.run_id || "");
+    const runId = String(req.query?.run_id || "").trim();
 
     if (!/^\d+$/.test(runId)) {
-      return res.status(400).send("Invalid run ID.");
+      return res.status(400).json({
+        ok: false,
+        error: "A valid run_id is required."
+      });
     }
 
-    const artifactsResponse = await fetch(
-      `https://api.github.com/repos/${OWNER}/${REPO}/actions/runs/${runId}/artifacts`,
-      { headers: GH_HEADERS }
-    );
+    const artifactsPath =
+      `/repos/${OWNER}/${REPO}/actions/runs/` +
+      `${runId}/artifacts`;
 
-    const artifactData = await artifactsResponse.json();
+    const { data } = await githubRequest(artifactsPath);
 
-    if (!artifactsResponse.ok) {
-      return res.status(502).send("Could not fetch build artifact.");
-    }
+    const artifacts = Array.isArray(data.artifacts)
+      ? data.artifacts
+      : [];
 
-    const artifact = (artifactData.artifacts || []).find(item =>
-      item.name.toLowerCase() === "myapp-apk" &&
-      !item.expired
-    );
-
-    if (!artifact) {
-      return res.status(404).send("APK artifact not found.");
-    }
-
-    const zipResponse = await fetch(artifact.archive_download_url, {
-      headers: GH_HEADERS,
-      redirect: "follow"
+    const artifact = artifacts.find((item) => {
+      return (
+        item.name.toLowerCase() === "myapp-apk" &&
+        !item.expired
+      );
     });
 
-    if (!zipResponse.ok) {
-      return res.status(502).send("Could not download APK artifact.");
+    if (!artifact) {
+      return res.status(404).json({
+        ok: false,
+        error: "APK artifact not found or expired."
+      });
     }
 
-    // The artifact is a ZIP file. This endpoint currently redirects
-    // users to GitHub's artifact ZIP; extracting the APK directly
-    // requires a ZIP parser and the exact workflow artifact layout.
+    const zipPath =
+      `/repos/${OWNER}/${REPO}/actions/artifacts/` +
+      `${artifact.id}/zip`;
+
+    const { response } = await githubRequest(zipPath);
+
+    const zipBuffer = Buffer.from(
+      await response.arrayBuffer()
+    );
+
+    res.setHeader(
+      "Content-Type",
+      "application/zip"
+    );
     res.setHeader(
       "Content-Disposition",
-      'attachment; filename="Myapp-APK.zip"'
+      `attachment; filename="Myapp-APK.zip"`
     );
-    res.setHeader("Content-Type", "application/zip");
 
-    const zipBuffer = Buffer.from(await zipResponse.arrayBuffer());
-    return res.status(200).send(zipBuffer);
+    return res.send(zipBuffer);
   } catch (error) {
-    console.error("Download error:", error);
-    return res.status(500).send("APK download failed.");
+    console.error("APK download error:", error);
+
+    return res.status(500).json({
+      ok: false,
+      error: error.message || "Could not download APK artifact."
+    });
   }
 });
 
 app.listen(PORT, () => {
-  console.log(`AI App Builder backend running on port ${PORT}`);
+  console.log(
+    `AI App Builder backend running on port ${PORT}`
+  );
 });
