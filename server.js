@@ -205,8 +205,7 @@ Return ONLY valid JSON with these keys:
 
 The html value must contain a complete valid HTML document.
 `;
-  }
-
+}  
 
 app.post("/api/generate", async (req, res) => {
   try {
@@ -346,11 +345,18 @@ app.post("/api/edit-app", async (req, res) => {
     }
 
     if (!GEMINI_API_KEY) {
-      return res.status(500).json({
-        ok: false,
-        error: "GEMINI_API_KEY is missing."
-      });
-    }
+  return res.status(500).json({
+    ok: false,
+    error: "GEMINI_API_KEY is missing in Render environment."
+  });
+}
+
+if (!ENGINE_CATALOG[engine]) {
+  return res.status(400).json({
+    ok: false,
+    error: "Unsupported engine selection."
+  });
+}
 
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
