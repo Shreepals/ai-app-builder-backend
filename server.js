@@ -85,7 +85,7 @@ h1{font-size:clamp(30px,8vw,48px);margin:0 0 10px}p{color:#c3d8e8;line-height:1.
  <div class="panel"><div class="small">SCORE</div><div class="value" id="score">0</div></div>
  <button class="action" id="pause">Ⅱ</button>
 </div>
-<div class="hint" id="hint">Hold ◀ ▶ to steer · ▲ to accelerate</div>
+<div class="hint hidden" id="hint">Hold ◀ ▶ to steer · ▲ to accelerate</div>
 <div class="buttons">
  <div class="group">
   <button class="control" id="left">◀</button>
