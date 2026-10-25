@@ -351,13 +351,6 @@ app.post("/api/edit-app", async (req, res) => {
   });
 }
 
-if (!ENGINE_CATALOG[engine]) {
-  return res.status(400).json({
-    ok: false,
-    error: "Unsupported engine selection."
-  });
-}
-
     const response = await fetch(
       `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}`,
       {
