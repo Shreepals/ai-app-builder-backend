@@ -207,6 +207,7 @@ The html value must contain a complete valid HTML document.
 `;
   }
 
+
 app.post("/api/generate", async (req, res) => {
   try {
     const idea = String(req.body?.idea || "").trim();
