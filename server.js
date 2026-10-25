@@ -66,59 +66,104 @@ function cleanHtml(value) {
 }
 
 function makePrompt({ appName, idea, theme, engine }) {
-  return `
-You are an expert app and game developer.
+  const gameRequest =
+    /\b(game|gaming|racing|race|car game|shooting|shooter|football|soccer|cricket|running|runner|adventure|platformer|minecraft|survival|fighting|combat|puzzle|sports game|3d game|video game)\b|गेम|खेल|रेसिंग|शूटिंग|फुटबॉल|क्रिकेट/i.test(idea);
 
-Create a complete, working, idea-specific application.
+  const selectedEngine = gameRequest ? "threejs" : engine;
+
+  return `
+You are a professional application and game developer.
 
 APP NAME: ${appName}
 USER IDEA: ${idea}
 THEME: ${theme}
-REQUESTED ENGINE: ${engine}
-AVAILABLE ENGINES:
-${JSON.stringify(ENGINE_CATALOG, null, 2)}
+ENGINE: ${selectedEngine}
+IS GAME: ${gameRequest}
 
-ENGINE RULES:
-- For auto, choose the most suitable supported engine.
-- html means a complete HTML/CSS/JavaScript application.
-- phaser means a playable Phaser 2D browser game.
-- threejs means a playable Three.js 3D browser game.
-- Do not falsely claim a Godot, Unity or Unreal project was built
-  when you only return HTML.
-- If a native engine project cannot be generated in this response,
-  state that limitation in the summary.
+IMPORTANT GAME RULE:
+If IS GAME is true, create a real playable 3D game using Three.js.
+Do not make a 2D game or merely draw a red box and call it a game.
 
-FOR WEB APPS AND BROWSER GAMES:
-Return one complete standalone index.html file.
-Include CSS and JavaScript inside the HTML.
-Make it responsive for phones and desktop.
-Create actual features that match the user's exact idea.
-Do not substitute a calculator, farming dashboard, or generic page
-unless the user specifically requested it.
-Implement working buttons, forms, navigation and game controls.
-For games, include a playable game loop, player controls, scoring,
-restart and game-over handling when appropriate.
-For 3D games, use Three.js and include a visible scene, camera,
-lighting, objects and controls.
-Use external libraries only when necessary and load them from a
-reliable CDN. If unavailable, display a helpful error message.
-Do not claim that external APIs or live services work without keys.
-Do not include secret API keys.
-Do not use placeholder sections instead of requested functionality.
-Do not omit major features from the requested idea.
+GAMEPLAY MUST MATCH THE USER'S IDEA:
+- Racing: 3D road or track, player vehicle, opponents, steering,
+  acceleration, braking, collisions and race score.
+- Football or soccer: 3D pitch, controllable player, ball, goals,
+  opponent or target logic, scoring and match reset.
+- Cricket: 3D pitch, bat, ball, batting controls, wickets and runs.
+- Shooting: 3D environment, player movement, aiming, targets,
+  shooting controls, hit detection and score.
+- Running or endless runner: 3D path, player, obstacles, movement,
+  jumping or dodging, distance score and collision handling.
+- Adventure or survival: 3D environment, player movement, objectives,
+  interaction and health or progress where appropriate.
+- Fighting: 3D arena, player controls, opponent, attacks, health
+  and win/lose handling.
+- Puzzle: create a 3D interactive puzzle whose mechanics match
+  the requested idea, with working selection and reset controls.
+- Other game types: invent gameplay that specifically matches
+  the user's idea. Do not replace it with racing or an unrelated game.
 
-Return ONLY valid JSON in this format:
+3D REQUIREMENTS:
+- Use Three.js with a perspective camera, lighting, ground/environment,
+  visible 3D objects and appropriate animations.
+- The main player, ball, car, character or other game objects must
+  be visibly identifiable, not just a colored cube.
+- Include working keyboard and mobile touch controls as appropriate.
+- Include a real game loop, collision or interaction logic, score or
+  progress, and restart behavior.
+- Pause must actually stop gameplay; Resume must continue it.
+- Restart must reset the game state.
+- Show instructions and a clear start screen.
+- Handle game-over or victory where appropriate.
+- Use responsive controls suitable for Android phones.
+- If a required CDN library fails, show a useful error.
+- Do not claim a feature works unless its code implements it.
+
+MANDATORY DASHBOARD FOR EVERY NEW APP:
+- Desktop: a collapsible left sidebar.
+- Mobile: hide the sidebar by default and show a three-dot (⋮)
+  menu button in the top-right corner.
+- The mobile menu must open and close correctly.
+- Include Dashboard, Home and all sections relevant to the idea.
+- For games, include Play, Instructions, Score/Statistics,
+  Progress, Levels and Settings when appropriate.
+- Each navigation item must open the correct screen or section.
+- All visible buttons must perform their stated action.
+- Remove unnecessary buttons rather than leaving non-working controls.
+- Keep all screens responsive and preserve user progress locally
+  where appropriate.
+
+NON-GAME APP RULES:
+- For non-game ideas, create a complete idea-specific application.
+- Do not force a game into a business, education or utility app.
+- Include the dashboard layout and functional sections appropriate
+  to the actual app idea.
+
+HTML REQUIREMENTS:
+- Return one complete standalone index.html document.
+- Embed CSS and JavaScript inside the HTML.
+- Use Three.js for games.
+- Use HTML/CSS/JavaScript for ordinary web apps.
+- Implement actual features, navigation, forms and actions.
+- Do not create a generic landing page instead of the requested app.
+- Do not use empty placeholders for major requested features.
+- Do not invent live APIs or include secret keys.
+- Do not claim a native Godot, Unity or Unreal project was built
+  when only HTML is returned.
+- Be honest about limitations in the summary.
+
+Return ONLY valid JSON with these keys:
 {
   "appName": "name",
-  "summary": "what works and any limitations",
+  "summary": "working features and limitations",
   "engine": "actual engine used",
   "html": "<!DOCTYPE html> ...",
   "features": ["feature 1", "feature 2"]
 }
 
-The html field must contain the complete HTML document.
+The html field must contain a complete valid HTML document.
 `;
-}
+  }
 
 app.post("/api/generate", async (req, res) => {
   try {
