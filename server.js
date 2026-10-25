@@ -65,14 +65,16 @@ function cleanHtml(value) {
     .trim();
 }
 
+
 function makePrompt({ appName, idea, theme, engine }) {
   const gameRequest =
-    /\b(game|gaming|racing|race|car game|shooting|shooter|football|soccer|cricket|running|runner|adventure|platformer|minecraft|survival|fighting|combat|puzzle|sports game|3d game|video game)\b|गेम|खेल|रेसिंग|शूटिंग|फुटबॉल|क्रिकेट/i.test(idea);
+    /\b(game|gaming|racing|race|car game|shooting|shooter|football|soccer|cricket|running|runner|adventure|platformer|minecraft|survival|fighting|combat|puzzle|sports game|3d game|video game|gameplay)\b|गेम|खेल|रेसिंग|शूटिंग|फुटबॉल|क्रिकेट|दौड़/i.test(idea);
 
   const selectedEngine = gameRequest ? "threejs" : engine;
 
   return `
-You are a professional application and game developer.
+You are a senior game and application developer.
+Create a functional app matching the user's exact idea.
 
 APP NAME: ${appName}
 USER IDEA: ${idea}
@@ -80,88 +82,95 @@ THEME: ${theme}
 ENGINE: ${selectedEngine}
 IS GAME: ${gameRequest}
 
-IMPORTANT GAME RULE:
-If IS GAME is true, create a real playable 3D game using Three.js.
-Do not make a 2D game or merely draw a red box and call it a game.
+IMPORTANT:
+Return a complete standalone HTML document, not an explanation,
+mockup, empty dashboard, or a picture pretending to be an app.
 
-GAMEPLAY MUST MATCH THE USER'S IDEA:
-- Racing: 3D road or track, player vehicle, opponents, steering,
-  acceleration, braking, collisions and race score.
-- Football or soccer: 3D pitch, controllable player, ball, goals,
-  opponent or target logic, scoring and match reset.
-- Cricket: 3D pitch, bat, ball, batting controls, wickets and runs.
-- Shooting: 3D environment, player movement, aiming, targets,
-  shooting controls, hit detection and score.
-- Running or endless runner: 3D path, player, obstacles, movement,
-  jumping or dodging, distance score and collision handling.
-- Adventure or survival: 3D environment, player movement, objectives,
-  interaction and health or progress where appropriate.
-- Fighting: 3D arena, player controls, opponent, attacks, health
-  and win/lose handling.
-- Puzzle: create a 3D interactive puzzle whose mechanics match
-  the requested idea, with working selection and reset controls.
-- Other game types: invent gameplay that specifically matches
-  the user's idea. Do not replace it with racing or an unrelated game.
+IF IS GAME IS TRUE:
+Build an actual playable 3D game using Three.js.
+Do not build an unrelated game. Match gameplay to this exact idea.
 
-3D REQUIREMENTS:
-- Use Three.js with a perspective camera, lighting, ground/environment,
-  visible 3D objects and appropriate animations.
-- The main player, ball, car, character or other game objects must
-  be visibly identifiable, not just a colored cube.
-- Include working keyboard and mobile touch controls as appropriate.
-- Include a real game loop, collision or interaction logic, score or
-  progress, and restart behavior.
-- Pause must actually stop gameplay; Resume must continue it.
-- Restart must reset the game state.
-- Show instructions and a clear start screen.
-- Handle game-over or victory where appropriate.
-- Use responsive controls suitable for Android phones.
-- If a required CDN library fails, show a useful error.
-- Do not claim a feature works unless its code implements it.
+GAME TYPE REQUIREMENTS:
+- Racing: visible road, player car, opponent cars, lanes,
+  steering, acceleration, braking, collisions, speed and distance.
+- Football: 3D pitch, player, ball, goals, movement, shooting,
+  opponent or target logic, goals counter and reset.
+- Cricket: pitch, batter, bat, ball, bowling, batting controls,
+  wickets, runs and restart.
+- Shooting: 3D arena, player, targets or enemies, aiming,
+  firing, hit detection, health and score.
+- Runner: 3D path, character, obstacles, jump/dodge controls,
+  collision detection and distance.
+- Adventure/survival: 3D environment, character movement,
+  objectives, interaction, health or inventory where appropriate.
+- Fighting: 3D arena, visible fighters, movement, attack controls,
+  health bars and win/lose conditions.
+- Puzzle: interactive 3D puzzle with real rules, selection,
+  success detection and reset.
+- Other ideas: implement mechanics specific to the user's idea.
+  Never substitute racing for a different game.
 
-MANDATORY DASHBOARD FOR EVERY NEW APP:
-- Desktop: a collapsible left sidebar.
-- Mobile: hide the sidebar by default and show a three-dot (⋮)
-  menu button in the top-right corner.
-- The mobile menu must open and close correctly.
-- Include Dashboard, Home and all sections relevant to the idea.
-- For games, include Play, Instructions, Score/Statistics,
-  Progress, Levels and Settings when appropriate.
-- Each navigation item must open the correct screen or section.
+3D SCENE:
+- Load Three.js and create a perspective camera, renderer,
+  lights, ground, environment and recognizable 3D objects.
+- Show the actual game scene immediately after pressing Play.
+- Create recognizable cars, people, balls, buildings or objects
+  using geometry and materials if external models are unavailable.
+- Animate objects and update gameplay in a real animation loop.
+- Resize the renderer when the screen orientation or size changes.
+- Display a readable error if Three.js fails to load.
+
+CONTROLS:
+- Add working touch controls for Android.
+- Add keyboard controls for computers.
+- Buttons must control the actual player or game.
+- Pause must stop gameplay updates.
+- Resume must continue the paused game.
+- Restart must reset position, score, health, obstacles and state.
+- Start must begin the game.
+- Detect collisions and implement scoring or progress.
+- Add a game-over or victory screen when appropriate.
+- Prevent touch controls from accidentally scrolling the page.
+
+MANDATORY APP DASHBOARD:
+- Desktop: collapsible left sidebar.
+- Mobile: sidebar hidden by default and a working three-dot
+  menu button at the top-right.
+- Menu must open and close.
+- Include Dashboard, Home and sections suitable for the idea.
+- Games should include Play, Instructions, Score/Statistics,
+  Progress, Levels and Settings where relevant.
+- Every navigation item must open its correct screen or section.
 - All visible buttons must perform their stated action.
-- Remove unnecessary buttons rather than leaving non-working controls.
-- Keep all screens responsive and preserve user progress locally
-  where appropriate.
+- Do not include decorative buttons that do nothing.
+- Keep layout readable on mobile and desktop.
 
-NON-GAME APP RULES:
-- For non-game ideas, create a complete idea-specific application.
-- Do not force a game into a business, education or utility app.
-- Include the dashboard layout and functional sections appropriate
-  to the actual app idea.
+FOR NON-GAME APPS:
+Create a complete idea-specific app with a useful dashboard,
+working navigation, forms and functional features.
+Do not force a game into an ordinary app.
 
-HTML REQUIREMENTS:
-- Return one complete standalone index.html document.
-- Embed CSS and JavaScript inside the HTML.
-- Use Three.js for games.
-- Use HTML/CSS/JavaScript for ordinary web apps.
-- Implement actual features, navigation, forms and actions.
-- Do not create a generic landing page instead of the requested app.
-- Do not use empty placeholders for major requested features.
-- Do not invent live APIs or include secret keys.
-- Do not claim a native Godot, Unity or Unreal project was built
-  when only HTML is returned.
-- Be honest about limitations in the summary.
+TECHNICAL RULES:
+- Return one complete index.html document.
+- Embed CSS and JavaScript in the HTML.
+- Use Three.js for games and HTML/CSS/JavaScript for ordinary apps.
+- Do not expose API keys or invent live data.
+- Do not claim native Unity, Unreal or Godot output if you only
+  generated an HTML app.
+- Ensure every referenced JavaScript variable and function exists.
+- Do not leave placeholder sections for core requested features.
+- Keep the code as self-contained as possible.
 
 Return ONLY valid JSON with these keys:
 {
   "appName": "name",
-  "summary": "working features and limitations",
+  "summary": "features and honest limitations",
   "engine": "actual engine used",
   "html": "<!DOCTYPE html> ...",
   "features": ["feature 1", "feature 2"]
 }
 
-The html field must contain a complete valid HTML document.
+The html field must contain a complete HTML document.
 `;
   }
 
