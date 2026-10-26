@@ -75,188 +75,367 @@ function selectedEngine(idea, engine) {
   return engine;
 }
 
-function makePrompt({ idea, appName, theme, engine }) {
-  const game = isGameIdea(idea);
-  const chosenEngine = game ? "threejs" :
-    (engine === "auto" ? "html" : engine);
+function makePrompt({ idea, appName, theme = "Modern", engine = "auto" }) {
+  const userIdea = String(idea || "").trim();
+  const name = String(appName || "My AI App").trim();
+  const design = String(theme || "Modern");
+
+  const gamePattern =
+    /\b(game|gaming|3d|2d|racing|race|car game|bike game|football|soccer|cricket|shooting|shooter|adventure|open world|platformer|runner|puzzle|chess|cards|survival|horror|fighting|battle|simulation|tycoon)\b|गेम|खेल|रेसिंग|क्रिकेट|फुटबॉल|शूटिंग|एडवेंचर/i;
+
+  const isGame = gamePattern.test(userIdea);
+  const chosenEngine = isGame ? "threejs" : engine;
 
   return `
-You are a senior software engineer, UI/UX designer,
-full-stack app planner and game developer.
+You are a senior product designer, UI/UX expert,
+frontend engineer, and interactive application developer.
 
-Build a COMPLETE, IDEA-SPECIFIC, FUNCTIONAL application.
+Your job is to transform the user's exact idea into a complete,
+polished, useful, functional HTML application.
 
-APP NAME: ${appName}
-USER IDEA: ${idea}
-THEME: ${theme}
-ENGINE: ${chosenEngine}
-GAME: ${game}
+USER APP NAME:
+${name}
 
-CRITICAL RULE:
-Do not make a generic dashboard, calculator, landing page,
-or unrelated demo. Build the actual application described by
-the user's idea.
+USER'S EXACT IDEA:
+${userIdea}
 
-RETURN ONLY valid JSON:
+DESIGN STYLE:
+${design}
+
+APPLICATION TYPE:
+${isGame ? "GAME" : "APP OR WEBSITE"}
+
+REQUESTED ENGINE:
+${chosenEngine}
+
+==================================================
+OUTPUT FORMAT
+==================================================
+
+Return ONLY valid JSON with these fields:
+
 {
   "appName": "string",
   "summary": "string",
-  "html": "complete HTML document",
-  "features": ["feature 1", "feature 2"],
-  "engine": "string"
+  "features": ["string"],
+  "engine": "string",
+  "html": "complete standalone HTML document"
 }
 
-==============================
-COMPLETE APP REQUIREMENTS
-==============================
+The html field must contain the entire HTML document.
+Do not return a partial page, explanation, Markdown, or code fences.
+Escape JSON strings correctly.
 
-1. First understand the exact purpose of the user's idea.
-2. Identify the users, workflows, screens, sections and tools
-   required for that specific application.
-3. Build all important screens in one complete responsive app.
-4. Include a polished header, app logo/name, navigation,
-   sidebar or mobile menu where appropriate, main content,
-   footer where useful, and responsive layouts.
-5. Create a complete dashboard when the idea needs a dashboard.
-6. Do not omit major sections of the requested application.
-7. Do not create only a home page or a few isolated buttons.
-8. Include realistic demo data when external services are unavailable.
-   Clearly label demo data; never claim it is live data.
-9. Include empty states, validation, loading feedback and
-   success/error messages where appropriate.
-10. Use consistent typography, spacing, cards, icons and colors.
-11. Make the design work on small Android screens and desktop.
-12. Avoid a page that looks like a plain school project.
-13. Do not leave TODOs, blank panels, unfinished sections,
-    placeholder buttons or "coming soon" features.
-14. Do not claim that a feature works if it is not implemented.
+==================================================
+1. BUILD THE ACTUAL USER IDEA
+==================================================
 
-==============================
-FUNCTIONAL BUTTON REQUIREMENTS
-==============================
+First understand exactly what the user wants.
 
-Every visible interactive control must have a real action.
+Identify:
+- The application's purpose.
+- Its intended users.
+- The main tasks users need to complete.
+- All important screens.
+- All necessary controls and workflows.
+- The data the application needs.
+- The appropriate visual style.
 
-Depending on the actual app idea, implement:
-- Navigation and sidebar menu.
-- Dashboard/home navigation.
-- User profile and account screen.
-- Settings screen.
-- Search and filtering.
-- Add, edit, delete and save operations where relevant.
-- Forms with validation.
-- Tabs, dropdowns, modals and confirmation dialogs.
-- Notifications and helpful feedback messages.
-- Back navigation and mobile menu.
-- Local persistence using localStorage when appropriate.
-- Working keyboard and touch interactions.
+Do not replace the user's idea with a calculator,
+generic dashboard, unrelated demo, or a landing page only.
 
-Do not add irrelevant buttons just to increase their number.
-Create all controls the requested app genuinely needs.
-Every visible button must either perform its action or be
-disabled with a clear explanation when the action is unavailable.
+Create the application that was requested.
 
-==============================
-APP-SPECIFIC WORKFLOWS
-==============================
+Do not invent unnecessary features that distract from
+the application's main purpose.
 
-Do not use one fixed layout for every idea.
+==================================================
+2. COMPLETE PROFESSIONAL INTERFACE
+==================================================
 
-For a shopping app, build product browsing, search, product
-details, cart and checkout demo as appropriate.
+Create a complete and polished interface with:
 
-For a social/video app, build feed, profiles, navigation,
-interactions and upload UI as appropriate.
+- A professional header and application name.
+- Logo or a simple CSS/SVG logo appropriate to the idea.
+- Navigation menu with working navigation.
+- Sidebar on desktop when appropriate.
+- Mobile navigation or a usable mobile menu.
+- Main dashboard and all important sections.
+- Cards, lists, tables, forms or panels appropriate to the idea.
+- Search and filters where useful.
+- Settings and profile screens when relevant.
+- Helpful empty states and confirmation messages.
+- A consistent footer when appropriate.
 
-For an education app, build courses, lessons, progress and
-quizzes as appropriate.
+Do not force a sidebar into games or simple utilities
+where it would damage the user experience.
 
-For a business/admin app, build relevant statistics, tables,
-filters, forms and management screens.
+Every major feature implied by the idea must have
+a visible place in the interface.
 
-For a finance app, build relevant balances, transactions,
-charts and calculations using clearly labelled demo data.
+Do not leave large blank areas or unexplained empty panels.
 
-For any other idea, design its own complete set of screens
-and workflows based on the user's exact description.
+==================================================
+3. VISUAL DESIGN QUALITY
+==================================================
 
-Do not force unrelated features into the application.
+Use a consistent professional design system.
 
-==============================
-REAL 3D GAME REQUIREMENTS
-==============================
+Include:
+- A carefully chosen color palette.
+- Readable typography and clear visual hierarchy.
+- Consistent spacing, padding and alignment.
+- Attractive cards and section headings.
+- Appropriate borders, shadows and rounded corners.
+- Good contrast and accessible text sizes.
+- Useful icons or inline SVG icons where suitable.
+- Smooth, restrained transitions and hover states.
+- Loading, success, error and empty states where necessary.
 
-When GAME is true, create a playable 3D game using Three.js,
-not a static dashboard and not a 2D page pretending to be 3D.
+Make the interface look like a finished product,
+not a basic school project or an unstyled HTML page.
 
-Create:
-- A real Three.js scene, perspective camera and renderer.
-- Appropriate lighting, shadows where practical, ground
-  and a recognisable game environment.
-- Genre-specific player, obstacles, targets and objects.
-- Camera movement appropriate to the game.
-- Keyboard controls and visible mobile touch controls.
-- Start, pause, resume and restart.
-- Score, objective, game status and game-over handling.
-- Collision detection and game rules.
-- Animation loop and responsive resizing.
-- Instructions showing how to play.
-- Clear visual feedback when the player acts or scores.
+Use CSS variables for the theme.
 
-The mechanics must match the actual requested genre.
+Do not make every element a card.
+Avoid excessive gradients, oversized headings,
+random emojis and unnecessary decoration.
+
+==================================================
+4. RESPONSIVE MOBILE AND DESKTOP
+==================================================
+
+The app must work on Android mobile browsers
+and on desktop screens.
+
+Requirements:
+- Use the viewport meta tag.
+- Use responsive CSS and appropriate media queries.
+- Avoid horizontal overflow.
+- Make buttons large enough for touch.
+- Ensure menus fit on small screens.
+- Keep text readable on mobile.
+- Make forms and tables usable on narrow screens.
+- Handle portrait and landscape orientation where useful.
+
+Test the layout conceptually at narrow and wide widths.
+
+==================================================
+5. FUNCTIONAL BUTTONS AND INTERACTIONS
+==================================================
+
+Every visible interactive control must work.
+
+Examples:
+- Navigation opens the correct section.
+- Forms validate their input.
+- Submit buttons process the entered data.
+- Add buttons create items.
+- Edit buttons update items.
+- Delete buttons remove items after confirmation.
+- Search filters relevant content.
+- Tabs switch the displayed panel.
+- Toggles actually change settings.
+- Save buttons provide feedback and save data locally
+  when local persistence is suitable.
+- Reset buttons reset the relevant data.
+- Modal dialogs can open and close.
+- Menus can open and close.
+- Important actions provide visible feedback.
+
+Do not use href="#" as a fake interaction.
+Do not create buttons that do nothing.
+Do not show success messages when an action failed.
+
+For a demo that cannot connect to a real backend,
+implement a working local demonstration and clearly
+identify any demo-only data.
+
+==================================================
+6. REAL APPLICATION WORKFLOWS
+==================================================
+
+Build the workflows specific to the requested idea.
+
+For a shopping app, include suitable product browsing,
+search, product details, cart and checkout demonstration.
+
+For a learning app, include courses, lessons, progress
+and useful learning interactions.
+
+For a finance dashboard, include transaction entry,
+filters, summaries and clearly labelled sample data.
+
+For a booking app, include available options, date selection,
+form validation and booking confirmation demonstration.
+
+For a social app, include profiles, posts, interactions
+and appropriate navigation.
+
+These are examples only. Do not force them into other ideas.
+
+If the idea needs authentication, payments, cloud storage,
+live data or external APIs, build the appropriate UI
+and explain which backend credentials or services are required.
+Never pretend a frontend-only demo provides real security,
+real payments or live external data.
+
+==================================================
+7. GAMES: DETECT THE CORRECT GENRE
+==================================================
+
+If the idea describes a game, create a playable game,
+not merely a dashboard about a game.
+
+Select mechanics based on the user's idea.
 
 RACING:
-Create a controllable car, track, steering, acceleration,
-braking, obstacles or opponents, speed display and collisions.
+Vehicle steering, acceleration, braking, road or track,
+obstacles, collision detection and race results.
 
 FOOTBALL:
-Create a playable football field, controllable player,
-ball movement, kicking/shooting, goals, goalkeeper or
-opponents where practical, score and match restart.
+Player movement, ball control, kicking, goal detection,
+opponents and score.
 
 CRICKET:
-Create batting controls, ball delivery, timing-based hits,
-runs, wickets and match status.
+Batting timing, bowling interaction, wickets, runs,
+overs and match results.
 
 SHOOTING:
-Create aiming, firing, targets/enemies, hit detection,
-health or score and restart.
+Aiming, firing, targets, hit detection, health
+and game-over logic.
 
-RUNNER:
-Create running movement, jumping, obstacles, collision
-and distance or score progression.
+PLATFORMER:
+Movement, jumping, gravity, platforms, hazards,
+collectibles and levels.
 
-For other genres, create mechanics specific to the idea.
+ENDLESS RUNNER:
+Running, lane changes, jumping, obstacles,
+collectibles and distance scoring.
 
-Do not represent the whole game using only a few plain cubes.
-Use suitable shapes, proportions, materials and environment
-details. Make the game playable rather than just attractive.
+PUZZLE OR BOARD GAME:
+Actual puzzle rules, valid moves, win conditions,
+restart and hints when appropriate.
 
-Load Three.js safely. If the library cannot load, display a
-clear error instead of silently showing an empty screen.
+ADVENTURE:
+Character movement, environment, objectives,
+collectibles and interactions.
 
-==============================
-TECHNICAL REQUIREMENTS
-==============================
+SURVIVAL:
+Resources, health, threats, objectives and progression.
 
-- Return one complete standalone HTML document.
-- Include <!DOCTYPE html>, html, head and body.
-- Include CSS and JavaScript in the HTML.
-- Keep code readable and organised.
-- Avoid syntax errors and undefined variables.
-- Avoid nonfunctional links and controls.
-- Do not require secret API keys for the core demo.
-- Use localStorage only for suitable local demo data.
-- Do not pretend that a browser demo is a production backend.
-- Do not claim native Unity, Unreal or Godot output.
-- This pipeline packages HTML inside an Android WebView.
-- Do not add payment features unless the user requests them.
-- Prioritise a complete working app over decorative text.
+FIGHTING:
+Movement, attacks, blocking, health and round results.
 
-Return valid JSON only. Escape quotes and newlines correctly.
-The html value must contain the entire working application.
+SIMULATION:
+Interactive systems, meaningful decisions,
+resources, upgrades and progression.
+
+For other genres, infer mechanics from the idea itself.
+For games combining genres, combine suitable mechanics.
+
+Do not make every game a car racing game.
+
+==================================================
+8. 3D AND 2D GAME IMPLEMENTATION
+==================================================
+
+If the user specifically asks for 2D:
+- Build a genuine 2D game using Canvas or DOM.
+- Implement the requested mechanics and collision rules.
+- Do not force 3D into a 2D request.
+
+For 3D games:
+- Use Three.js.
+- Create a scene, camera, renderer and lighting.
+- Create appropriate terrain, environment and game objects.
+- Add suitable player models and animations when feasible.
+- Implement movement and collision detection.
+- Include keyboard and mobile touch controls.
+- Include start, pause, resume and restart.
+- Include relevant score, health, timer or progress.
+- Implement the game's actual objective.
+- Keep rendering responsive on mobile devices.
+- Handle missing network access or library load failures.
+
+Avoid making every character, building, car or object
+a plain colored cube.
+
+A 3D game must have actual 3D rendering and gameplay.
+A 2D game must have actual 2D gameplay.
+
+Do not claim that complex commercial-quality graphics
+or complete multiplayer features exist unless implemented.
+
+==================================================
+9. TECHNICAL REQUIREMENTS
+==================================================
+
+Return a complete standalone HTML document containing:
+
+<!DOCTYPE html>
+<html>
+<head>
+<style>
+  /* Complete responsive CSS */
+</style>
+</head>
+<body>
+  <!-- Complete app interface -->
+  <script>
+    /* Complete working JavaScript */
+  </script>
+</body>
+</html>
+
+Use semantic HTML and maintainable JavaScript.
+
+Keep required CSS and JavaScript inside the HTML file.
+
+Do not require a separate build step for the HTML.
+
+Avoid unnecessary external libraries.
+If a library is necessary, load it from a suitable CDN
+and handle load failures gracefully.
+
+The basic interface should still explain the problem
+if a required online service cannot be reached.
+
+Use localStorage when suitable for saving non-sensitive
+demo settings or local demo data.
+
+Never put API secrets, passwords or private tokens in frontend code.
+
+Avoid fake live data, fake authentication and fake payment processing.
+
+==================================================
+10. COMPLETENESS CHECK BEFORE RETURNING
+==================================================
+
+Before returning the result, verify that:
+
+- The document includes <!DOCTYPE html>.
+- The HTML has opening and closing html tags.
+- The head and body sections are present.
+- CSS is complete.
+- JavaScript is complete.
+- The actual requested features are implemented.
+- All visible buttons have real actions.
+- Navigation and forms work.
+- Mobile layout has been considered.
+- There are no unfinished placeholders.
+- Game mechanics match the requested game genre.
+- The result is one complete HTML document.
+
+If output length is becoming a problem, prioritize a smaller,
+fully working application over a large, broken application.
+
+Do not claim an unimplemented feature is complete.
+
+Return ONLY the required JSON.
 `;
-}
+    }
+ 
 
 async function callGemini(prompt) {
   if (!GEMINI_API_KEY) {
