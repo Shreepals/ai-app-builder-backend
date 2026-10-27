@@ -1,10 +1,10 @@
-to
 <!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI App Builder Studio</title>
+<script src="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"></script>
 <style>
 :root{--bg:#0b1020;--panel:#141c30;--line:#293550;--text:#f4f7ff;--muted:#a8b4cc;--blue:#5685ff;--green:#21c58b}
 *{box-sizing:border-box}
@@ -12,11 +12,11 @@ body{margin:0;background:var(--bg);color:var(--text);font:15px Arial,sans-serif}
 button,input,textarea,select{font:inherit}
 button{cursor:pointer}
 .layout{display:flex;min-height:100vh}
-aside{width:225px;background:#0e1527;border-right:1px solid var(--line);padding:20px 12px;flex-shrink:0}
+aside{width:225px;background:#0e1527;border-right:1px solid var(--line);padding:15px;flex-shrink:0}
 .brand{font-size:21px;font-weight:bold;padding:12px 8px 24px}
 .brand span{color:#79a0ff}
 .nav{display:grid;gap:7px}
-.nav button{background:transparent;color:var(--muted);border:0;text-align:left;padding:13px;border-radius:9px}
+.nav button{background:transparent;color:var(--muted);border:0;text-align:left;padding:12px;border-radius:9px}
 .nav button.active,.nav button:hover{background:#202d49;color:white}
 main{flex:1;min-width:0;padding:22px;max-width:1500px}
 header{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:22px}
@@ -24,47 +24,33 @@ h1{font-size:25px;margin:0 0 7px}
 h2{font-size:19px;margin-top:0}
 p,.muted{color:var(--muted);line-height:1.5}
 .page{display:none}.page.active{display:block}
-.grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:16px}
 .stats{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px;margin-bottom:20px}
-.card,.stat{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:18px;min-width:0}
+.card,.stat{background:var(--panel);border:1px solid var(--line);border-radius:13px;padding:18px;min-width:0;margin-bottom:15px}
 .stat strong{display:block;font-size:25px;margin-bottom:8px}
 label{display:block;font-weight:bold;margin:15px 0 7px}
 input,textarea,select{width:100%;background:#0c1426;color:white;border:1px solid #34415e;border-radius:8px;padding:12px;outline:none}
 textarea{min-height:115px;resize:vertical}
-input:focus,textarea:focus,select:focus{border-color:var(--blue)}
 .btn{border:0;border-radius:8px;padding:11px 15px;background:var(--blue);color:white;font-weight:bold}
-.btn.secondary{background:#293650}
-.btn.green{background:#087e60}
-.btn.red{background:#8f3547}
+.btn.secondary{background:#293650}.btn.green{background:#087e60}.btn.red{background:#8f3547}
 .btn:disabled{opacity:.5;cursor:wait}
 .actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:15px}
-.engine-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
-.engine{border:1px solid var(--line);border-radius:10px;padding:12px;background:#10192c}
-.engine label{display:flex;align-items:center;gap:8px;margin:0;cursor:pointer}
+.engine-grid,.templates{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px;margin-top:10px}
+.template,.engine{border:1px solid var(--line);border-radius:10px;padding:12px;background:#10192c}
+.engine label{display:flex;align-items:center;gap:8px;margin:0}
 .engine input{width:auto}
-.templates{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:12px}
-.template{background:#10192c;border:1px solid var(--line);border-radius:10px;padding:14px}
-.template h3{font-size:16px}
 .status{padding:12px;background:#10192c;border-radius:8px;margin-top:12px;overflow-wrap:anywhere}
 .status a{color:#8cb4ff}
 iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);border-radius:9px}
 .project{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap;padding:13px 0;border-bottom:1px solid var(--line)}
 .small{font-size:13px;color:var(--muted)}
-footer{padding:25px 0;color:var(--muted);font-size:12px}
+#scene3d{height:360px;background:#080d19;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+#scene3d canvas{display:block}
 @media(max-width:760px){
-.layout{display:block}
-aside{width:100%;border-right:0;border-bottom:1px solid var(--line);padding:10px}
-.brand{padding:8px}
-.nav{display:flex;overflow-x:auto}
-.nav button{white-space:nowrap;padding:10px}
-main{padding:14px}
-.grid{grid-template-columns:1fr}
-.stats{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
-.stat{padding:10px}
-.stat strong{font-size:19px}
-.templates{grid-template-columns:1fr}
-.engine-grid{grid-template-columns:1fr}
-iframe{height:55vh}
+.layout{display:block}aside{width:100%;border-right:0;border-bottom:1px solid var(--line);padding:10px}
+.brand{padding:8px}.nav{display:flex;overflow-x:auto}
+.nav button{white-space:nowrap;padding:10px}main{padding:14px}
+.stats{gap:7px}.stat{padding:10px}.stat strong{font-size:19px}
+.templates,.engine-grid{grid-template-columns:1fr}iframe{height:55vh}
 }
 </style>
 </head>
@@ -73,63 +59,18 @@ iframe{height:55vh}
 <aside>
 <div class="brand">AI <span>App Builder</span></div>
 <nav class="nav">
-<button data-page="editor3d">🎮 3D Editor</button>  
 <button class="active" data-page="dashboard">🏠 Dashboard</button>
 <button data-page="generator">✨ App Generator</button>
 <button data-page="editor">🛠️ AI Editor</button>
+<button data-page="editor3d">🎮 3D Editor</button>
 <button data-page="projects">📁 My Projects</button>
 <button data-page="preview">👁️ Preview</button>
 <button data-page="apk">📦 Android APK</button>
 </nav>
 </aside>
-  
-<section class="page" id="editor3d">
-  <div class="card">
-    <h2>🎮 3D Game Editor</h2>
-    <p>अपना 3D गेम बनाएँ और टेस्ट करें।</p>
-
-    <div class="actions">
-      <button class="btn" id="addCube">+ Cube</button>
-      <button class="btn" id="addSphere">+ Sphere</button>
-      <button class="btn secondary" id="addGround">+ Ground</button>
-      <button class="btn green" id="play3d">▶ Play</button>
-      <button class="btn red" id="stop3d">■ Stop</button>
-    </div>
-
-    <div id="scene3d" style="height:320px;background:#080d19;border-radius:10px;margin-top:15px"></div>
-
-    <label for="objectList">Scene Objects</label>
-    <select id="objectList"></select>
-
-    <label for="posX">Position X</label>
-    <input id="posX" type="number" step="0.5" value="0">
-
-    <label for="posY">Position Y</label>
-    <input id="posY" type="number" step="0.5" value="1">
-
-    <label for="posZ">Position Z</label>
-    <input id="posZ" type="number" step="0.5" value="0">
-
-    <label for="objScale">Object Size</label>
-    <input id="objScale" type="range" min="0.2" max="5" step="0.1" value="1">
-
-    <div class="actions">
-      <button class="btn" id="applyObject">Apply Changes</button>
-      <button class="btn secondary" id="save3d">Save Scene</button>
-      <button class="btn secondary" id="export3d">Export HTML</button>
-      <button class="btn red" id="delete3d">Delete Object</button>
-    </div>
-
-    <div id="status3d" class="status">3D Editor तैयार है।</div>
-  </div>
-      </section>
-  
 <main>
 <header>
-<div>
-<h1 id="pageTitle">AI App Builder Studio</h1>
-<div class="muted">अपना आइडिया लिखें और ऐप बनाएँ</div>
-</div>
+<div><h1 id="pageTitle">AI App Builder Studio</h1><div class="muted">अपना आइडिया लिखें और ऐप बनाएँ</div></div>
 <button class="btn secondary" id="healthBtn">Backend जाँचें</button>
 </header>
 
@@ -140,730 +81,385 @@ iframe{height:55vh}
 <div class="stat"><strong id="currentStatus">तैयार</strong><span class="small">स्थिति</span></div>
 </div>
 <div class="card">
-<h2>नया ऐप बनाएँ</h2>
-<p>ऐप का नाम, आइडिया और इंजन चुनकर Generate करें।</p>
+<h2>नया ऐप बनाएँ</h2><p>ऐप का नाम, आइडिया और इंजन चुनें।</p>
 <button class="btn" data-goto="generator">+ नया ऐप बनाएँ</button>
 </div>
-<div class="card" style="margin-top:16px">
+<div class="card">
 <h2>टेम्पलेट</h2>
 <div class="templates">
-<div class="template">
-<h3>💼 बिज़नेस ऐप</h3>
-<p>ग्राहक, बिक्री, खर्च और रिपोर्ट।</p>
-<button class="btn secondary" data-template="एक पूरा बिज़नेस मैनेजमेंट ऐप बनाओ जिसमें डैशबोर्ड, ग्राहक, बिक्री, खर्च, इन्वेंटरी, रिपोर्ट, सर्च और डेटा सेव करने की सुविधा हो।" data-name="Business Manager">चुनें</button>
-</div>
-<div class="template">
-<h3>📚 स्टडी ऐप</h3>
-<p>नोट्स, क्विज़ और पढ़ाई का शेड्यूल।</p>
-<button class="btn secondary" data-template="एक पूरा स्टडी ऐप बनाओ जिसमें विषय, नोट्स, पढ़ाई का शेड्यूल, क्विज़, प्रोग्रेस ट्रैकर और डेटा सेव करने की सुविधा हो।" data-name="Study Planner">चुनें</button>
-</div>
-<div class="template">
-<h3>🏎️ 3D रेसिंग गेम</h3>
-<p>Three.js में खेलने योग्य 3D गेम।</p>
-<button class="btn secondary" data-template="Three.js में एक खेलने योग्य 3D कार रेसिंग गेम बनाओ। 3D ट्रैक, कार, कैमरा, मोबाइल टच कंट्रोल, कीबोर्ड कंट्रोल, बाधाएँ, स्कोर, टक्कर और रीस्टार्ट बटन शामिल हों।" data-name="3D Racing Game" data-engine="threejs">चुनें</button>
+<div class="template"><h3>💼 बिज़नेस ऐप</h3><p>ग्राहक, बिक्री, खर्च और रिपोर्ट।</p><button class="btn secondary" data-template="एक पूरा बिज़नेस मैनेजमेंट ऐप बनाओ जिसमें डैशबोर्ड, ग्राहक, बिक्री, खर्च, इन्वेंटरी, रिपोर्ट, सर्च और डेटा सेव करने की सुविधा हो।" data-name="Business Manager">चुनें</button></div>
+<div class="template"><h3>📚 स्टडी ऐप</h3><p>नोट्स, क्विज़ और पढ़ाई का शेड्यूल।</p><button class="btn secondary" data-template="एक पूरा स्टडी ऐप बनाओ जिसमें विषय, नोट्स, पढ़ाई का शेड्यूल, क्विज़, प्रोग्रेस ट्रैकर और डेटा सेव करने की सुविधा हो।" data-name="Study Planner">चुनें</button></div>
+<div class="template"><h3>🏎️ 3D रेसिंग गेम</h3><p>खेलने योग्य 3D गेम बनाने का आइडिया।</p><button class="btn secondary" data-template="Three.js में खेलने योग्य 3D कार रेसिंग गेम बनाओ। 3D ट्रैक, कार, कैमरा, मोबाइल कंट्रोल, बाधाएँ, स्कोर और रीस्टार्ट शामिल हों।" data-name="3D Racing Game" data-engine="threejs">चुनें</button></div>
 </div>
 </div>
-</div>
-<div class="card" style="margin-top:16px">
-<h2>Backend स्थिति</h2>
-<div id="healthStatus" class="status">अभी जाँच नहीं हुई।</div>
-</div>
+<div class="card"><h2>Backend स्थिति</h2><div id="healthStatus" class="status">अभी जाँच नहीं हुई।</div></div>
 </section>
 
 <section class="page" id="generator">
 <div class="card">
 <h2>AI App Generator</h2>
 <form id="generateForm">
-<label for="appName">ऐप का नाम</label>
-<input id="appName" required maxlength="80" placeholder="जैसे My Business App">
-<label for="idea">ऐप का पूरा आइडिया</label>
-<textarea id="idea" required placeholder="ऐप में कौन-कौन से पेज, बटन और सुविधाएँ चाहिए, विस्तार से लिखें।"></textarea>
-<label for="theme">डिज़ाइन</label>
-<select id="theme">
-<option>Modern</option>
-<option>Professional</option>
-<option>Simple</option>
-<option>Gaming</option>
-</select>
+<label for="appName">ऐप का नाम</label><input id="appName" required maxlength="80" placeholder="जैसे My Business App">
+<label for="idea">ऐप का पूरा आइडिया</label><textarea id="idea" required placeholder="ऐप में कौन-कौन से पेज, बटन और सुविधाएँ चाहिए, विस्तार से लिखें।"></textarea>
+<label for="theme">डिज़ाइन</label><select id="theme"><option>Modern</option><option>Professional</option><option>Simple</option><option>Gaming</option></select>
 <label>इंजन चुनें</label>
 <div class="engine-grid">
-<div class="engine"><label><input type="radio" name="engine" value="auto" checked> Auto</label><p class="small">आइडिया के अनुसार चयन</p></div>
-<div class="engine"><label><input type="radio" name="engine" value="html"> HTML / Web App</label><p class="small">डैशबोर्ड और सामान्य ऐप</p></div>
-<div class="engine"><label><input type="radio" name="engine" value="threejs"> Three.js 3D</label><p class="small">3D गेम और अनुभव</p></div>
-<div class="engine"><label><input type="radio" name="engine" value="phaser"> Phaser 2D</label><p class="small">2D गेम</p></div>
-<div class="engine"><label><input type="radio" name="engine" value="godot"> Godot</label><p class="small">अलग बिल्ड सपोर्ट चाहिए</p></div>
-<div class="engine"><label><input type="radio" name="engine" value="unity"> Unity</label><p class="small">अलग बिल्ड सपोर्ट चाहिए</p></div>
-<div class="engine"><label><input type="radio" name="engine" value="unreal"> Unreal Engine</label><p class="small">अलग बिल्ड सपोर्ट चाहिए</p></div>
+<div class="engine"><label><input type="radio" name="engine" value="auto" checked> Auto</label></div>
+<div class="engine"><label><input type="radio" name="engine" value="html"> HTML / Web App</label></div>
+<div class="engine"><label><input type="radio" name="engine" value="threejs"> Three.js 3D</label></div>
+<div class="engine"><label><input type="radio" name="engine" value="phaser"> Phaser 2D</label></div>
+<div class="engine"><label><input type="radio" name="engine" value="godot"> Godot</label></div>
+<div class="engine"><label><input type="radio" name="engine" value="unity"> Unity</label></div>
+<div class="engine"><label><input type="radio" name="engine" value="unreal"> Unreal Engine</label></div>
 </div>
-<div class="actions">
-<button class="btn" id="generateBtn" type="submit">✨ पूरा ऐप बनाएँ</button>
-<button class="btn secondary" type="reset">फॉर्म साफ़ करें</button>
-</div>
+<div class="actions"><button class="btn" id="generateBtn" type="submit">✨ पूरा ऐप बनाएँ</button><button class="btn secondary" type="reset">फॉर्म साफ़ करें</button></div>
 </form>
 <div id="generateStatus" class="status">ऐप बनाने के लिए आइडिया भरें।</div>
 </div>
 </section>
 
 <section class="page" id="editor">
-<div class="card">
-<h2>AI Editor</h2>
-<p>पहले ऐप Generate करें या Projects से खोलें। फिर बदलाव लिखें।</p>
+<div class="card"><h2>AI Editor</h2><p>पहले ऐप बनाएँ या Projects से खोलें। फिर बदलाव लिखें।</p>
 <div id="editorCurrent" class="status">कोई ऐप चुना नहीं गया।</div>
-<label for="editInstruction">क्या बदलाव करना है?</label>
-<textarea id="editInstruction" placeholder="जैसे डैशबोर्ड पूरा करो, सर्च और सेव बटन जोड़ो।"></textarea>
-<div class="actions">
-<button class="btn" id="editBtn">AI से बदलाव करें</button>
-<button class="btn secondary" data-goto="generator">नया ऐप</button>
-</div>
-<div id="editStatus" class="status">बदलाव यहाँ दिखेंगे।</div>
+<label for="editInstruction">क्या बदलाव करना है?</label><textarea id="editInstruction" placeholder="जैसे डैशबोर्ड पूरा करो, सर्च और सेव बटन जोड़ो।"></textarea>
+<div class="actions"><button class="btn" id="editBtn">AI से बदलाव करें</button><button class="btn secondary" data-goto="generator">नया ऐप</button></div>
+<div id="editStatus" class="status">बदलाव यहाँ दिखेंगे।</div></div>
+</section>
+
+<section class="page" id="editor3d">
+<div class="card"><h2>🎮 3D Game Editor</h2><p>Cube और Sphere जोड़ें, उनका आकार और स्थान बदलें। Three.js के लिए इंटरनेट चाहिए।</p>
+<div class="actions"><button class="btn" id="addCube">+ Cube</button><button class="btn" id="addSphere">+ Sphere</button><button class="btn secondary" id="addGround">+ Ground</button><button class="btn green" id="play3d">▶ Play</button><button class="btn red" id="stop3d">■ Stop</button></div>
+<div id="scene3d" style="margin-top:15px"></div>
+<label for="objectList">Scene Objects</label><select id="objectList"></select>
+<label for="posX">Position X</label><input id="posX" type="number" step="0.5" value="0">
+<label for="posY">Position Y</label><input id="posY" type="number" step="0.5" value="1">
+<label for="posZ">Position Z</label><input id="posZ" type="number" step="0.5" value="0">
+<label for="objScale">Object Size</label><input id="objScale" type="range" min="0.2" max="5" step="0.1" value="1">
+<div class="actions"><button class="btn" id="applyObject">Apply Changes</button><button class="btn secondary" id="save3d">Save Scene</button><button class="btn secondary" id="load3d">Load Scene</button><button class="btn secondary" id="export3d">Export HTML</button><button class="btn red" id="delete3d">Delete Object</button></div>
+<div id="status3d" class="status">3D Editor तैयार है।</div>
 </div>
 </section>
 
 <section class="page" id="projects">
-<div class="card">
-<h2>मेरे प्रोजेक्ट</h2>
-<div id="projectsList"></div>
-<div class="actions">
-<button class="btn" data-goto="generator">+ नया ऐप</button>
-<button class="btn secondary" id="refreshProjects">रिफ्रेश</button>
-</div>
-</div>
+<div class="card"><h2>मेरे प्रोजेक्ट</h2><button class="btn secondary" id="refreshProjects">रिफ्रेश</button><div id="projectsList" style="margin-top:15px"></div></div>
 </section>
 
 <section class="page" id="preview">
-<div class="card">
-<h2>App Preview</h2>
-<div id="previewInfo" class="status">पहले ऐप बनाएँ।</div>
-<div class="actions">
-<button class="btn" id="reloadPreview">Preview रीलोड</button>
-<button class="btn secondary" id="openEditor">AI Editor</button>
-</div>
-<div style="margin-top:14px">
-<iframe id="previewFrame" title="App Preview" sandbox="allow-scripts allow-forms allow-modals allow-popups"></iframe>
-</div>
-</div>
+<div class="card"><h2>App Preview</h2><div id="previewInfo" class="status">पहले ऐप बनाएँ।</div><div class="actions"><button class="btn secondary" id="reloadPreview">Preview रीलोड करें</button><button class="btn secondary" id="openEditor">AI Editor</button></div><iframe id="previewFrame" sandbox="allow-scripts allow-forms allow-modals allow-downloads"></iframe></div>
 </section>
 
 <section class="page" id="apk">
-<div class="card">
-<h2>Android APK Builder</h2>
-<p>यह बटन आपके Render backend और GitHub Actions से build शुरू करने का अनुरोध भेजता है।</p>
-<div id="buildInfo" class="status">पहले ऐप चुनें।</div>
-<div class="actions">
-<button class="btn green" id="buildBtn">📦 APK Build शुरू करें</button>
-<button class="btn secondary" id="checkBuildBtn">Build Status जाँचें</button>
-</div>
-<div id="buildStatus" class="status">APK की स्थिति यहाँ दिखेगी।</div>
-<p class="small">APK तभी बनेगा जब backend और GitHub workflow सही तरह configured हों।</p>
-</div>
+<div class="card"><h2>Android APK</h2><p>पहले ऐप बनाएँ, फिर APK build शुरू करें।</p><div id="buildInfo" class="status">कोई ऐप चुना नहीं गया।</div><div class="actions"><button class="btn green" id="buildBtn">APK Build शुरू करें</button><button class="btn secondary" id="checkBuildBtn">Build Status जाँचें</button></div><div id="buildStatus" class="status">APK build अभी शुरू नहीं हुआ।</div></div>
 </section>
-
-<footer>AI App Builder Studio · प्रोजेक्ट इस ब्राउज़र में सेव होते हैं।</footer>
+<footer>AI App Builder Studio — ऐप बनाने और परीक्षण करने का कार्यक्षेत्र</footer>
 </main>
 </div>
 
 <script>
-"use strict";
+const API="https://ai-app-builder-backend-1.onrender.com";
+const STORAGE_KEY="aiAppStudioProjectsV3";
+const $=id=>document.getElementById(id);
+let projects=[];
+let currentApp=null;
+let buildTimer=null;
+let buildBusy=false;
 
-const API = "https://ai-app-builder-backend-1.onrender.com";
-const STORAGE_KEY = "aiAppStudioProjectsV3";
-let projects = [];
-let currentApp = null;
-let buildTimer = null;
-let buildBusy = false;
+function status(id,message){const el=$(id);if(el)el.textContent=message}
 
-const $ = id => document.getElementById(id);
-const getEngine = () => document.querySelector('input[name="engine"]:checked')?.value || "auto";
-
-function status(id, message) {
-  const el = $(id);
-  if (el) el.textContent = String(message ?? "");
+function navigate(page){
+document.querySelectorAll(".page").forEach(el=>el.classList.toggle("active",el.id===page));
+document.querySelectorAll(".nav button").forEach(btn=>btn.classList.toggle("active",btn.dataset.page===page));
+const titles={dashboard:"AI App Builder Studio",generator:"App Generator",editor:"AI Editor",editor3d:"3D Game Editor",projects:"My Projects",preview:"App Preview",apk:"Android APK"};
+$("pageTitle").textContent=titles[page]||"AI App Builder Studio";
+if(page==="editor3d")init3d();
+if(page==="preview")renderPreview();
 }
 
-function esc(value) {
-  return String(value ?? "").replace(/[&<>"']/g, c => ({
-    "&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"
-  })[c]);
+document.querySelectorAll("[data-page]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.page)));
+document.querySelectorAll("[data-goto]").forEach(btn=>btn.addEventListener("click",()=>navigate(btn.dataset.goto)));
+document.querySelectorAll("[data-template]").forEach(btn=>btn.addEventListener("click",()=>{
+$("appName").value=btn.dataset.name||"My App";
+$("idea").value=btn.dataset.template;
+if(btn.dataset.engine){const el=document.querySelector(`input[name="engine"][value="${btn.dataset.engine}"]`);if(el)el.checked=true}
+navigate("generator");
+}));
+
+async function request(path,body=null,method="POST"){
+const options={method,headers:{"Content-Type":"application/json"}};
+if(body!==null)options.body=JSON.stringify(body);
+const response=await fetch(API+path,options);
+const text=await response.text();
+let data;
+try{data=JSON.parse(text)}catch{throw new Error("Backend से सही JSON जवाब नहीं मिला।")}
+if(!response.ok)throw new Error(data.error||data.message||"Request असफल हुई।");
+return data;
 }
 
-function readProjects() {
-  try {
-    const value = JSON.parse(localStorage.getItem(STORAGE_KEY) || "[]");
-    projects = Array.isArray(value) ? value : [];
-  } catch {
-    projects = [];
-  }
+function extractHtml(data){
+return data.html||data.app?.html||data.data?.html||data.result?.html||data.code||"";
 }
 
-function saveProjects() {
-  try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(projects));
-  } catch {
-    alert("ब्राउज़र में डेटा सेव नहीं हो पाया।");
-  }
-}
-
-function updateInfo() {
-  $("projectCount").textContent = projects.length;
-  $("currentStatus").textContent = currentApp ? "ऐप तैयार" : "तैयार";
-  $("editorCurrent").textContent = currentApp
-    ? currentApp.appName + " · " + (currentApp.engine || "auto")
-    : "कोई ऐप चुना नहीं गया।";
-  $("previewInfo").textContent = currentApp
-    ? currentApp.appName + " · " + (currentApp.summary || "Preview उपलब्ध")
-    : "पहले ऐप बनाएँ या Projects से खोलें।";
-  $("buildInfo").textContent = currentApp
-    ? "ऐप: " + currentApp.appName + " · इंजन: " + (currentApp.engine || "auto")
-    : "पहले ऐप बनाएँ या Projects से खोलें।";
-}
-
-function navigate(page) {
-  document.querySelectorAll(".page").forEach(el => {
-    el.classList.toggle("active", el.id === page);
-  });
-  document.querySelectorAll("[data-page]").forEach(el => {
-    el.classList.toggle("active", el.dataset.page === page);
-  });
-  const titles = {
-    dashboard:"AI App Builder Studio",
-    generator:"App Generator",
-    editor:"AI Editor",
-    projects:"My Projects",
-    preview:"App Preview",
-    apk:"Android APK Builder"
-  };
-  $("pageTitle").textContent = titles[page] || "AI App Builder Studio";
-  if (page === "projects") renderProjects();
-  if (page === "preview") renderPreview();
-  updateInfo();
-}
-
-document.querySelectorAll("[data-page]").forEach(btn => {
-  btn.addEventListener("click", () => navigate(btn.dataset.page));
-});
-document.querySelectorAll("[data-goto]").forEach(btn => {
-  btn.addEventListener("click", () => navigate(btn.dataset.goto));
-});
-
-async function request(path, body = null, method = "POST") {
-  const controller = new AbortController();
-  const timer = setTimeout(() => controller.abort(), 180000);
-  try {
-    const response = await fetch(API + path, {
-      method,
-      headers: body ? {"Content-Type":"application/json"} : {},
-      body: body ? JSON.stringify(body) : undefined,
-      signal: controller.signal
-    });
-    const raw = await response.text();
-    let data;
-    try { data = raw ? JSON.parse(raw) : {}; }
-    catch { data = {message:raw}; }
-    if (!response.ok) {
-      throw new Error(data.error || data.message || "Server error " + response.status);
-    }
-    return data;
-  } catch (error) {
-    if (error.name === "AbortError") {
-      throw new Error("सर्वर से जवाब आने में बहुत समय लगा।");
-    }
-    if (error instanceof TypeError) {
-      throw new Error("Backend से कनेक्शन नहीं हो रहा। Render और इंटरनेट जाँचें।");
-    }
-    throw error;
-  } finally {
-    clearTimeout(timer);
-  }
-}
-
-function extractHtml(data) {
-  const candidates = [
-    data?.html, data?.appHtml, data?.app_html,
-    data?.htmlContent, data?.html_content, data?.code,
-    data?.result?.html, data?.app?.html, data?.data?.html
-  ];
-  return candidates.find(value =>
-    typeof value === "string" && value.includes("<")
-  ) || "";
-}
-
-function setCurrentApp(app) {
-  currentApp = app;
-  const index = projects.findIndex(p => p.id === app.id);
-  if (index >= 0) projects[index] = app;
-  else projects.unshift(app);
-  projects = projects.slice(0, 100);
-  saveProjects();
-  renderProjects();
-  renderPreview();
-  updateInfo();
-}
-
-function renderPreview() {
-  if (!currentApp?.html) {
-    $("previewFrame").srcdoc =
-      "<!doctype html><html><body style='font-family:Arial;padding:24px'><h2>Preview खाली है</h2><p>पहले ऐप बनाएँ।</p></body></html>";
-    return;
-  }
-  $("previewFrame").srcdoc = currentApp.html;
-}
-
-function renderProjects() {
-  const host = $("projectsList");
-  if (!projects.length) {
-    host.innerHTML = "<p class='muted'>अभी कोई प्रोजेक्ट सेव नहीं है।</p>";
-    updateInfo();
-    return;
-  }
-  host.innerHTML = projects.map(app => `
-    <div class="project">
-      <div>
-        <strong>${esc(app.appName || "My App")}</strong>
-        <div class="small">${esc(app.engine || "auto")} · ${esc(app.updatedAt || "")}</div>
-        <div class="small">${esc(app.summary || app.idea || "")}</div>
-      </div>
-      <div class="actions">
-        <button class="btn secondary" data-open="${esc(app.id)}">खोलें</button>
-        <button class="btn red" data-delete="${esc(app.id)}">हटाएँ</button>
-      </div>
-    </div>
-  `).join("");
-
-  host.querySelectorAll("[data-open]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const app = projects.find(p => p.id === btn.dataset.open);
-      if (app) {
-        currentApp = app;
-        updateInfo();
-        navigate("preview");
-      }
-    });
-  });
-
-  host.querySelectorAll("[data-delete]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const id = btn.dataset.delete;
-      if (!confirm("क्या यह प्रोजेक्ट हटाना चाहते हैं?")) return;
-      projects = projects.filter(p => p.id !== id);
-      if (currentApp?.id === id) currentApp = null;
-      saveProjects();
-      renderProjects();
-      updateInfo();
-    });
-  });
-  updateInfo();
-}
-
-document.querySelectorAll("[data-template]").forEach(btn => {
-  btn.addEventListener("click", () => {
-    $("idea").value = btn.dataset.template;
-    $("appName").value = btn.dataset.name || "My App";
-    if (btn.dataset.engine) {
-      const input = document.querySelector(
-        'input[name="engine"][value="' + btn.dataset.engine + '"]'
-      );
-      if (input) input.checked = true;
-    }
-    navigate("generator");
-  });
-});
-
-$("generateForm").addEventListener("submit", async event => {
-  event.preventDefault();
-  const appName = $("appName").value.trim();
-  const idea = $("idea").value.trim();
-  const theme = $("theme").value;
-  const engine = getEngine();
-
-  if (!appName || !idea) {
-    status("generateStatus", "ऐप का नाम और आइडिया भरें।");
-    return;
-  }
-
-  const btn = $("generateBtn");
-  btn.disabled = true;
-  btn.textContent = "ऐप बनाया जा रहा है…";
-  status("generateStatus", "AI से ऐप बनाया जा रहा है। प्रतीक्षा करें…");
-  $("currentStatus").textContent = "बन रहा है";
-
-  try {
-    const data = await request("/api/generate", {
-      appName, idea, theme, engine
-    });
-    const html = extractHtml(data);
-    if (!html) {
-      throw new Error("Backend response में HTML नहीं मिला।");
-    }
-
-    const app = {
-      id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())),
-      appName: data.appName || appName,
-      idea,
-      theme,
-      engine: data.engine || engine,
-      summary: data.summary || "AI द्वारा बनाया गया ऐप",
-      features: data.features || [],
-      html,
-      updatedAt: new Date().toLocaleString("hi-IN")
-    };
-    setCurrentApp(app);
-    status("generateStatus", "ऐप बन गया! Preview में जाँचें।");
-    navigate("preview");
-  } catch (error) {
-    status("generateStatus", "ऐप नहीं बन पाया: " + error.message);
-    $("currentStatus").textContent = "त्रुटि";
-  } finally {
-    btn.disabled = false;
-    btn.textContent = "✨ पूरा ऐप बनाएँ";
-  }
-});
-
-$("editBtn").addEventListener("click", async () => {
-  if (!currentApp?.html) {
-    status("editStatus", "पहले ऐप बनाएँ या Projects से खोलें।");
-    return;
-  }
-  const instruction = $("editInstruction").value.trim();
-  if (!instruction) {
-    status("editStatus", "बदलाव का निर्देश लिखें।");
-    return;
-  }
-
-  const btn = $("editBtn");
-  btn.disabled = true;
-  status("editStatus", "AI आपके ऐप में बदलाव कर रहा है…");
-  try {
-    const data = await request("/api/edit-app", {
-      appName: currentApp.appName,
-      idea: currentApp.idea,
-      theme: currentApp.theme,
-      engine: currentApp.engine || "auto",
-      instruction,
-      html: currentApp.html
-    });
-    const html = extractHtml(data);
-    if (!html) throw new Error("अपडेट किया हुआ HTML नहीं मिला।");
-    setCurrentApp({
-      ...currentApp,
-      html,
-      summary: data.summary || currentApp.summary,
-      features: data.features || currentApp.features,
-      updatedAt: new Date().toLocaleString("hi-IN")
-    });
-    $("editInstruction").value = "";
-    status("editStatus", "बदलाव सेव हो गए।");
-    navigate("preview");
-  } catch (error) {
-    status("editStatus", "बदलाव नहीं हुए: " + error.message);
-  } finally {
-    btn.disabled = false;
-  }
-});
-
-$("refreshProjects").addEventListener("click", renderProjects);
-$("reloadPreview").addEventListener("click", () => {
-  renderPreview();
-  status("previewInfo", currentApp ? "Preview रीलोड हुआ।" : "पहले ऐप बनाएँ।");
-});
-$("openEditor").addEventListener("click", () => navigate("editor"));
-
-async function checkBackend() {
-  status("healthStatus", "Backend जाँचा जा रहा है…");
-  try {
-    const data = await request("/health", null, "GET");
-    status("healthStatus", "Backend जवाब दे रहा है: " + JSON.stringify(data));
-  } catch (error) {
-    status("healthStatus", "Backend जाँच असफल: " + error.message);
-  }
-}
-$("healthBtn").addEventListener("click", checkBackend);
-
-async function checkBuildStatus() {
-  try {
-    const data = await request("/api/build-status", null, "GET");
-    const url = data.downloadUrl || data.download_url ||
-      data.artifactUrl || data.url;
-    status("buildStatus",
-      "स्थिति: " + (data.status || data.conclusion || data.state || "जवाब मिला") +
-      (data.message ? " — " + data.message : "")
-    );
-
-    if (url) {
-      const link = document.createElement("a");
-      link.href = url;
-      link.target = "_blank";
-      link.rel = "noopener";
-      link.textContent = "APK / Artifact डाउनलोड करें";
-      link.style.display = "inline-block";
-      link.style.marginTop = "10px";
-      $("buildStatus").appendChild(document.createElement("br"));
-      $("buildStatus").appendChild(link);
-      if (buildTimer) {
-        clearInterval(buildTimer);
-        buildTimer = null;
-      }
-    }
-    return data;
-  } catch (error) {
-    status("buildStatus", "Build status नहीं मिला: " + error.message);
-    return null;
-  }
-}
-$("checkBuildBtn").addEventListener("click", checkBuildStatus);
-
-$("buildBtn").addEventListener("click", async () => {
-  if (buildBusy) return;
-  if (!currentApp?.idea) {
-    status("buildStatus", "पहले ऐप बनाएँ या Projects से खोलें।");
-    navigate("generator");
-    return;
-  }
-
-  buildBusy = true;
-  const btn = $("buildBtn");
-  btn.disabled = true;
-  status("buildStatus", "APK build request भेजी जा रही है…");
-
-  try {
-    const data = await request("/api/build", {
-      idea: currentApp.idea,
-      appName: currentApp.appName,
-      app_name: currentApp.appName,
-      theme: currentApp.theme,
-      engine: currentApp.engine || "auto",
-      html: currentApp.html
-    });
-    status("buildStatus", data.message || data.status || "Build request भेज दी गई।");
-    if (buildTimer) clearInterval(buildTimer);
-    await checkBuildStatus();
-    buildTimer = setInterval(checkBuildStatus, 15000);
-  } catch (error) {
-    status("buildStatus", "APK build शुरू नहीं हुआ: " + error.message);
-  } finally {
-    buildBusy = false;
-    btn.disabled = false;
-  }
-});
-
-readProjects();
-renderProjects();
-renderPreview();
+function saveProjects(){
+localStorage.setItem(STORAGE_KEY,JSON.stringify(projects));
 updateInfo();
-<script src="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"></script>  
-</script>
-const scene3d = document.getElementById("scene3d");
-const objectList = document.getElementById("objectList");
-const status3d = document.getElementById("status3d");
-
-let scene = null;
-let camera = null;
-let renderer = null;
-let selectedObject = null;
-let objects3d = [];
-let animationId = null;
-let playing3d = false;
-
-function init3d() {
-  if (renderer) return;
-
-  if (!window.THREE) {
-    status3d.textContent = "Three.js लोड नहीं हुई। इंटरनेट कनेक्शन जाँचें।";
-    return;
-  }
-
-  scene = new THREE.Scene();
-  scene.background = new THREE.Color(0x10192c);
-
-  camera = new THREE.PerspectiveCamera(
-    60,
-    scene3d.clientWidth / scene3d.clientHeight,
-    0.1,
-    1000
-  );
-  camera.position.set(6, 5, 8);
-  camera.lookAt(0, 0, 0);
-
-  renderer = new THREE.WebGLRenderer({ antialias: true });
-  renderer.setSize(scene3d.clientWidth, scene3d.clientHeight);
-  scene3d.appendChild(renderer.domElement);
-
-  scene.add(new THREE.HemisphereLight(0xffffff, 0x334466, 2));
-
-  const light = new THREE.DirectionalLight(0xffffff, 2);
-  light.position.set(5, 10, 7);
-  scene.add(light);
-
-  const grid = new THREE.GridHelper(20, 20, 0x5685ff, 0x293550);
-  scene.add(grid);
-
-  const ground = new THREE.Mesh(
-    new THREE.PlaneGeometry(20, 20),
-    new THREE.MeshStandardMaterial({ color: 0x263b32 })
-  );
-  ground.rotation.x = -Math.PI / 2;
-  ground.position.y = -0.03;
-  scene.add(ground);
-
-  function resize() {
-    if (!renderer) return;
-    const w = scene3d.clientWidth;
-    const h = scene3d.clientHeight;
-    if (!w || !h) return;
-    camera.aspect = w / h;
-    camera.updateProjectionMatrix();
-    renderer.setSize(w, h);
-  }
-
-  window.addEventListener("resize", resize);
-  animate3d();
+renderProjects();
 }
 
-function animate3d() {
-  animationId = requestAnimationFrame(animate3d);
-  if (renderer && scene && camera) renderer.render(scene, camera);
+function updateInfo(){
+$("projectCount").textContent=projects.length;
+$("currentStatus").textContent=currentApp?"ऐप तैयार":"तैयार";
+$("buildInfo").textContent=currentApp?"चुना हुआ ऐप: "+currentApp.appName:"कोई ऐप चुना नहीं गया।";
+$("editorCurrent").textContent=currentApp?"चुना हुआ ऐप: "+currentApp.appName:"कोई ऐप चुना नहीं गया।";
 }
 
-function refreshObjectList() {
-  objectList.innerHTML = "";
-
-  objects3d.forEach((obj, index) => {
-    const option = document.createElement("option");
-    option.value = String(index);
-    option.textContent = obj.name;
-    objectList.appendChild(option);
-  });
-
-  if (selectedObject) {
-    objectList.value = String(objects3d.indexOf(selectedObject));
-  }
+function readProjects(){
+try{projects=JSON.parse(localStorage.getItem(STORAGE_KEY)||"[]");if(!Array.isArray(projects))projects=[]}
+catch{projects=[]}
+renderProjects();
+updateInfo();
 }
 
-function addObject3d(type) {
-  init3d();
-  if (!scene) return;
-
-  let geometry;
-  let name;
-
-  if (type === "cube") {
-    geometry = new THREE.BoxGeometry(1, 1, 1);
-    name = "Cube " + (objects3d.length + 1);
-  } else if (type === "sphere") {
-    geometry = new THREE.SphereGeometry(0.6, 24, 16);
-    name = "Sphere " + (objects3d.length + 1);
-  } else {
-    geometry = new THREE.BoxGeometry(8, 0.2, 8);
-    name = "Ground " + (objects3d.length + 1);
-  }
-
-  const colors = [0x5685ff, 0x21c58b, 0xffa33b, 0xe45d78];
-  const material = new THREE.MeshStandardMaterial({
-    color: colors[objects3d.length % colors.length]
-  });
-
-  const obj = new THREE.Mesh(geometry, material);
-  obj.name = name;
-  obj.position.set(0, type === "ground" ? -0.1 : 1, 0);
-  scene.add(obj);
-  objects3d.push(obj);
-  selectedObject = obj;
-
-  refreshObjectList();
-  objectList.value = String(objects3d.length - 1);
-  showObject3d();
-  status3d.textContent = name + " जोड़ा गया।";
+function renderProjects(){
+const list=$("projectsList");
+list.replaceChildren();
+if(!projects.length){list.textContent="अभी कोई प्रोजेक्ट सेव नहीं है।";return}
+projects.forEach((project,index)=>{
+const row=document.createElement("div");row.className="project";
+const details=document.createElement("div");
+const name=document.createElement("strong");name.textContent=project.appName||"My App";
+const desc=document.createElement("div");desc.className="small";desc.textContent=project.summary||project.idea||"";
+details.append(name,desc);
+const actions=document.createElement("div");actions.className="actions";
+const open=document.createElement("button");open.className="btn";open.textContent="खोलें";
+open.addEventListener("click",()=>{currentApp=project;updateInfo();renderPreview();navigate("preview")});
+const remove=document.createElement("button");remove.className="btn red";remove.textContent="हटाएँ";
+remove.addEventListener("click",()=>{projects.splice(index,1);if(currentApp?.id===project.id)currentApp=null;saveProjects();updateInfo()});
+actions.append(open,remove);row.append(details,actions);list.append(row);
+});
 }
 
-function showObject3d() {
-  if (!selectedObject) return;
-
-  document.getElementById("posX").value = selectedObject.position.x;
-  document.getElementById("posY").value = selectedObject.position.y;
-  document.getElementById("posZ").value = selectedObject.position.z;
-  document.getElementById("objScale").value = selectedObject.scale.x;
+function renderPreview(){
+if(!currentApp||!currentApp.html){$("previewFrame").srcdoc="";status("previewInfo","पहले ऐप बनाएँ या Projects से खोलें।");return}
+$("previewFrame").srcdoc=currentApp.html;
+status("previewInfo","Preview: "+currentApp.appName);
 }
 
-document.getElementById("addCube").addEventListener("click", () => addObject3d("cube"));
-document.getElementById("addSphere").addEventListener("click", () => addObject3d("sphere"));
-document.getElementById("addGround").addEventListener("click", () => addObject3d("ground"));
-
-objectList.addEventListener("change", () => {
-  selectedObject = objects3d[Number(objectList.value)] || null;
-  showObject3d();
+$("generateForm").addEventListener("submit",async event=>{
+event.preventDefault();
+const btn=$("generateBtn");btn.disabled=true;
+status("generateStatus","AI आपका ऐप बना रहा है। कृपया प्रतीक्षा करें…");
+const appName=$("appName").value.trim();
+const idea=$("idea").value.trim();
+const theme=$("theme").value;
+const engine=document.querySelector('input[name="engine"]:checked')?.value||"auto";
+try{
+const data=await request("/api/generate",{appName,idea,theme,engine});
+const html=extractHtml(data);
+if(!html||!html.includes("<"))throw new Error("AI ने पूरा HTML ऐप नहीं लौटाया।");
+currentApp={id:Date.now().toString(),appName:data.appName||appName,idea,theme,engine,html,summary:data.summary||"",features:data.features||[],createdAt:new Date().toISOString()};
+projects.unshift(currentApp);
+saveProjects();
+renderPreview();
+status("generateStatus","ऐप बन गया! Preview पेज खोलकर देखें।");
+navigate("preview");
+}catch(error){status("generateStatus","ऐप नहीं बना: "+error.message)}
+finally{btn.disabled=false}
 });
 
-document.getElementById("applyObject").addEventListener("click", () => {
-  if (!selectedObject) {
-    status3d.textContent = "पहले कोई ऑब्जेक्ट चुनें।";
-    return;
-  }
-
-  selectedObject.position.set(
-    Number(document.getElementById("posX").value) || 0,
-    Number(document.getElementById("posY").value) || 0,
-    Number(document.getElementById("posZ").value) || 0
-  );
-
-  const scale = Number(document.getElementById("objScale").value) || 1;
-  selectedObject.scale.set(scale, scale, scale);
-  status3d.textContent = "ऑब्जेक्ट में बदलाव लागू हो गए।";
+$("editBtn").addEventListener("click",async()=>{
+if(!currentApp){status("editStatus","पहले ऐप बनाएँ या Projects से खोलें।");return}
+const instruction=$("editInstruction").value.trim();
+if(!instruction){status("editStatus","पहले बदलाव लिखें।");return}
+const btn=$("editBtn");btn.disabled=true;status("editStatus","AI बदलाव कर रहा है…");
+try{
+const data=await request("/api/edit-app",{appName:currentApp.appName,idea:currentApp.idea,instruction,editInstruction:instruction,html:currentApp.html,theme:currentApp.theme,engine:currentApp.engine});
+const html=extractHtml(data);
+if(!html)throw new Error("AI ने बदला हुआ HTML नहीं लौटाया।");
+currentApp.html=html;
+currentApp.summary=data.summary||currentApp.summary;
+const index=projects.findIndex(p=>p.id===currentApp.id);
+if(index>=0)projects[index]=currentApp;else projects.unshift(currentApp);
+saveProjects();renderPreview();status("editStatus","बदलाव हो गए। Preview में ऐप देखें।");
+}catch(error){status("editStatus","बदलाव नहीं हुए: "+error.message)}
+finally{btn.disabled=false}
 });
 
-document.getElementById("delete3d").addEventListener("click", () => {
-  if (!selectedObject) {
-    status3d.textContent = "पहले कोई ऑब्जेक्ट चुनें।";
-    return;
-  }
+$("refreshProjects").addEventListener("click",readProjects);
+$("reloadPreview").addEventListener("click",renderPreview);
+$("openEditor").addEventListener("click",()=>navigate("editor"));
 
-  scene.remove(selectedObject);
-  objects3d = objects3d.filter(obj => obj !== selectedObject);
-  selectedObject = null;
-  refreshObjectList();
-  status3d.textContent = "ऑब्जेक्ट हटा दिया गया।";
+async function checkBackend(){
+status("healthStatus","Backend जाँचा जा रहा है…");
+try{const data=await request("/health",null,"GET");status("healthStatus","Backend जवाब दे रहा है: "+JSON.stringify(data))}
+catch(error){status("healthStatus","Backend जाँच असफल: "+error.message)}
+}
+$("healthBtn").addEventListener("click",checkBackend);
+
+async function checkBuildStatus(){
+try{
+const data=await request("/api/build-status",null,"GET");
+const url=data.downloadUrl||data.download_url||data.artifactUrl||data.url;
+status("buildStatus","स्थिति: "+(data.status||data.conclusion||data.state||"जवाब मिला")+(data.message?" — "+data.message:""));
+if(url){
+const link=document.createElement("a");link.href=url;link.target="_blank";link.rel="noopener";link.textContent="APK / Artifact डाउनलोड करें";
+link.style.display="inline-block";link.style.marginTop="10px";
+$("buildStatus").append(document.createElement("br"),link);
+if(buildTimer){clearInterval(buildTimer);buildTimer=null}
+}
+return data;
+}catch(error){status("buildStatus","Build status नहीं मिला: "+error.message);return null}
+}
+
+$("checkBuildBtn").addEventListener("click",checkBuildStatus);
+$("buildBtn").addEventListener("click",async()=>{
+if(buildBusy)return;
+if(!currentApp?.idea){status("buildStatus","पहले ऐप बनाएँ या Projects से खोलें।");navigate("generator");return}
+buildBusy=true;
+const btn=$("buildBtn");btn.disabled=true;
+status("buildStatus","APK build request भेजी जा रही है…");
+try{
+const data=await request("/api/build",{idea:currentApp.idea,appName:currentApp.appName,app_name:currentApp.appName,theme:currentApp.theme,engine:currentApp.engine||"auto",html:currentApp.html});
+status("buildStatus",data.message||data.status||"Build request भेज दी गई।");
+if(buildTimer)clearInterval(buildTimer);
+await checkBuildStatus();
+buildTimer=setInterval(checkBuildStatus,15000);
+}catch(error){status("buildStatus","APK build शुरू नहीं हुआ: "+error.message)}
+finally{buildBusy=false;btn.disabled=false}
 });
 
-document.getElementById("play3d").addEventListener("click", () => {
-  init3d();
-  playing3d = true;
-  status3d.textContent = "3D सीन चल रहा है।";
+/* 3D Editor */
+let scene3dWorld=null,camera3d=null,renderer3d=null,objects3d=[],selectedObject3d=null,threeStarted=false,playMode3d=false,resizeObserver3d=null;
+
+function init3d(){
+if(threeStarted)return true;
+const host=$("scene3d");
+if(!window.THREE){status("status3d","Three.js लोड नहीं हुई। इंटरनेट जाँचें और पेज रिफ्रेश करें।");return false}
+const w=host.clientWidth||600,h=host.clientHeight||360;
+scene3dWorld=new THREE.Scene();
+scene3dWorld.background=new THREE.Color(0x10192c);
+camera3d=new THREE.PerspectiveCamera(60,w/h,.1,1000);
+camera3d.position.set(6,5,8);camera3d.lookAt(0,0,0);
+renderer3d=new THREE.WebGLRenderer({antialias:true});
+renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
+renderer3d.setSize(w,h);host.replaceChildren(renderer3d.domElement);
+scene3dWorld.add(new THREE.HemisphereLight(0xffffff,0x334466,2));
+const light=new THREE.DirectionalLight(0xffffff,2);light.position.set(5,10,7);scene3dWorld.add(light);
+scene3dWorld.add(new THREE.GridHelper(20,20,0x5685ff,0x293550));
+const floor=new THREE.Mesh(new THREE.PlaneGeometry(20,20),new THREE.MeshStandardMaterial({color:0x263b32,side:THREE.DoubleSide}));
+floor.rotation.x=-Math.PI/2;floor.position.y=-.04;floor.name="Editor Floor";scene3dWorld.add(floor);
+threeStarted=true;
+function renderLoop(){
+if(!renderer3d)return;
+requestAnimationFrame(renderLoop);
+if(playMode3d&&selectedObject3d&&selectedObject3d.userData.kind!=="ground")selectedObject3d.rotation.y+=.008;
+renderer3d.render(scene3dWorld,camera3d);
+}
+renderLoop();
+if(resizeObserver3d)resizeObserver3d.disconnect();
+resizeObserver3d=new ResizeObserver(()=>{
+if(!renderer3d||!host.clientWidth||!host.clientHeight)return;
+camera3d.aspect=host.clientWidth/host.clientHeight;
+camera3d.updateProjectionMatrix();renderer3d.setSize(host.clientWidth,host.clientHeight);
+});
+resizeObserver3d.observe(host);
+return true;
+}
+
+function updateObjectList3d(){
+const list=$("objectList");list.replaceChildren();
+objects3d.forEach((obj,i)=>{const option=document.createElement("option");option.value=String(i);option.textContent=obj.name;list.append(option)});
+if(selectedObject3d)list.value=String(objects3d.indexOf(selectedObject3d));
+}
+
+function selectObject3d(obj){
+selectedObject3d=obj;updateObjectList3d();
+if(!obj)return;
+$("posX").value=obj.position.x;$("posY").value=obj.position.y;$("posZ").value=obj.position.z;$("objScale").value=obj.scale.x;
+}
+
+function addObject3d(kind){
+if(!init3d())return;
+let geometry,name;
+if(kind==="cube"){geometry=new THREE.BoxGeometry(1,1,1);name="Cube"}
+else if(kind==="sphere"){geometry=new THREE.SphereGeometry(.6,24,16);name="Sphere"}
+else{geometry=new THREE.BoxGeometry(8,.2,8);name="Ground"}
+const palette=[0x5685ff,0x21c58b,0xffa33b,0xe45d78,0xc084fc];
+const material=new THREE.MeshStandardMaterial({color:palette[objects3d.length%palette.length]});
+const obj=new THREE.Mesh(geometry,material);
+obj.name=name+" "+(objects3d.filter(o=>o.userData.kind===kind).length+1);
+obj.userData.kind=kind;obj.position.set(0,kind==="ground"?-.1:1,0);
+scene3dWorld.add(obj);objects3d.push(obj);selectObject3d(obj);
+status("status3d",obj.name+" जोड़ा गया।");
+}
+
+function sceneData3d(){
+return objects3d.map(o=>({name:o.name,kind:o.userData.kind||"cube",color:o.material.color.getHex(),position:o.position.toArray(),rotation:o.rotation.toArray().slice(0,3),scale:o.scale.toArray()}));
+}
+
+function clearObjects3d(){
+objects3d.forEach(o=>{scene3dWorld.remove(o);o.geometry.dispose();o.material.dispose()});
+objects3d=[];selectedObject3d=null;updateObjectList3d();
+}
+
+function loadSceneData3d(data){
+if(!init3d())return;
+clearObjects3d();
+(Array.isArray(data)?data:[]).forEach(item=>{
+let g;
+if(item.kind==="sphere")g=new THREE.SphereGeometry(.6,24,16);
+else if(item.kind==="ground")g=new THREE.BoxGeometry(8,.2,8);
+else g=new THREE.BoxGeometry(1,1,1);
+const obj=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:item.color??0x5685ff}));
+obj.name=item.name||item.kind;obj.userData.kind=item.kind||"cube";
+obj.position.fromArray(item.position||[0,1,0]);
+if(item.rotation)obj.rotation.set(...item.rotation);
+obj.scale.fromArray(item.scale||[1,1,1]);
+scene3dWorld.add(obj);objects3d.push(obj);
+});
+selectObject3d(objects3d[objects3d.length-1]||null);
+}
+
+$("addCube").addEventListener("click",()=>addObject3d("cube"));
+$("addSphere").addEventListener("click",()=>addObject3d("sphere"));
+$("addGround").addEventListener("click",()=>addObject3d("ground"));
+$("objectList").addEventListener("change",()=>selectObject3d(objects3d[Number($("objectList").value)]||null));
+
+$("applyObject").addEventListener("click",()=>{
+if(!selectedObject3d){status("status3d","पहले कोई ऑब्जेक्ट चुनें।");return}
+selectedObject3d.position.set(Number($("posX").value)||0,Number($("posY").value)||0,Number($("posZ").value)||0);
+const s=Number($("objScale").value)||1;selectedObject3d.scale.set(s,s,s);
+status("status3d","ऑब्जेक्ट में बदलाव लागू हो गए।");
 });
 
-document.getElementById("stop3d").addEventListener("click", () => {
-  playing3d = false;
-  status3d.textContent = "सीन रोक दिया गया।";
+$("delete3d").addEventListener("click",()=>{
+if(!selectedObject3d){status("status3d","पहले कोई ऑब्जेक्ट चुनें।");return}
+scene3dWorld.remove(selectedObject3d);
+selectedObject3d.geometry.dispose();selectedObject3d.material.dispose();
+objects3d=objects3d.filter(o=>o!==selectedObject3d);selectedObject3d=null;
+updateObjectList3d();status("status3d","ऑब्जेक्ट हटा दिया गया।");
 });
 
-document.getElementById("save3d").addEventListener("click", () => {
-  const data = objects3d.map(obj => ({
-    name: obj.name,
-    type: obj.geometry.type,
-    color: obj.material.color.getHex(),
-    position: obj.position.toArray(),
-    scale: obj.scale.toArray()
-  }));
+$("play3d").addEventListener("click",()=>{if(!init3d())return;playMode3d=true;status("status3d","Play चालू: चुना हुआ ऑब्जेक्ट घूमेगा।")});
+$("stop3d").addEventListener("click",()=>{playMode3d=false;status("status3d","Play रोक दिया गया।")});
 
-  localStorage.setItem("aiAppStudio3DScene", JSON.stringify(data));
-  status3d.textContent = "3D सीन इस ब्राउज़र में सेव हो गया।";
+$("save3d").addEventListener("click",()=>{
+try{localStorage.setItem("aiAppStudio3DScene",JSON.stringify(sceneData3d()));status("status3d","3D सीन ब्राउज़र में सेव हुआ।")}
+catch(e){status("status3d","सेव नहीं हुआ: "+e.message)}
 });
 
-document.getElementById("export3d").addEventListener("click", () => {
-  const data = objects3d.map(obj => ({
-    name: obj.name,
-    type: obj.geometry.type,
-    color: obj.material.color.getHex(),
-    position: obj.position.toArray(),
-    scale: obj.scale.toArray()
-  }));
+$("load3d").addEventListener("click",()=>{
+try{const data=JSON.parse(localStorage.getItem("aiAppStudio3DScene")||"[]");loadSceneData3d(data);status("status3d",data.length?"सेव किया हुआ सीन लोड हुआ।":"कोई सेव किया हुआ सीन नहीं मिला।")}
+catch(e){status("status3d","सीन लोड नहीं हुआ: "+e.message)}
+});
 
-  const html = `<!DOCTYPE html>
-<html lang="en"><head><meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1">
-<title>My 3D Scene</title>
-<style>body{margin:0;overflow:hidden}</style></head><body>
-<script src="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"><\/script>
-<script>
-const scene=new THREE.Scene();
-scene.background=new THREE.Color(0x10192c);
+$("export3d").addEventListener("click",()=>{
+const data=sceneData3d();
+const gameHtml=`<!doctype html>
+<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>My 3D Scene</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden}canvas{display:block}</style>
+<script src="https://cdn.jsdelivr.net/npm/three@0.180.0/build/three.min.js"><\/script></head>
+<body><script>
+const scene=new THREE.Scene();scene.background=new THREE.Color(0x10192c);
 const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);
 camera.position.set(6,5,8);camera.lookAt(0,0,0);
 const renderer=new THREE.WebGLRenderer({antialias:true});
@@ -871,29 +467,27 @@ renderer.setSize(innerWidth,innerHeight);document.body.appendChild(renderer.domE
 scene.add(new THREE.HemisphereLight(0xffffff,0x334466,2));
 const light=new THREE.DirectionalLight(0xffffff,2);light.position.set(5,10,7);scene.add(light);
 scene.add(new THREE.GridHelper(20,20));
-const objects=${JSON.stringify(data)};
-objects.forEach(o=>{
- let g;
- if(o.type==="SphereGeometry")g=new THREE.SphereGeometry(.6,24,16);
- else if(o.type==="PlaneGeometry")g=new THREE.PlaneGeometry(8,8);
- else g=new THREE.BoxGeometry(1,1,1);
- const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:o.color}));
- m.position.fromArray(o.position);m.scale.fromArray(o.scale);scene.add(m);
+const data=${JSON.stringify(data)};
+data.forEach(o=>{
+let g=o.kind==="sphere"?new THREE.SphereGeometry(.6,24,16):new THREE.BoxGeometry(1,1,1);
+const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:o.color}));
+m.position.fromArray(o.position);m.rotation.set(...(o.rotation||[0,0,0]));
+m.scale.fromArray(o.scale);scene.add(m);
 });
 function loop(){requestAnimationFrame(loop);renderer.render(scene,camera)}loop();
 onresize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)};
 <\/script></body></html>`;
-
-  const blob = new Blob([html], { type: "text/html" });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  a.href = url;
-  a.download = "my-3d-scene.html";
-  a.click();
-  URL.revokeObjectURL(url);
-  status3d.textContent = "3D Scene HTML एक्सपोर्ट हो गया।";
+const blob=new Blob([gameHtml],{type:"text/html"});
+const url=URL.createObjectURL(blob);const a=document.createElement("a");
+a.href=url;a.download="my-3d-scene.html";a.click();
+setTimeout(()=>URL.revokeObjectURL(url),1000);
+status("status3d","3D Scene HTML एक्सपोर्ट हुआ।");
 });
 
-status3d.textContent = "3D Editor का कोड तैयार है  
+readProjects();
+renderProjects();
+renderPreview();
+updateInfo();
+</script>
 </body>
 </html>
