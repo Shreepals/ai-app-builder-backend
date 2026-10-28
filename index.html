@@ -500,8 +500,10 @@ function movePlayer3d(dx,dy,dz){
   const halfHeight =
     (obj.userData.kind==="sphere" ? 0.6 : 0.5) * obj.scale.y;
 
-  obj.position.x += dx;
-  obj.position.z += dz;
+  const limit = 3.3;
+
+obj.position.x = Math.max(-limit, Math.min(limit, obj.position.x + dx));
+obj.position.z = Math.max(-limit, Math.min(limit, obj.position.z + dz));
 
   // सामान्य movement से ऊँचाई नहीं बदलेगी
   if(dy > 0 && obj.position.y <= halfHeight + 0.02){
