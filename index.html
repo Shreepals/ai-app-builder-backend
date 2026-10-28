@@ -422,9 +422,22 @@ $("posX").value=obj.position.x;$("posY").value=obj.position.y;$("posZ").value=ob
 function addObject3d(kind){
 if(!init3d())return;
 let geometry,name;
-if(kind==="cube"){geometry=new THREE.BoxGeometry(1,1,1);name="Cube"}
-else if(kind==="sphere"){geometry=new THREE.SphereGeometry(.6,24,16);name="Sphere"}
-else{geometry=new THREE.BoxGeometry(8,.2,8);name="Ground"}
+if(kind==="cube"){
+  geometry=new THREE.BoxGeometry(1,1,1);
+  name="Cube";
+}
+else if(kind==="sphere"){
+  geometry=new THREE.SphereGeometry(.6,24,16);
+  name="Sphere";
+}
+else if(kind==="wall"){
+  geometry=new THREE.BoxGeometry(8,2,.3);
+  name="Wall";
+}
+else{
+  geometry=new THREE.BoxGeometry(8,.2,8);
+  name="Ground";
+}
 const palette=[0x5685ff,0x21c58b,0xffa33b,0xe45d78,0xc084fc];
 const material=new THREE.MeshStandardMaterial({color:palette[objects3d.length%palette.length]});
 const obj=new THREE.Mesh(geometry,material);
@@ -488,26 +501,54 @@ $("stop3d").addEventListener("click",()=>{playMode3d=false;status("status3d","Pl
 function movePlayer3d(dx,dy,dz){
   if(!init3d()) return;
 
-  if(!selectedObject3d ||
-     selectedObject3d.userData.kind==="ground"){
+  const obj = selectedObject3d;
+
+  if(!obj || obj.userData.kind==="ground" ||
+     obj.userData.kind==="wall"){
     status("status3d","पहले Cube या Sphere चुनें।");
     return;
   }
 
-  const obj = selectedObject3d;
-
-  // Player को जमीन के नीचे जाने से रोकें
   const halfHeight =
     (obj.userData.kind==="sphere" ? 0.6 : 0.5) * obj.scale.y;
 
-  const limit = 9.8;
+  const limitX = 3.5;
+  const limitZ = 3.5;
 
-obj.position.x = Math.max(-limit, Math.min(limit, obj.position.x + dx));
-obj.position.z = Math.max(-limit, Math.min(limit, obj.position.z + dz));
+  const oldPosition = obj.position.clone();
 
-  // सामान्य movement से ऊँचाई नहीं बदलेगी
-  if(dy > 0 && obj.position.y <= halfHeight + 0.02){
-    obj.position.y = halfHeight;
+  obj.position.x = Math.max(
+    -limitX,
+    Math.min(limitX, obj.position.x + dx)
+  );
+
+  obj.position.z = Math.max(
+    -limitZ,
+    Math.min(limitZ, obj.position.z + dz)
+  );
+
+  // Wall collision
+  const playerBox = new THREE.Box3();
+  const wallBox = new THREE.Box3();
+  playerBox.setFromObject(obj);
+
+  let hitWall = false;
+
+  for(const other of objects3d){
+    if(other === obj || other.userData.kind !== "wall") continue;
+
+    wallBox.setFromObject(other);
+
+    if(playerBox.intersectsBox(wallBox)){
+      hitWall = true;
+      break;
+    }
+  }
+
+  if(hitWall){
+    obj.position.x = oldPosition.x;
+    obj.position.z = oldPosition.z;
+    status("status3d","दीवार से टक्कर! आगे रास्ता बंद है।");
   }
 
   if(obj.position.y < halfHeight){
@@ -518,6 +559,7 @@ obj.position.z = Math.max(-limit, Math.min(limit, obj.position.z + dz));
   $("posX").value = obj.position.x.toFixed(1);
   $("posY").value = obj.position.y.toFixed(1);
   $("posZ").value = obj.position.z.toFixed(1);
+}
 
   status("status3d","Player चल रहा है।");
 }
