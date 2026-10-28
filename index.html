@@ -344,6 +344,7 @@ finally{buildBusy=false;btn.disabled=false}
 
 /* 3D Editor */
 let scene3dWorld=null,camera3d=null,renderer3d=null,objects3d=[],selectedObject3d=null,threeStarted=false,playMode3d=false,resizeObserver3d=null;
+let jumpVelocity3d = 0;  
 
 function init3d(){
 if(threeStarted)return true;
@@ -479,7 +480,15 @@ $("moveForward").addEventListener("click",()=>movePlayer3d(0,0,-1));
 $("moveBack").addEventListener("click",()=>movePlayer3d(0,0,1));
 $("moveLeft").addEventListener("click",()=>movePlayer3d(-1,0,0));
 $("moveRight").addEventListener("click",()=>movePlayer3d(1,0,0));
-$("jumpPlayer").addEventListener("click",()=>movePlayer3d(0,1,0));  
+$("jumpPlayer").addEventListener("click",()=>{
+  if(!selectedObject3d || selectedObject3d.userData.kind==="ground"){
+    status("status3d","पहले Cube या Sphere चुनें।");
+    return;
+  }
+  playMode3d=true;
+  jumpVelocity3d=0.18;
+  status("status3d","Jump शुरू हुआ!");
+});
 
 $("save3d").addEventListener("click",()=>{
 try{localStorage.setItem("aiAppStudio3DScene",JSON.stringify(sceneData3d()));status("status3d","3D सीन ब्राउज़र में सेव हुआ।")}
