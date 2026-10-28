@@ -156,23 +156,23 @@ jobs:
 
           if [ -z "$APP_HTML_GZIP_B64" ]; then
             set +e
-http_code=$(curl --silent --show-error \
-  --max-time 300 \
-  -w '%{http_code}' \
-  -X POST \
-  "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
-  -H "Content-Type: application/json" \
-  -d @request.json \
-  -o response.json)
-curl_exit=$?
-set -e
+            http_code=$(curl --silent --show-error \
+              --max-time 300 \
+              -w '%{http_code}' \
+              -X POST \
+              "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
+              -H "Content-Type: application/json" \
+              -d @request.json \
+              -o response.json)
+            curl_exit=$?
+            set -e
 
-if [ "$curl_exit" -ne 0 ] || [ "$http_code" != "200" ]; then
-  echo "Gemini HTTP status: ${http_code:-unknown}"
-  echo "Gemini response:"
-  cat response.json || true
-  exit 1
-fi
+            if [ "$curl_exit" -ne 0 ] || [ "$http_code" != "200" ]; then
+              echo "Gemini HTTP status: ${http_code:-unknown}"
+              echo "Gemini response:"
+              cat response.json || true
+              exit 1
+            fi
 
             python3 - <<'PY'
           import json, re
@@ -250,7 +250,6 @@ fi
           print("HTML validation successful. Length:", len(html))
           PY
 
-      
       - name: Add local Three.js for 3D games
         run: |
           set -euo pipefail
