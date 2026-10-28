@@ -344,7 +344,8 @@ finally{buildBusy=false;btn.disabled=false}
 
 /* 3D Editor */
 let scene3dWorld=null,camera3d=null,renderer3d=null,objects3d=[],selectedObject3d=null,threeStarted=false,playMode3d=false,resizeObserver3d=null;
-let jumpVelocity3d = 0;  
+let jumpVelocity3d = 0;
+let cameraFollow3d = true;  
 
 function init3d(){
 if(threeStarted)return true;
@@ -382,6 +383,17 @@ if(playMode3d && selectedObject3d && selectedObject3d.userData.kind!=="ground"){
     jumpVelocity3d = 0;
   }
   }
+if(cameraFollow3d && selectedObject3d && selectedObject3d.userData.kind!=="ground"){
+  const target = selectedObject3d.position;
+  const desired = new THREE.Vector3(
+    target.x + 6,
+    target.y + 5,
+    target.z + 8
+  );
+
+  camera3d.position.lerp(desired, 0.05);
+  camera3d.lookAt(target);
+}
 renderer3d.render(scene3dWorld,camera3d);
 }
 renderLoop();
