@@ -156,7 +156,7 @@ jobs:
 
           if [ -z "$APP_HTML_GZIP_B64" ]; then
             curl --fail-with-body --silent --show-error \
-              --retry 2 --max-time 300 \
+              --retry 5 --retry-all-errors --retry-delay 2 --max-time 300 \
               -X POST \
               "https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent?key=${GEMINI_API_KEY}" \
               -H "Content-Type: application/json" \
