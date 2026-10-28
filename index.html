@@ -367,7 +367,21 @@ threeStarted=true;
 function renderLoop(){
 if(!renderer3d)return;
 requestAnimationFrame(renderLoop);
-if(playMode3d&&selectedObject3d&&selectedObject3d.userData.kind!=="ground")selectedObject3d.rotation.y+=.008;
+if(playMode3d && selectedObject3d && selectedObject3d.userData.kind!=="ground"){
+  const obj = selectedObject3d;
+  obj.rotation.y += 0.008;
+
+  const halfHeight = (obj.userData.kind==="sphere" ? 0.6 : 0.5) * obj.scale.y;
+  const groundY = halfHeight;
+
+  obj.position.y += jumpVelocity3d;
+  jumpVelocity3d -= 0.008;
+
+  if(obj.position.y <= groundY){
+    obj.position.y = groundY;
+    jumpVelocity3d = 0;
+  }
+  }
 renderer3d.render(scene3dWorld,camera3d);
 }
 renderLoop();
@@ -485,9 +499,16 @@ $("jumpPlayer").addEventListener("click",()=>{
     status("status3d","पहले Cube या Sphere चुनें।");
     return;
   }
-  playMode3d=true;
-  jumpVelocity3d=0.18;
-  status("status3d","Jump शुरू हुआ!");
+
+  const halfHeight =
+    (selectedObject3d.userData.kind==="sphere" ? 0.6 : 0.5)
+    * selectedObject3d.scale.y;
+
+  if(selectedObject3d.position.y <= halfHeight + 0.02 && jumpVelocity3d <= 0){
+    jumpVelocity3d = 0.18;
+    playMode3d = true;
+    status("status3d","जंप चालू है!");
+  }
 });
 
 $("save3d").addEventListener("click",()=>{
