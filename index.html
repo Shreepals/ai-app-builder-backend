@@ -561,9 +561,6 @@ function movePlayer3d(dx,dy,dz){
   $("posZ").value = obj.position.z.toFixed(1);
 }
 
-  status("status3d","Player चल रहा है।");
-}
-
 $("moveForward").addEventListener("click",()=>movePlayer3d(0,0,-1));
 $("moveBack").addEventListener("click",()=>movePlayer3d(0,0,1));
 $("moveLeft").addEventListener("click",()=>movePlayer3d(-1,0,0));
