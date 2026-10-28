@@ -376,12 +376,12 @@ if(playMode3d && selectedObject3d && selectedObject3d.userData.kind!=="ground"){
   const groundY = halfHeight;
 
   obj.position.y += jumpVelocity3d;
-  jumpVelocity3d -= 0.008;
+jumpVelocity3d -= 0.008;
 
-  if(obj.position.y <= groundY){
-    obj.position.y = groundY;
-    jumpVelocity3d = 0;
-  }
+if (obj.position.y < groundY) {
+  obj.position.y = groundY;
+  jumpVelocity3d = 0;
+}
   }
 if(cameraFollow3d && selectedObject3d && selectedObject3d.userData.kind!=="ground"){
   const target = selectedObject3d.position;
