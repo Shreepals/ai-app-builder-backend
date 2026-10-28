@@ -130,6 +130,21 @@ iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);bord
 <div class="card"><h2>🎮 3D Game Editor</h2><p>Cube और Sphere जोड़ें, उनका आकार और स्थान बदलें। Three.js के लिए इंटरनेट चाहिए।</p>
 <div class="actions"><button class="btn" id="addCube">+ Cube</button><button class="btn" id="addSphere">+ Sphere</button><button class="btn secondary" id="addGround">+ Ground</button><button class="btn green" id="play3d">▶ Play</button><button class="btn red" id="stop3d">■ Stop</button></div>
 <div id="scene3d" style="margin-top:15px"></div>
+<div id="playerControls" style="margin-top:12px;padding:12px;background:#10192c;border-radius:10px">
+  <h3>🎮 Player Controls</h3>
+  <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:320px;margin:auto">
+    <span></span>
+    <button class="btn" id="moveForward">⬆️ आगे</button>
+    <span></span>
+    <button class="btn" id="moveLeft">⬅️ बाएँ</button>
+    <button class="btn green" id="jumpPlayer">⬆️ कूदें</button>
+    <button class="btn" id="moveRight">➡️ दाएँ</button>
+    <span></span>
+    <button class="btn" id="moveBack">⬇️ पीछे</button>
+    <span></span>
+  </div>
+  <p class="small">पहले Cube या Sphere चुनें, फिर बटन दबाएँ।</p>
+</div>  
 <label for="objectList">Scene Objects</label><select id="objectList"></select>
 <label for="posX">Position X</label><input id="posX" type="number" step="0.5" value="0">
 <label for="posY">Position Y</label><input id="posY" type="number" step="0.5" value="1">
@@ -441,6 +456,30 @@ updateObjectList3d();status("status3d","ऑब्जेक्ट हटा द�
 
 $("play3d").addEventListener("click",()=>{if(!init3d())return;playMode3d=true;status("status3d","Play चालू: चुना हुआ ऑब्जेक्ट घूमेगा।")});
 $("stop3d").addEventListener("click",()=>{playMode3d=false;status("status3d","Play रोक दिया गया।")});
+function movePlayer3d(dx,dy,dz){
+  if(!init3d())return;
+  if(!selectedObject3d){
+    status("status3d","पहले Cube या Sphere चुनें।");
+    return;
+  }
+  if(selectedObject3d.userData.kind==="ground"){
+    status("status3d","चलाने के लिए Cube या Sphere चुनें।");
+    return;
+  }
+  selectedObject3d.position.x+=dx;
+  selectedObject3d.position.y+=dy;
+  selectedObject3d.position.z+=dz;
+  $("posX").value=selectedObject3d.position.x.toFixed(1);
+  $("posY").value=selectedObject3d.position.y.toFixed(1);
+  $("posZ").value=selectedObject3d.position.z.toFixed(1);
+  status("status3d","Player चल रहा है।");
+}
+
+$("moveForward").addEventListener("click",()=>movePlayer3d(0,0,-1));
+$("moveBack").addEventListener("click",()=>movePlayer3d(0,0,1));
+$("moveLeft").addEventListener("click",()=>movePlayer3d(-1,0,0));
+$("moveRight").addEventListener("click",()=>movePlayer3d(1,0,0));
+$("jumpPlayer").addEventListener("click",()=>movePlayer3d(0,1,0));  
 
 $("save3d").addEventListener("click",()=>{
 try{localStorage.setItem("aiAppStudio3DScene",JSON.stringify(sceneData3d()));status("status3d","3D सीन ब्राउज़र में सेव हुआ।")}
