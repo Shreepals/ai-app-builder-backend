@@ -429,7 +429,9 @@ const palette=[0x5685ff,0x21c58b,0xffa33b,0xe45d78,0xc084fc];
 const material=new THREE.MeshStandardMaterial({color:palette[objects3d.length%palette.length]});
 const obj=new THREE.Mesh(geometry,material);
 obj.name=name+" "+(objects3d.filter(o=>o.userData.kind===kind).length+1);
-obj.userData.kind=kind;obj.position.set(0,kind==="ground"?-.1:1,0);
+obj.userData.kind=kind;
+const halfHeight = kind==="sphere" ? 0.6 : 0.5;
+obj.position.set(0,kind==="ground"?-.1:halfHeight,0);
 scene3dWorld.add(obj);objects3d.push(obj);selectObject3d(obj);
 status("status3d",obj.name+" जोड़ा गया।");
 }
