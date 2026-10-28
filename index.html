@@ -484,21 +484,37 @@ updateObjectList3d();status("status3d","ऑब्जेक्ट हटा द�
 $("play3d").addEventListener("click",()=>{if(!init3d())return;playMode3d=true;status("status3d","Play चालू: चुना हुआ ऑब्जेक्ट घूमेगा।")});
 $("stop3d").addEventListener("click",()=>{playMode3d=false;status("status3d","Play रोक दिया गया।")});
 function movePlayer3d(dx,dy,dz){
-  if(!init3d())return;
-  if(!selectedObject3d){
+  if(!init3d()) return;
+
+  if(!selectedObject3d ||
+     selectedObject3d.userData.kind==="ground"){
     status("status3d","पहले Cube या Sphere चुनें।");
     return;
   }
-  if(selectedObject3d.userData.kind==="ground"){
-    status("status3d","चलाने के लिए Cube या Sphere चुनें।");
-    return;
+
+  const obj = selectedObject3d;
+
+  // Player को जमीन के नीचे जाने से रोकें
+  const halfHeight =
+    (obj.userData.kind==="sphere" ? 0.6 : 0.5) * obj.scale.y;
+
+  obj.position.x += dx;
+  obj.position.z += dz;
+
+  // सामान्य movement से ऊँचाई नहीं बदलेगी
+  if(dy > 0 && obj.position.y <= halfHeight + 0.02){
+    obj.position.y = halfHeight;
   }
-  selectedObject3d.position.x+=dx;
-  selectedObject3d.position.y+=dy;
-  selectedObject3d.position.z+=dz;
-  $("posX").value=selectedObject3d.position.x.toFixed(1);
-  $("posY").value=selectedObject3d.position.y.toFixed(1);
-  $("posZ").value=selectedObject3d.position.z.toFixed(1);
+
+  if(obj.position.y < halfHeight){
+    obj.position.y = halfHeight;
+    jumpVelocity3d = 0;
+  }
+
+  $("posX").value = obj.position.x.toFixed(1);
+  $("posY").value = obj.position.y.toFixed(1);
+  $("posZ").value = obj.position.z.toFixed(1);
+
   status("status3d","Player चल रहा है।");
 }
 
