@@ -551,6 +551,21 @@ function resizeSelected3d(amount = 0.1){
 
   renderLoop();
   }  
+$("rotateLeft3d").addEventListener("click", () => {
+  rotateSelected3d(-15);
+});
+
+$("rotateRight3d").addEventListener("click", () => {
+  rotateSelected3d(15);
+});
+
+$("shrink3d").addEventListener("click", () => {
+  resizeSelected3d(-0.1);
+});
+
+$("grow3d").addEventListener("click", () => {
+  resizeSelected3d(0.1);
+});
 
 function clearObjects3d(){
 objects3d.forEach(o=>{scene3dWorld.remove(o);o.geometry.dispose();o.material.dispose()});
