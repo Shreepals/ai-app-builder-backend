@@ -780,10 +780,28 @@ const light=new THREE.DirectionalLight(0xffffff,2);light.position.set(5,10,7);sc
 scene.add(new THREE.GridHelper(20,20));
 const data=${JSON.stringify(data)};
 data.forEach(o=>{
-let g=o.kind==="sphere"?new THREE.SphereGeometry(.6,24,16):new THREE.BoxGeometry(1,1,1);
-const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:o.color}));
-m.position.fromArray(o.position);m.rotation.set(...(o.rotation||[0,0,0]));
-m.scale.fromArray(o.scale);scene.add(m);
+  let g;
+
+  if(o.kind==="sphere"){
+    g=new THREE.SphereGeometry(0.6,24,16);
+  } else if(o.kind==="ground"){
+    g=new THREE.BoxGeometry(8,0.2,8);
+  } else if(o.kind==="wall"){
+    g=new THREE.BoxGeometry(2,2,0.3);
+  } else {
+    g=new THREE.BoxGeometry(1,1,1);
+  }
+
+  const m=new THREE.Mesh(
+    g,
+    new THREE.MeshStandardMaterial({color:o.color})
+  );
+
+  m.name=o.name || o.kind;
+  m.position.fromArray(o.position);
+  m.rotation.set(...(o.rotation || [0,0,0]));
+  m.scale.fromArray(o.scale || [1,1,1]);
+  scene.add(m);
 });
 function loop(){requestAnimationFrame(loop);renderer.render(scene,camera)}loop();
 onresize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)};
