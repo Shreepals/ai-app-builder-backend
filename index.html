@@ -424,6 +424,51 @@ camera3d.updateProjectionMatrix();renderer3d.setSize(host.clientWidth,host.clien
 resizeObserver3d.observe(host);
 return true;
 }
+function addObject3d(kind){
+  if(!init3d()) return;
+
+  let geometry;
+  let color = 0x5685ff;
+
+  if(kind === "sphere"){
+    geometry = new THREE.SphereGeometry(0.6, 24, 16);
+    color = 0x21c58b;
+  } else if(kind === "ground"){
+    geometry = new THREE.BoxGeometry(8, 0.2, 8);
+    color = 0x293550;
+  } else if(kind === "wall"){
+    geometry = new THREE.BoxGeometry(2, 2, 0.3);
+    color = 0xff6b6b;
+  } else {
+    geometry = new THREE.BoxGeometry(1, 1, 1);
+  }
+
+  const obj = new THREE.Mesh(
+    geometry,
+    new THREE.MeshStandardMaterial({color})
+  );
+
+  obj.name = kind.charAt(0).toUpperCase() + kind.slice(1);
+  obj.userData.kind = kind;
+  obj.position.set(0, kind === "ground" ? -0.1 : 0.5, 0);
+
+  scene3dWorld.add(obj);
+  objects3d.push(obj);
+  selectObject3d(obj);
+
+  status("status3d", obj.name + " जोड़ दिया गया।");
+}
+
+function sceneData3d(){
+  return objects3d.map(obj => ({
+    name: obj.name,
+    kind: obj.userData.kind || "cube",
+    color: obj.material.color.getHex(),
+    position: obj.position.toArray(),
+    rotation: obj.rotation.toArray().slice(0, 3),
+    scale: obj.scale.toArray()
+  }));
+}  
 
 function updateObjectList3d(){
 const list=$("objectList");list.replaceChildren();
@@ -532,8 +577,6 @@ function rotateSelected3d(angle = 15){
 
   selectedObject3d.rotation.y +=
     THREE.MathUtils.degToRad(angle);
-
-  renderLoop();
 }
 
 function resizeSelected3d(amount = 0.1){
@@ -548,8 +591,6 @@ function resizeSelected3d(amount = 0.1){
   selectedObject3d.scale.z = Math.max(
     0.1, selectedObject3d.scale.z + amount
   );
-
-  renderLoop();
   }  
 $("rotateLeft3d").addEventListener("click", () => {
   rotateSelected3d(-15);
