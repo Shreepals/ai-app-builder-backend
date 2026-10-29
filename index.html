@@ -519,8 +519,23 @@ function movePlayer3d(dx,dy,dz){
   const halfHeight =
     (obj.userData.kind==="sphere" ? 0.6 : 0.5) * obj.scale.y;
 
-  const limitX = 3.9;
-  const limitZ = 3.9;
+  const ground = objects3d.find(
+  o => o.userData.kind === "ground"
+);
+
+const groundSizeX = ground
+  ? (ground.geometry.parameters.width || 10) * ground.scale.x
+  : 10;
+
+const groundSizeZ = ground
+  ? (ground.geometry.parameters.depth || 10) * ground.scale.z
+  : 10;
+
+const halfWidth = 0.5 * obj.scale.x;
+const halfDepth = 0.5 * obj.scale.z;
+
+const limitX = Math.max(0, groundSizeX / 2 - halfWidth);
+const limitZ = Math.max(0, groundSizeZ / 2 - halfDepth);
 
   const oldPosition = obj.position.clone();
 
