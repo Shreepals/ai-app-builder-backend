@@ -486,6 +486,7 @@ selectObject3d(objects3d[objects3d.length-1]||null);
 $("addCube").addEventListener("click",()=>addObject3d("cube"));
 $("addSphere").addEventListener("click",()=>addObject3d("sphere"));
 $("addGround").addEventListener("click",()=>addObject3d("ground"));
+$("addWall").addEventListener("click",()=>addObject3d("wall"));  
 $("objectList").addEventListener("change",()=>selectObject3d(objects3d[Number($("objectList").value)]||null));
 
 $("applyObject").addEventListener("click",()=>{
