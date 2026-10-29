@@ -427,39 +427,6 @@ if(!obj)return;
 $("posX").value=obj.position.x;$("posY").value=obj.position.y;$("posZ").value=obj.position.z;$("objScale").value=obj.scale.x;
 }
 
-function addObject3d(kind){
-if(!init3d())return;
-let geometry,name;
-if(kind==="cube"){
-  geometry=new THREE.BoxGeometry(1,1,1);
-  name="Cube";
-}
-else if(kind==="sphere"){
-  geometry=new THREE.SphereGeometry(.6,24,16);
-  name="Sphere";
-}
-else if(kind==="wall"){
-  geometry=new THREE.BoxGeometry(8,2,.3);
-  name="Wall";
-}
-else{
-  geometry=new THREE.BoxGeometry(8,.2,8);
-  name="Ground";
-}
-const palette=[0x5685ff,0x21c58b,0xffa33b,0xe45d78,0xc084fc];
-const material=new THREE.MeshStandardMaterial({color:palette[objects3d.length%palette.length]});
-const obj=new THREE.Mesh(geometry,material);
-obj.name=name+" "+(objects3d.filter(o=>o.userData.kind===kind).length+1);
-obj.userData.kind=kind;
-const halfHeight = kind==="sphere" ? 0.6 : 0.5;
-obj.position.set(0,kind==="ground"?-.1:halfHeight,0);
-scene3dWorld.add(obj);objects3d.push(obj);selectObject3d(obj);
-status("status3d",obj.name+" जोड़ा गया।");
-}
-
-function sceneData3d(){
-return objects3d.map(o=>({name:o.name,kind:o.userData.kind||"cube",color:o.material.color.getHex(),position:o.position.toArray(),rotation:o.rotation.toArray().slice(0,3),scale:o.scale.toArray()}));
-}
 function enableDrag3d(){
   if(!renderer3d || !camera3d) return;
 
@@ -518,10 +485,12 @@ function enableDrag3d(){
 
     if(raycaster.ray.intersectPlane(plane, hitPoint)){
       const targetX = hitPoint.x + offset.x;
-const targetZ = hitPoint.z + offset.z;
+      const targetZ = hitPoint.z + offset.z;
 
-dragging.position.x += (targetX - dragging.position.x) * 0.2;
-dragging.position.z += (targetZ - dragging.position.z) * 0.2;
+      dragging.position.x +=
+        (targetX - dragging.position.x) * 0.2;
+      dragging.position.z +=
+        (targetZ - dragging.position.z) * 0.2;
 
       const halfHeight =
         (dragging.userData.kind === "sphere" ? 0.6 : 0.5)
@@ -546,7 +515,32 @@ dragging.position.z += (targetZ - dragging.position.z) * 0.2;
 
   canvas.addEventListener("pointerup", stopDrag);
   canvas.addEventListener("pointercancel", stopDrag);
-}  
+}
+
+function rotateSelected3d(angle = 15){
+  if(!selectedObject3d || playMode3d) return;
+
+  selectedObject3d.rotation.y +=
+    THREE.MathUtils.degToRad(angle);
+
+  renderLoop();
+}
+
+function resizeSelected3d(amount = 0.1){
+  if(!selectedObject3d || playMode3d) return;
+
+  selectedObject3d.scale.x = Math.max(
+    0.1, selectedObject3d.scale.x + amount
+  );
+  selectedObject3d.scale.y = Math.max(
+    0.1, selectedObject3d.scale.y + amount
+  );
+  selectedObject3d.scale.z = Math.max(
+    0.1, selectedObject3d.scale.z + amount
+  );
+
+  renderLoop();
+  }  
 
 function clearObjects3d(){
 objects3d.forEach(o=>{scene3dWorld.remove(o);o.geometry.dispose();o.material.dispose()});
