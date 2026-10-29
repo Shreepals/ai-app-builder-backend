@@ -404,6 +404,7 @@ if(cameraFollow3d && selectedObject3d && selectedObject3d.userData.kind!=="groun
 renderer3d.render(scene3dWorld,camera3d);
 }
 renderLoop();
+enableDrag3d();  
 if(resizeObserver3d)resizeObserver3d.disconnect();
 resizeObserver3d=new ResizeObserver(()=>{
 if(!renderer3d||!host.clientWidth||!host.clientHeight)return;
@@ -459,6 +460,91 @@ status("status3d",obj.name+" जोड़ा गया।");
 function sceneData3d(){
 return objects3d.map(o=>({name:o.name,kind:o.userData.kind||"cube",color:o.material.color.getHex(),position:o.position.toArray(),rotation:o.rotation.toArray().slice(0,3),scale:o.scale.toArray()}));
 }
+function enableDrag3d(){
+  if(!renderer3d || !camera3d) return;
+
+  const canvas = renderer3d.domElement;
+  if(canvas.dataset.dragEnabled === "yes") return;
+  canvas.dataset.dragEnabled = "yes";
+
+  const raycaster = new THREE.Raycaster();
+  const pointer = new THREE.Vector2();
+  const plane = new THREE.Plane();
+  const hitPoint = new THREE.Vector3();
+  const offset = new THREE.Vector3();
+  let dragging = null;
+
+  function getPointer(e){
+    const rect = canvas.getBoundingClientRect();
+    pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
+    pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  }
+
+  canvas.style.touchAction = "none";
+
+  canvas.addEventListener("pointerdown", e => {
+    if(playMode3d) return;
+
+    getPointer(e);
+    raycaster.setFromCamera(pointer, camera3d);
+
+    const hits = raycaster.intersectObjects(objects3d, false);
+    if(!hits.length) return;
+
+    const obj = hits[0].object;
+    if(obj.userData.kind === "ground" ||
+       obj.userData.kind === "wall") return;
+
+    dragging = obj;
+    selectObject3d(obj);
+
+    plane.setFromNormalAndCoplanarPoint(
+      new THREE.Vector3(0,1,0),
+      obj.position
+    );
+
+    if(raycaster.ray.intersectPlane(plane, hitPoint)){
+      offset.copy(obj.position).sub(hitPoint);
+    }
+
+    canvas.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  canvas.addEventListener("pointermove", e => {
+    if(!dragging || playMode3d) return;
+
+    getPointer(e);
+    raycaster.setFromCamera(pointer, camera3d);
+
+    if(raycaster.ray.intersectPlane(plane, hitPoint)){
+      dragging.position.x = hitPoint.x + offset.x;
+      dragging.position.z = hitPoint.z + offset.z;
+
+      const halfHeight =
+        (dragging.userData.kind === "sphere" ? 0.6 : 0.5)
+        * dragging.scale.y;
+
+      dragging.position.y = Math.max(
+        halfHeight,
+        dragging.position.y
+      );
+
+      $("posX").value = dragging.position.x.toFixed(1);
+      $("posY").value = dragging.position.y.toFixed(1);
+      $("posZ").value = dragging.position.z.toFixed(1);
+    }
+
+    e.preventDefault();
+  });
+
+  function stopDrag(){
+    dragging = null;
+  }
+
+  canvas.addEventListener("pointerup", stopDrag);
+  canvas.addEventListener("pointercancel", stopDrag);
+}  
 
 function clearObjects3d(){
 objects3d.forEach(o=>{scene3dWorld.remove(o);o.geometry.dispose();o.material.dispose()});
