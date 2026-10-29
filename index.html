@@ -517,8 +517,11 @@ function enableDrag3d(){
     raycaster.setFromCamera(pointer, camera3d);
 
     if(raycaster.ray.intersectPlane(plane, hitPoint)){
-      dragging.position.x = hitPoint.x + offset.x;
-      dragging.position.z = hitPoint.z + offset.z;
+      const targetX = hitPoint.x + offset.x;
+const targetZ = hitPoint.z + offset.z;
+
+dragging.position.x += (targetX - dragging.position.x) * 0.2;
+dragging.position.z += (targetZ - dragging.position.z) * 0.2;
 
       const halfHeight =
         (dragging.userData.kind === "sphere" ? 0.6 : 0.5)
