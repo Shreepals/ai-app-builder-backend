@@ -492,8 +492,7 @@ function enableDrag3d(){
     if(!hits.length) return;
 
     const obj = hits[0].object;
-    if(obj.userData.kind === "ground" ||
-       obj.userData.kind === "wall") return;
+    if(obj.userData.kind === "ground") return;
 
     dragging = obj;
     selectObject3d(obj);
