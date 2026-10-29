@@ -157,7 +157,17 @@ iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);bord
 <label for="posY">Position Y</label><input id="posY" type="number" step="0.5" value="1">
 <label for="posZ">Position Z</label><input id="posZ" type="number" step="0.5" value="0">
 <label for="objScale">Object Size</label><input id="objScale" type="range" min="0.2" max="5" step="0.1" value="1">
-<div class="actions"><button class="btn" id="applyObject">Apply Changes</button><button class="btn secondary" id="save3d">Save Scene</button><button class="btn secondary" id="load3d">Load Scene</button><button class="btn secondary" id="export3d">Export HTML</button><button class="btn red" id="delete3d">Delete Object</button></div>
+<div class="actions">
+  <button class="btn" id="applyObject">Apply Changes</button>
+  <button class="btn secondary" id="rotateLeft3d">↶ Rotate Left</button>
+  <button class="btn secondary" id="rotateRight3d">↷ Rotate Right</button>
+  <button class="btn secondary" id="shrink3d">− Resize</button>
+  <button class="btn secondary" id="grow3d">+ Resize</button>
+  <button class="btn secondary" id="save3d">Save Scene</button>
+  <button class="btn secondary" id="load3d">Load Scene</button>
+  <button class="btn secondary" id="export3d">Export HTML</button>
+  <button class="btn red" id="delete3d">Delete Object</button>
+    </div>
 <div id="status3d" class="status">3D Editor तैयार है।</div>
 </div>
 </section>
