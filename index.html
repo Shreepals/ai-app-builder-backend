@@ -525,12 +525,12 @@ function movePlayer3d(dx,dy,dz){
 );
 
 const groundSizeX = ground
-  ? (ground.geometry.parameters.width || 10) * ground.scale.x
-  : 10;
+  ? 8 * ground.scale.x
+  : 8;
 
 const groundSizeZ = ground
-  ? (ground.geometry.parameters.depth || 10) * ground.scale.z
-  : 10;
+  ? 8 * ground.scale.z
+  : 8;
 
 const halfWidth = 0.5 * obj.scale.x;
 const halfDepth = 0.5 * obj.scale.z;
