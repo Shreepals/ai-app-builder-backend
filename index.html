@@ -535,8 +535,8 @@ const groundSizeZ = ground
 const halfWidth = 0.5 * obj.scale.x;
 const halfDepth = 0.5 * obj.scale.z;
 
-const limitX = Math.max(0, groundSizeX / 2 - halfWidth);
-const limitZ = Math.max(0, groundSizeZ / 2 - halfDepth);
+const limitX = Math.max(0, 10 * (ground ? ground.scale.x : 1) - halfWidth);
+const limitZ = Math.max(0, 10 * (ground ? ground.scale.z : 1) - halfDepth);
 
   const oldPosition = obj.position.clone();
 
