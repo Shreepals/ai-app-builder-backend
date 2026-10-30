@@ -653,6 +653,8 @@ function enableDrag3d(){
         dragging.position.y
       );
 
+      updateTransformGizmo3d();
+
       $("posX").value = dragging.position.x.toFixed(1);
       $("posY").value = dragging.position.y.toFixed(1);
       $("posZ").value = dragging.position.z.toFixed(1);
