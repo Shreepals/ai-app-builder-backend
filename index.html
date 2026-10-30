@@ -872,11 +872,21 @@ function updateHud(){
 
 function move(dx,dz){
  if(!playing||gameOver)return;
+
  const oldX=player.position.x;
  const oldZ=player.position.z;
+
  player.position.x+=dx;
  player.position.z+=dz;
 
+ // Ground की सीमा
+ const minX=-3.5, maxX=3.5;
+ const minZ=-3.5, maxZ=3.5;
+
+ player.position.x=Math.max(minX,Math.min(maxX,player.position.x));
+ player.position.z=Math.max(minZ,Math.min(maxZ,player.position.z));
+
+ // दीवारों से टक्कर
  const box=new THREE.Box3().setFromObject(player);
  for(const obj of objects){
   if(obj===player||obj.userData.kind!=="wall")continue;
