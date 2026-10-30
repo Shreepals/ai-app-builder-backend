@@ -573,6 +573,28 @@ function createTransformGizmo3d(){
     );
 
     axisGroup.add(line,arrow);
+    const hitMaterial = new THREE.MeshBasicMaterial({
+  transparent: true,
+  opacity: 0.001,
+  depthWrite: false,
+  colorWrite: false
+});
+
+const hitArea = new THREE.Mesh(
+  new THREE.CylinderGeometry(0.18, 0.18, 1.3, 12),
+  hitMaterial
+);
+
+hitArea.position.copy(
+  axis.direction.clone().multiplyScalar(0.65)
+);
+
+hitArea.quaternion.setFromUnitVectors(
+  new THREE.Vector3(0, 1, 0),
+  axis.direction
+);
+
+axisGroup.add(hitArea);
     transformGizmo3d.add(axisGroup);
   });
 
