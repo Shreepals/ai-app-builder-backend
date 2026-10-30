@@ -764,57 +764,166 @@ catch(e){status("status3d","सीन लोड नहीं हुआ: "+e.mess
 });
 
 $("export3d").addEventListener("click",()=>{
-const data=sceneData3d();
-const gameHtml=`<!doctype html>
-<html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-<title>My 3D Scene</title><style>html,body{margin:0;width:100%;height:100%;overflow:hidden}canvas{display:block}</style>
-<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"><\/script></head>
-<body><script>
-const scene=new THREE.Scene();scene.background=new THREE.Color(0x10192c);
+  const data = sceneData3d();
+
+  const gameHtml = `<!doctype html>
+<html lang="hi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>My 3D Game</title>
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#10192c;font-family:Arial}
+canvas{display:block}
+#controls{
+ position:fixed;bottom:15px;left:0;right:0;
+ display:flex;justify-content:space-between;
+ padding:10px;pointer-events:none;
+}
+.group{display:grid;grid-template-columns:repeat(3,55px);gap:7px;pointer-events:auto}
+button{
+ border:0;border-radius:12px;padding:14px 10px;
+ background:#ffffffdd;color:#111;font-weight:bold;font-size:16px;
+}
+#actions{position:fixed;top:12px;right:12px;display:flex;gap:8px}
+#actions button{font-size:13px;padding:12px}
+</style>
+</head>
+<body>
+<div id="actions">
+<button id="play">PLAY</button>
+<button id="stop">STOP</button>
+</div>
+<div id="controls">
+ <div class="group">
+  <span></span><button id="forward">▲</button><span></span>
+  <button id="left">◀</button><button id="jump">JUMP</button><button id="right">▶</button>
+  <span></span><button id="back">▼</button><span></span>
+ </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.min.js"><\/script>
+<script>
+const scene=new THREE.Scene();
+scene.background=new THREE.Color(0x10192c);
 const camera=new THREE.PerspectiveCamera(60,innerWidth/innerHeight,.1,1000);
-camera.position.set(6,5,8);camera.lookAt(0,0,0);
+camera.position.set(6,5,8);
 const renderer=new THREE.WebGLRenderer({antialias:true});
-renderer.setClearColor(0x10192c);
-renderer.domElement.style.width = "100vw";
-renderer.domElement.style.height = "100vh";
-renderer.domElement.style.display = "block";
-renderer.setSize(innerWidth,innerHeight);document.body.appendChild(renderer.domElement);
+renderer.setSize(innerWidth,innerHeight);
+renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+document.body.appendChild(renderer.domElement);
+
 scene.add(new THREE.HemisphereLight(0xffffff,0x334466,2));
-const light=new THREE.DirectionalLight(0xffffff,2);light.position.set(5,10,7);scene.add(light);
-scene.add(new THREE.GridHelper(20,20));
+const light=new THREE.DirectionalLight(0xffffff,2);
+light.position.set(5,10,7);
+scene.add(light);
+scene.add(new THREE.GridHelper(30,30));
+
 const data=${JSON.stringify(data)};
+const gameObjects=[];
+let player=null;
+let playing=false;
+let jumping=false;
+let jumpSpeed=0;
+
 data.forEach(o=>{
-  let g;
+ let g;
+ if(o.kind==="sphere")g=new THREE.SphereGeometry(.6,24,16);
+ else if(o.kind==="ground")g=new THREE.BoxGeometry(8,.2,8);
+ else if(o.kind==="wall")g=new THREE.BoxGeometry(2,2,.3);
+ else g=new THREE.BoxGeometry(1,1,1);
 
-  if(o.kind==="sphere"){
-    g=new THREE.SphereGeometry(0.6,24,16);
-  } else if(o.kind==="ground"){
-    g=new THREE.BoxGeometry(8,0.2,8);
-  } else if(o.kind==="wall"){
-    g=new THREE.BoxGeometry(2,2,0.3);
-  } else {
-    g=new THREE.BoxGeometry(1,1,1);
-  }
-
-  const m=new THREE.Mesh(
-    g,
-    new THREE.MeshStandardMaterial({color:o.color})
-  );
-
-  m.name=o.name || o.kind;
-  m.position.fromArray(o.position);
-  m.rotation.set(...(o.rotation || [0,0,0]));
-  m.scale.fromArray(o.scale || [1,1,1]);
-  scene.add(m);
+ const m=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:o.color}));
+ m.name=o.name||o.kind;
+ m.position.fromArray(o.position);
+ m.rotation.set(...(o.rotation||[0,0,0]));
+ m.scale.fromArray(o.scale||[1,1,1]);
+ m.userData.kind=o.kind;
+ scene.add(m);
+ gameObjects.push(m);
+ if(!player && o.kind!=="ground" && o.kind!=="wall")player=m;
 });
-function loop(){requestAnimationFrame(loop);renderer.render(scene,camera)}loop();
-onresize=()=>{camera.aspect=innerWidth/innerHeight;camera.updateProjectionMatrix();renderer.setSize(innerWidth,innerHeight)};
-<\/script></body></html>`;
-const blob=new Blob([gameHtml],{type:"text/html"});
-const url=URL.createObjectURL(blob);const a=document.createElement("a");
-a.href=url;a.download="my-3d-scene.html";a.click();
-setTimeout(()=>URL.revokeObjectURL(url),1000);
-status("status3d","3D Scene HTML एक्सपोर्ट हुआ।");
+
+if(!player){
+ const g=new THREE.BoxGeometry(1,1,1);
+ player=new THREE.Mesh(g,new THREE.MeshStandardMaterial({color:0x22aaff}));
+ player.position.y=.6;
+ scene.add(player);
+}
+
+camera.lookAt(player.position);
+
+function move(dx,dz){
+ if(!playing)return;
+ const oldX=player.position.x;
+ const oldZ=player.position.z;
+ player.position.x+=dx;
+ player.position.z+=dz;
+
+ const playerBox=new THREE.Box3().setFromObject(player);
+ for(const obj of gameObjects){
+  if(obj===player || obj.userData.kind!=="wall")continue;
+  const wallBox=new THREE.Box3().setFromObject(obj);
+  if(playerBox.intersectsBox(wallBox)){
+   player.position.x=oldX;
+   player.position.z=oldZ;
+   break;
+  }
+ }
+}
+
+document.getElementById("play").onclick=()=>{playing=true};
+document.getElementById("stop").onclick=()=>{playing=false};
+
+document.getElementById("forward").onclick=()=>move(0,-.5);
+document.getElementById("back").onclick=()=>move(0,.5);
+document.getElementById("left").onclick=()=>move(-.5,0);
+document.getElementById("right").onclick=()=>move(.5,0);
+
+document.getElementById("jump").onclick=()=>{
+ if(playing&&!jumping){jumping=true;jumpSpeed=.18}
+};
+
+function loop(){
+ requestAnimationFrame(loop);
+
+ if(jumping){
+  player.position.y+=jumpSpeed;
+  jumpSpeed-=.012;
+  if(player.position.y<=.6){
+   player.position.y=.6;
+   jumping=false;
+   jumpSpeed=0;
+  }
+ }
+
+ const target=new THREE.Vector3(
+ player.position.x+6,player.position.y+5,player.position.z+8
+ );
+ camera.position.lerp(target,.06);
+ camera.lookAt(player.position);
+ renderer.render(scene,camera);
+}
+loop();
+
+onresize=()=>{
+ camera.aspect=innerWidth/innerHeight;
+ camera.updateProjectionMatrix();
+ renderer.setSize(innerWidth,innerHeight);
+};
+<\/script>
+</body>
+</html>`;
+
+  const blob=new Blob([gameHtml],{type:"text/html"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  a.href=url;
+  a.download="my-3d-game.html";
+  a.click();
+  setTimeout(()=>URL.revokeObjectURL(url),3000);
+  status("status3d","Playable 3D Game HTML एक्सपोर्ट हुआ।");
 });
 
 readProjects();
