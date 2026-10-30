@@ -608,6 +608,76 @@ function enableDrag3d(){
   canvas.addEventListener("pointerup", stopDrag);
   canvas.addEventListener("pointercancel", stopDrag);
 }
+function enableCameraControls3d(){
+  if(!renderer3d || !camera3d) return;
+
+  const canvas = renderer3d.domElement;
+  if(canvas.dataset.cameraEnabled === "yes") return;
+  canvas.dataset.cameraEnabled = "yes";
+
+  let rotating = false;
+  let previousX = 0;
+  let previousY = 0;
+  let distance = camera3d.position.length();
+  let pinchDistance = 0;
+
+  function updateCamera(){
+    const target = new THREE.Vector3(0,0,0);
+    const direction = camera3d.position.clone().sub(target).normalize();
+    camera3d.position.copy(
+      target.clone().add(direction.multiplyScalar(distance))
+    );
+    camera3d.lookAt(target);
+  }
+
+  canvas.addEventListener("pointerdown", e => {
+    if(playMode3d || e.pointerType === "touch") return;
+    rotating = true;
+    previousX = e.clientX;
+    previousY = e.clientY;
+    canvas.setPointerCapture(e.pointerId);
+  });
+
+  canvas.addEventListener("pointermove", e => {
+    if(!rotating || playMode3d) return;
+
+    const dx = e.clientX - previousX;
+    const dy = e.clientY - previousY;
+    previousX = e.clientX;
+    previousY = e.clientY;
+
+    const offset = camera3d.position.clone();
+    const spherical = new THREE.Spherical().setFromVector3(offset);
+    spherical.theta -= dx * 0.008;
+    spherical.phi = THREE.MathUtils.clamp(
+      spherical.phi + dy * 0.008,
+      0.15,
+      Math.PI - 0.15
+    );
+
+    camera3d.position.setFromSpherical(spherical);
+    camera3d.lookAt(0,0,0);
+  });
+
+  canvas.addEventListener("pointerup", () => {
+    rotating = false;
+  });
+
+  canvas.addEventListener("pointercancel", () => {
+    rotating = false;
+  });
+
+  canvas.addEventListener("wheel", e => {
+    if(playMode3d) return;
+    distance = THREE.MathUtils.clamp(
+      distance + e.deltaY * 0.01,
+      3,
+      40
+    );
+    updateCamera();
+    e.preventDefault();
+  }, {passive:false});
+  }  
 
 function rotateSelected3d(angle = 15){
   if(!selectedObject3d || playMode3d) return;
