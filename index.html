@@ -970,6 +970,8 @@ const limitZ = Math.max(0, 10 * (ground ? ground.scale.z : 1) - halfDepth);
     obj.position.y = halfHeight;
     jumpVelocity3d = 0;
   }
+  
+  updateTransformGizmo3d();
 
   $("posX").value = obj.position.x.toFixed(1);
   $("posY").value = obj.position.y.toFixed(1);
