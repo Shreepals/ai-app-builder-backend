@@ -429,6 +429,8 @@ renderer3d.render(scene3dWorld,camera3d);
 }
 renderLoop();
 enableDrag3d();
+createTransformGizmo3d();
+updateTransformGizmo3d();  
 enableCameraControls3d();  
 if(resizeObserver3d)resizeObserver3d.disconnect();
 resizeObserver3d=new ResizeObserver(()=>{
