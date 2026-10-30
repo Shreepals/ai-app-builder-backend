@@ -542,8 +542,10 @@ function createTransformGizmo3d(){
   ];
 
   axes.forEach(axis=>{
+    // Move Gizmo
     const axisGroup = new THREE.Group();
     axisGroup.userData.axis = axis.name;
+    axisGroup.userData.mode = "move";
 
     const material = new THREE.MeshBasicMaterial({
       color:axis.color,
@@ -572,35 +574,80 @@ function createTransformGizmo3d(){
       axis.direction
     );
 
-    axisGroup.add(line,arrow);
     const hitMaterial = new THREE.MeshBasicMaterial({
-  transparent: true,
-  opacity: 0.001,
-  depthWrite: false,
-  colorWrite: false
-});
+      transparent:true,
+      opacity:0.001,
+      depthWrite:false,
+      colorWrite:false
+    });
 
-const hitArea = new THREE.Mesh(
-  new THREE.CylinderGeometry(0.18, 0.18, 1.3, 12),
-  hitMaterial
-);
+    const hitArea = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.18,0.18,1.3,12),
+      hitMaterial
+    );
 
-hitArea.position.copy(
-  axis.direction.clone().multiplyScalar(0.65)
-);
+    hitArea.position.copy(
+      axis.direction.clone().multiplyScalar(0.65)
+    );
 
-hitArea.quaternion.setFromUnitVectors(
-  new THREE.Vector3(0, 1, 0),
-  axis.direction
-);
+    hitArea.quaternion.setFromUnitVectors(
+      new THREE.Vector3(0,1,0),
+      axis.direction
+    );
 
-axisGroup.add(hitArea);
+    axisGroup.add(line,arrow,hitArea);
     transformGizmo3d.add(axisGroup);
+
+    // Rotation Gizmo
+    const rotationGroup = new THREE.Group();
+    rotationGroup.userData.axis = axis.name;
+    rotationGroup.userData.mode = "rotate";
+
+    const ringMaterial = new THREE.MeshBasicMaterial({
+      color:axis.color,
+      depthTest:false,
+      transparent:true,
+      opacity:0.9
+    });
+
+    const ring = new THREE.Mesh(
+      new THREE.TorusGeometry(1.35,0.025,8,80),
+      ringMaterial
+    );
+
+    if(axis.name === "X"){
+      ring.rotation.y = Math.PI/2;
+    } else if(axis.name === "Y"){
+      ring.rotation.x = Math.PI/2;
+    }
+
+    rotationGroup.add(ring);
+
+    const ringHitMaterial = new THREE.MeshBasicMaterial({
+      transparent:true,
+      opacity:0.001,
+      colorWrite:false,
+      depthWrite:false
+    });
+
+    const ringHit = new THREE.Mesh(
+      new THREE.TorusGeometry(1.35,0.13,8,80),
+      ringHitMaterial
+    );
+
+    if(axis.name === "X"){
+      ringHit.rotation.y = Math.PI/2;
+    } else if(axis.name === "Y"){
+      ringHit.rotation.x = Math.PI/2;
+    }
+
+    rotationGroup.add(ringHit);
+    transformGizmo3d.add(rotationGroup);
   });
 
   scene3dWorld.add(transformGizmo3d);
   transformGizmo3d.visible = false;
-    }
+  }
 
 function updateTransformGizmo3d(){
   if(!transformGizmo3d || !selectedObject3d) return;
@@ -625,13 +672,24 @@ function enableDrag3d(){
   let dragging = null;
   let dragAxis = null;
   let dragMode = "object";
-  let objectStart = new THREE.Vector3();
-  let pointerStart = new THREE.Vector3();
+
+  const objectStart = new THREE.Vector3();
+  const pointerStart = new THREE.Vector3();
+  const objectStartRotation = new THREE.Vector3();
+  const rotationStartVector = new THREE.Vector3();
 
   function getPointer(e){
     const rect = canvas.getBoundingClientRect();
     pointer.x = ((e.clientX - rect.left) / rect.width) * 2 - 1;
     pointer.y = -((e.clientY - rect.top) / rect.height) * 2 + 1;
+  }
+
+  function getAxis(name){
+    return {
+      X:new THREE.Vector3(1,0,0),
+      Y:new THREE.Vector3(0,1,0),
+      Z:new THREE.Vector3(0,0,1)
+    }[name];
   }
 
   canvas.style.touchAction = "none";
@@ -642,7 +700,7 @@ function enableDrag3d(){
     getPointer(e);
     raycaster.setFromCamera(pointer,camera3d);
 
-    // Gizmo axis selection
+    // Move and Rotation Gizmo selection
     if(transformGizmo3d && transformGizmo3d.visible){
       const hits = raycaster.intersectObjects(
         transformGizmo3d.children,
@@ -651,34 +709,54 @@ function enableDrag3d(){
 
       if(hits.length){
         let group = hits[0].object;
+
         while(group.parent && group.parent !== transformGizmo3d){
           group = group.parent;
         }
 
         const axisName = group.userData.axis;
+        const mode = group.userData.mode;
 
-        if(axisName){
-          dragAxis = {
-            X:new THREE.Vector3(1,0,0),
-            Y:new THREE.Vector3(0,1,0),
-            Z:new THREE.Vector3(0,0,1)
-          }[axisName];
-
+        if(axisName && mode){
+          dragAxis = getAxis(axisName);
           dragging = selectedObject3d;
-          dragMode = "axis";
-          objectStart.copy(dragging.position);
+          dragMode = mode;
 
-          plane.setFromNormalAndCoplanarPoint(
-            camera3d.getWorldDirection(new THREE.Vector3()),
-            dragging.position
-          );
+          if(mode === "move"){
+            objectStart.copy(dragging.position);
 
-          if(raycaster.ray.intersectPlane(plane,hitPoint)){
-            pointerStart.copy(hitPoint);
+            plane.setFromNormalAndCoplanarPoint(
+              camera3d.getWorldDirection(new THREE.Vector3()),
+              dragging.position
+            );
+
+            if(raycaster.ray.intersectPlane(plane,hitPoint)){
+              pointerStart.copy(hitPoint);
+            }
+          }
+
+          if(mode === "rotate"){
+            objectStartRotation.set(
+              dragging.rotation.x,
+              dragging.rotation.y,
+              dragging.rotation.z
+            );
+
+            plane.setFromNormalAndCoplanarPoint(
+              dragAxis,
+              dragging.position
+            );
+
+            if(raycaster.ray.intersectPlane(plane,hitPoint)){
+              rotationStartVector.copy(hitPoint)
+                .sub(dragging.position)
+                .normalize();
+            }
           }
 
           canvas.setPointerCapture(e.pointerId);
           e.preventDefault();
+          e.stopPropagation();
           return;
         }
       }
@@ -689,12 +767,14 @@ function enableDrag3d(){
     if(!hits.length) return;
 
     const obj = hits[0].object;
+
     if(obj.userData.kind === "ground" ||
        obj.userData.kind === "wall") return;
 
     dragging = obj;
     dragMode = "object";
     dragAxis = null;
+
     selectObject3d(obj);
 
     plane.setFromNormalAndCoplanarPoint(
@@ -708,6 +788,7 @@ function enableDrag3d(){
 
     canvas.setPointerCapture(e.pointerId);
     e.preventDefault();
+    e.stopPropagation();
   });
 
   canvas.addEventListener("pointermove", e => {
@@ -716,9 +797,34 @@ function enableDrag3d(){
     getPointer(e);
     raycaster.setFromCamera(pointer,camera3d);
 
-    if(!raycaster.ray.intersectPlane(plane,hitPoint)) return;
+    if(dragMode === "rotate" && dragAxis){
+      if(!raycaster.ray.intersectPlane(plane,hitPoint)) return;
 
-    if(dragMode === "axis" && dragAxis){
+      const currentVector = hitPoint.clone()
+        .sub(dragging.position)
+        .normalize();
+
+      const cross = new THREE.Vector3()
+        .crossVectors(rotationStartVector,currentVector);
+
+      const angle = Math.atan2(
+        dragAxis.dot(cross),
+        rotationStartVector.dot(currentVector)
+      );
+
+      dragging.rotation.set(
+        objectStartRotation.x,
+        objectStartRotation.y,
+        objectStartRotation.z
+      );
+
+      if(dragAxis.x) dragging.rotation.x += angle;
+      if(dragAxis.y) dragging.rotation.y += angle;
+      if(dragAxis.z) dragging.rotation.z += angle;
+
+    } else if(dragMode === "axis" && dragAxis){
+      if(!raycaster.ray.intersectPlane(plane,hitPoint)) return;
+
       const amount = hitPoint.clone()
         .sub(pointerStart)
         .dot(dragAxis);
@@ -734,7 +840,10 @@ function enableDrag3d(){
         halfHeight,
         dragging.position.y
       );
-    } else {
+
+    } else if(dragMode === "object"){
+      if(!raycaster.ray.intersectPlane(plane,hitPoint)) return;
+
       const targetX = hitPoint.x + offset.x;
       const targetZ = hitPoint.z + offset.z;
 
