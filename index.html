@@ -428,7 +428,8 @@ if(cameraFollow3d && selectedObject3d && selectedObject3d.userData.kind!=="groun
 renderer3d.render(scene3dWorld,camera3d);
 }
 renderLoop();
-enableDrag3d();  
+enableDrag3d();
+enableCameraControls3d();  
 if(resizeObserver3d)resizeObserver3d.disconnect();
 resizeObserver3d=new ResizeObserver(()=>{
 if(!renderer3d||!host.clientWidth||!host.clientHeight)return;
