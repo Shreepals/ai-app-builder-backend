@@ -971,7 +971,11 @@ const limitZ = Math.max(0, 10 * (ground ? ground.scale.z : 1) - halfDepth);
     jumpVelocity3d = 0;
   }
   
-  updateTransformGizmo3d();
+  if(transformGizmo3d){
+  transformGizmo3d.position.copy(obj.position);
+  transformGizmo3d.visible = !playMode3d;
+  transformGizmo3d.updateMatrixWorld(true);
+  }
 
   $("posX").value = obj.position.x.toFixed(1);
   $("posY").value = obj.position.y.toFixed(1);
