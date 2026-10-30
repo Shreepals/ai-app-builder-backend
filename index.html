@@ -506,6 +506,13 @@ function updateObjectList3d(){
 function selectObject3d(obj){
   selectedObject3d=obj;
   updateObjectList3d();
+  if(transformGizmo3d){
+  transformGizmo3d.visible = !!obj && !playMode3d;
+
+  if(obj){
+    transformGizmo3d.position.copy(obj.position);
+  }
+  }
 
   if(!obj)return;
 
