@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+mo<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
@@ -616,39 +616,28 @@ function enableCameraControls3d(){
   if(canvas.dataset.cameraEnabled === "yes") return;
   canvas.dataset.cameraEnabled = "yes";
 
-  let rotating = false;
+  let pointers = new Map();
   let previousX = 0;
   let previousY = 0;
-  let distance = camera3d.position.length();
   let pinchDistance = 0;
+  let distance = camera3d.position.length();
 
-  function updateCamera(){
-    const target = new THREE.Vector3(0,0,0);
-    const direction = camera3d.position.clone().sub(target).normalize();
-    camera3d.position.copy(
-      target.clone().add(direction.multiplyScalar(distance))
+  const target = new THREE.Vector3(0,0,0);
+
+  function getPinchDistance(){
+    const points = [...pointers.values()];
+    if(points.length < 2) return 0;
+
+    return Math.hypot(
+      points[0].x - points[1].x,
+      points[0].y - points[1].y
     );
-    camera3d.lookAt(target);
   }
 
-  canvas.addEventListener("pointerdown", e => {
-    if(playMode3d || e.pointerType === "touch") return;
-    rotating = true;
-    previousX = e.clientX;
-    previousY = e.clientY;
-    canvas.setPointerCapture(e.pointerId);
-  });
+  function rotateCamera(dx,dy){
+    const spherical = new THREE.Spherical()
+      .setFromVector3(camera3d.position.clone().sub(target));
 
-  canvas.addEventListener("pointermove", e => {
-    if(!rotating || playMode3d) return;
-
-    const dx = e.clientX - previousX;
-    const dy = e.clientY - previousY;
-    previousX = e.clientX;
-    previousY = e.clientY;
-
-    const offset = camera3d.position.clone();
-    const spherical = new THREE.Spherical().setFromVector3(offset);
     spherical.theta -= dx * 0.008;
     spherical.phi = THREE.MathUtils.clamp(
       spherical.phi + dy * 0.008,
@@ -657,29 +646,82 @@ function enableCameraControls3d(){
     );
 
     camera3d.position.setFromSpherical(spherical);
-    camera3d.lookAt(0,0,0);
-  });
+    camera3d.lookAt(target);
+  }
 
-  canvas.addEventListener("pointerup", () => {
-    rotating = false;
-  });
-
-  canvas.addEventListener("pointercancel", () => {
-    rotating = false;
-  });
-
-  canvas.addEventListener("wheel", e => {
-    if(playMode3d) return;
+  function zoomCamera(change){
     distance = THREE.MathUtils.clamp(
-      distance + e.deltaY * 0.01,
+      distance + change,
       3,
       40
     );
-    updateCamera();
-    e.preventDefault();
-  }, {passive:false});
-  }  
 
+    const direction = camera3d.position.clone().sub(target).normalize();
+    camera3d.position.copy(
+      target.clone().add(direction.multiplyScalar(distance))
+    );
+    camera3d.lookAt(target);
+  }
+
+  canvas.style.touchAction = "none";
+
+  canvas.addEventListener("pointerdown", e => {
+    if(playMode3d) return;
+
+    pointers.set(e.pointerId,{
+      x:e.clientX,
+      y:e.clientY
+    });
+
+    previousX = e.clientX;
+    previousY = e.clientY;
+    pinchDistance = getPinchDistance();
+
+    canvas.setPointerCapture(e.pointerId);
+    e.preventDefault();
+  });
+
+  canvas.addEventListener("pointermove", e => {
+    if(playMode3d || !pointers.has(e.pointerId)) return;
+
+    const oldPoint = pointers.get(e.pointerId);
+    const dx = e.clientX - oldPoint.x;
+    const dy = e.clientY - oldPoint.y;
+
+    pointers.set(e.pointerId,{
+      x:e.clientX,
+      y:e.clientY
+    });
+
+    if(pointers.size === 1){
+      rotateCamera(dx,dy);
+    } else if(pointers.size === 2){
+      const newDistance = getPinchDistance();
+
+      if(pinchDistance > 0){
+        zoomCamera((pinchDistance - newDistance) * 0.04);
+      }
+
+      pinchDistance = newDistance;
+    }
+
+    e.preventDefault();
+  });
+
+  function stopCameraPointer(e){
+    pointers.delete(e.pointerId);
+    pinchDistance = getPinchDistance();
+  }
+
+  canvas.addEventListener("pointerup",stopCameraPointer);
+  canvas.addEventListener("pointercancel",stopCameraPointer);
+
+  canvas.addEventListener("wheel",e=>{
+    if(playMode3d) return;
+    zoomCamera(e.deltaY * 0.01);
+    e.preventDefault();
+  },{passive:false});
+  }
 function rotateSelected3d(angle = 15){
   if(!selectedObject3d || playMode3d) return;
 
