@@ -519,6 +519,56 @@ function selectObject3d(obj){
   if($("rotY")) $("rotY").value=THREE.MathUtils.radToDeg(obj.rotation.y);
   if($("rotZ")) $("rotZ").value=THREE.MathUtils.radToDeg(obj.rotation.z);
   }
+  let transformGizmo3d = null;
+
+function createTransformGizmo3d(){
+  if(!scene3dWorld || transformGizmo3d) return;
+
+  transformGizmo3d = new THREE.Group();
+
+  const axes = [
+    {color:0xff3333, direction:new THREE.Vector3(1,0,0)},
+    {color:0x33dd66, direction:new THREE.Vector3(0,1,0)},
+    {color:0x3388ff, direction:new THREE.Vector3(0,0,1)}
+  ];
+
+  axes.forEach(axis=>{
+    const material = new THREE.MeshBasicMaterial({color:axis.color});
+    const line = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.025,0.025,1,8),
+      material
+    );
+
+    line.position.copy(axis.direction.clone().multiplyScalar(0.5));
+    line.quaternion.setFromUnitVectors(
+      new THREE.Vector3(0,1,0),
+      axis.direction
+    );
+
+    const arrow = new THREE.Mesh(
+      new THREE.ConeGeometry(0.09,0.22,12),
+      material
+    );
+
+    arrow.position.copy(axis.direction.clone().multiplyScalar(1.08));
+    arrow.quaternion.setFromUnitVectors(
+      new THREE.Vector3(0,1,0),
+      axis.direction
+    );
+
+    transformGizmo3d.add(line,arrow);
+  });
+
+  scene3dWorld.add(transformGizmo3d);
+  transformGizmo3d.visible = false;
+}
+
+function updateTransformGizmo3d(){
+  if(!transformGizmo3d || !selectedObject3d) return;
+
+  transformGizmo3d.position.copy(selectedObject3d.position);
+  transformGizmo3d.visible = !playMode3d;
+    }
 
 function enableDrag3d(){
   if(!renderer3d || !camera3d) return;
