@@ -536,13 +536,20 @@ function createTransformGizmo3d(){
   transformGizmo3d = new THREE.Group();
 
   const axes = [
-    {color:0xff3333, direction:new THREE.Vector3(1,0,0)},
-    {color:0x33dd66, direction:new THREE.Vector3(0,1,0)},
-    {color:0x3388ff, direction:new THREE.Vector3(0,0,1)}
+    {name:"X", color:0xff3333, direction:new THREE.Vector3(1,0,0)},
+    {name:"Y", color:0x33dd66, direction:new THREE.Vector3(0,1,0)},
+    {name:"Z", color:0x3388ff, direction:new THREE.Vector3(0,0,1)}
   ];
 
   axes.forEach(axis=>{
-    const material = new THREE.MeshBasicMaterial({color:axis.color});
+    const axisGroup = new THREE.Group();
+    axisGroup.userData.axis = axis.name;
+
+    const material = new THREE.MeshBasicMaterial({
+      color:axis.color,
+      depthTest:false
+    });
+
     const line = new THREE.Mesh(
       new THREE.CylinderGeometry(0.025,0.025,1,8),
       material
@@ -565,12 +572,13 @@ function createTransformGizmo3d(){
       axis.direction
     );
 
-    transformGizmo3d.add(line,arrow);
+    axisGroup.add(line,arrow);
+    transformGizmo3d.add(axisGroup);
   });
 
   scene3dWorld.add(transformGizmo3d);
   transformGizmo3d.visible = false;
-}
+    }
 
 function updateTransformGizmo3d(){
   if(!transformGizmo3d || !selectedObject3d) return;
@@ -591,7 +599,12 @@ function enableDrag3d(){
   const plane = new THREE.Plane();
   const hitPoint = new THREE.Vector3();
   const offset = new THREE.Vector3();
+
   let dragging = null;
+  let dragAxis = null;
+  let dragMode = "object";
+  let objectStart = new THREE.Vector3();
+  let pointerStart = new THREE.Vector3();
 
   function getPointer(e){
     const rect = canvas.getBoundingClientRect();
@@ -602,18 +615,64 @@ function enableDrag3d(){
   canvas.style.touchAction = "none";
 
   canvas.addEventListener("pointerdown", e => {
-    if(playMode3d) return;
+    if(playMode3d || !selectedObject3d) return;
 
     getPointer(e);
-    raycaster.setFromCamera(pointer, camera3d);
+    raycaster.setFromCamera(pointer,camera3d);
 
-    const hits = raycaster.intersectObjects(objects3d, false);
+    // Gizmo axis selection
+    if(transformGizmo3d && transformGizmo3d.visible){
+      const hits = raycaster.intersectObjects(
+        transformGizmo3d.children,
+        true
+      );
+
+      if(hits.length){
+        let group = hits[0].object;
+        while(group.parent && group.parent !== transformGizmo3d){
+          group = group.parent;
+        }
+
+        const axisName = group.userData.axis;
+
+        if(axisName){
+          dragAxis = {
+            X:new THREE.Vector3(1,0,0),
+            Y:new THREE.Vector3(0,1,0),
+            Z:new THREE.Vector3(0,0,1)
+          }[axisName];
+
+          dragging = selectedObject3d;
+          dragMode = "axis";
+          objectStart.copy(dragging.position);
+
+          plane.setFromNormalAndCoplanarPoint(
+            camera3d.getWorldDirection(new THREE.Vector3()),
+            dragging.position
+          );
+
+          if(raycaster.ray.intersectPlane(plane,hitPoint)){
+            pointerStart.copy(hitPoint);
+          }
+
+          canvas.setPointerCapture(e.pointerId);
+          e.preventDefault();
+          return;
+        }
+      }
+    }
+
+    // Normal object drag
+    const hits = raycaster.intersectObjects(objects3d,false);
     if(!hits.length) return;
 
     const obj = hits[0].object;
-    if(obj.userData.kind === "ground") return;
+    if(obj.userData.kind === "ground" ||
+       obj.userData.kind === "wall") return;
 
     dragging = obj;
+    dragMode = "object";
+    dragAxis = null;
     selectObject3d(obj);
 
     plane.setFromNormalAndCoplanarPoint(
@@ -621,7 +680,7 @@ function enableDrag3d(){
       obj.position
     );
 
-    if(raycaster.ray.intersectPlane(plane, hitPoint)){
+    if(raycaster.ray.intersectPlane(plane,hitPoint)){
       offset.copy(obj.position).sub(hitPoint);
     }
 
@@ -633,14 +692,33 @@ function enableDrag3d(){
     if(!dragging || playMode3d) return;
 
     getPointer(e);
-    raycaster.setFromCamera(pointer, camera3d);
+    raycaster.setFromCamera(pointer,camera3d);
 
-    if(raycaster.ray.intersectPlane(plane, hitPoint)){
+    if(!raycaster.ray.intersectPlane(plane,hitPoint)) return;
+
+    if(dragMode === "axis" && dragAxis){
+      const amount = hitPoint.clone()
+        .sub(pointerStart)
+        .dot(dragAxis);
+
+      dragging.position.copy(objectStart)
+        .add(dragAxis.clone().multiplyScalar(amount));
+
+      const halfHeight =
+        (dragging.userData.kind === "sphere" ? 0.6 : 0.5)
+        * dragging.scale.y;
+
+      dragging.position.y = Math.max(
+        halfHeight,
+        dragging.position.y
+      );
+    } else {
       const targetX = hitPoint.x + offset.x;
       const targetZ = hitPoint.z + offset.z;
 
       dragging.position.x +=
         (targetX - dragging.position.x) * 0.2;
+
       dragging.position.z +=
         (targetZ - dragging.position.z) * 0.2;
 
@@ -652,24 +730,30 @@ function enableDrag3d(){
         halfHeight,
         dragging.position.y
       );
-
-      updateTransformGizmo3d();
-
-      $("posX").value = dragging.position.x.toFixed(1);
-      $("posY").value = dragging.position.y.toFixed(1);
-      $("posZ").value = dragging.position.z.toFixed(1);
     }
+
+    if(transformGizmo3d){
+      transformGizmo3d.position.copy(dragging.position);
+      transformGizmo3d.updateMatrixWorld(true);
+    }
+
+    $("posX").value = dragging.position.x.toFixed(1);
+    $("posY").value = dragging.position.y.toFixed(1);
+    $("posZ").value = dragging.position.z.toFixed(1);
 
     e.preventDefault();
   });
 
   function stopDrag(){
     dragging = null;
+    dragAxis = null;
+    dragMode = "object";
   }
 
-  canvas.addEventListener("pointerup", stopDrag);
-  canvas.addEventListener("pointercancel", stopDrag);
-}
+  canvas.addEventListener("pointerup",stopDrag);
+  canvas.addEventListener("pointercancel",stopDrag);
+  }
+  
 function enableCameraControls3d(){
   if(!renderer3d || !camera3d) return;
 
