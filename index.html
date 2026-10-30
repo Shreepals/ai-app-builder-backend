@@ -157,6 +157,20 @@ iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);bord
 <label for="posY">Position Y</label><input id="posY" type="number" step="0.5" value="1">
 <label for="posZ">Position Z</label><input id="posZ" type="number" step="0.5" value="0">
 <label for="objScale">Object Size</label><input id="objScale" type="range" min="0.2" max="5" step="0.1" value="1">
+<label for="objName">Object Name</label>
+<input id="objName" type="text" placeholder="Object Name">
+
+<label for="objColor">Object Color</label>
+<input id="objColor" type="color" value="#22aaff">
+
+<label for="rotX">Rotation X</label>
+<input id="rotX" type="number" step="5" value="0">
+
+<label for="rotY">Rotation Y</label>
+<input id="rotY" type="number" step="5" value="0">
+
+<label for="rotZ">Rotation Z</label>
+<input id="rotZ" type="number" step="5" value="0">  
 <div class="actions">
   <button class="btn" id="applyObject">Apply Changes</button>
   <button class="btn secondary" id="rotateLeft3d">↶ Rotate Left</button>
@@ -661,10 +675,43 @@ $("addWall").addEventListener("click",()=>addObject3d("wall"));
 $("objectList").addEventListener("change",()=>selectObject3d(objects3d[Number($("objectList").value)]||null));
 
 $("applyObject").addEventListener("click",()=>{
-if(!selectedObject3d){status("status3d","पहले कोई ऑब्जेक्ट चुनें।");return}
-selectedObject3d.position.set(Number($("posX").value)||0,Number($("posY").value)||0,Number($("posZ").value)||0);
-const s=Number($("objScale").value)||1;selectedObject3d.scale.set(s,s,s);
-status("status3d","ऑब्जेक्ट में बदलाव लागू हो गए।");
+  if(!selectedObject3d){
+    status("status3d","पहले कोई ऑब्जेक्ट चुनें।");
+    return;
+  }
+
+  const obj=selectedObject3d;
+
+  // Position
+  obj.position.set(
+    Number($("posX").value)||0,
+    Number($("posY").value)||0,
+    Number($("posZ").value)||0
+  );
+
+  // Size
+  const s=Number($("objScale").value)||1;
+  obj.scale.set(s,s,s);
+
+  // Name
+  if($("objName").value.trim()){
+    obj.name=$("objName").value.trim();
+  }
+
+  // Color
+  if(obj.material && obj.material.color){
+    obj.material.color.set($("objColor").value);
+  }
+
+  // Rotation
+  obj.rotation.set(
+    THREE.MathUtils.degToRad(Number($("rotX").value)||0),
+    THREE.MathUtils.degToRad(Number($("rotY").value)||0),
+    THREE.MathUtils.degToRad(Number($("rotZ").value)||0)
+  );
+
+  updateObjectList3d();
+  status("status3d","Name, Color, Position, Size और Rotation लागू हो गए।");
 });
 
 $("delete3d").addEventListener("click",()=>{
