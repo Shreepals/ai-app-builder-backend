@@ -471,16 +471,39 @@ function sceneData3d(){
 }  
 
 function updateObjectList3d(){
-const list=$("objectList");list.replaceChildren();
-objects3d.forEach((obj,i)=>{const option=document.createElement("option");option.value=String(i);option.textContent=obj.name;list.append(option)});
-if(selectedObject3d)list.value=String(objects3d.indexOf(selectedObject3d));
+  const list=$("objectList");
+  list.replaceChildren();
+
+  objects3d.forEach((obj,i)=>{
+    const option=document.createElement("option");
+    option.value=String(i);
+    option.textContent=obj.name || ("Object "+(i+1));
+    list.append(option);
+  });
+
+  if(selectedObject3d){
+    list.value=String(objects3d.indexOf(selectedObject3d));
+  }
 }
 
 function selectObject3d(obj){
-selectedObject3d=obj;updateObjectList3d();
-if(!obj)return;
-$("posX").value=obj.position.x;$("posY").value=obj.position.y;$("posZ").value=obj.position.z;$("objScale").value=obj.scale.x;
-}
+  selectedObject3d=obj;
+  updateObjectList3d();
+
+  if(!obj)return;
+
+  $("posX").value=obj.position.x;
+  $("posY").value=obj.position.y;
+  $("posZ").value=obj.position.z;
+  $("objScale").value=obj.scale.x;
+
+  if($("objName")) $("objName").value=obj.name || "";
+  if($("objColor")) $("objColor").value="#"+obj.material.color.getHexString();
+
+  if($("rotX")) $("rotX").value=THREE.MathUtils.radToDeg(obj.rotation.x);
+  if($("rotY")) $("rotY").value=THREE.MathUtils.radToDeg(obj.rotation.y);
+  if($("rotZ")) $("rotZ").value=THREE.MathUtils.radToDeg(obj.rotation.z);
+  }
 
 function enableDrag3d(){
   if(!renderer3d || !camera3d) return;
