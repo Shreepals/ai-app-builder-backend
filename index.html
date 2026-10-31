@@ -441,8 +441,61 @@ camera3d.updateProjectionMatrix();renderer3d.setSize(host.clientWidth,host.clien
 resizeObserver3d.observe(host);
 return true;
 }
+  
+let undoHistory3d = [];
+let redoHistory3d = [];
+
+function recordUndo3d(){
+  if(!scene3dWorld) return;
+
+  undoHistory3d.push(
+    JSON.parse(JSON.stringify(sceneData3d()))
+  );
+
+  if(undoHistory3d.length > 50){
+    undoHistory3d.shift();
+  }
+
+  redoHistory3d = [];
+}
+
+function undo3d(){
+  if(!undoHistory3d.length){
+    status("status3d","वापस करने के लिए कोई बदलाव नहीं है।");
+    return;
+  }
+
+  redoHistory3d.push(
+    JSON.parse(JSON.stringify(sceneData3d()))
+  );
+
+  const previous = undoHistory3d.pop();
+  loadSceneData3d(previous);
+
+  updateObjectList3d();
+  status("status3d","Undo: पिछला बदलाव वापस किया गया।");
+}
+
+function redo3d(){
+  if(!redoHistory3d.length){
+    status("status3d","दोबारा करने के लिए कोई बदलाव नहीं है।");
+    return;
+  }
+
+  undoHistory3d.push(
+    JSON.parse(JSON.stringify(sceneData3d()))
+  );
+
+  const next = redoHistory3d.pop();
+  loadSceneData3d(next);
+
+  updateObjectList3d();
+  status("status3d","Redo: बदलाव दोबारा लागू किया गया।");
+  }
+  
 function addObject3d(kind){
   if(!init3d()) return;
+  recordUndo3d();
 
   let geometry;
   let color = 0x5685ff;
@@ -1106,6 +1159,7 @@ $("applyObject").addEventListener("click",()=>{
   }
 
   const obj=selectedObject3d;
+  recordUndo3d();
 
   // Position
   obj.position.set(
