@@ -957,6 +957,14 @@ groupStartPositions3d = draggingGroup3d.map(obj => ({
     recordUndo3d();
     dragMode = "object";
     dragAxis = null;
+    draggingGroup3d = selectedObjects3d.length > 1
+  ? selectedObjects3d.slice()
+  : [obj];
+
+groupStartPositions3d = draggingGroup3d.map(item => ({
+  object: item,
+  position: item.position.clone()
+}));
 
     selectObject3d(obj);
 
