@@ -513,6 +513,8 @@ function redo3d(){
     redo3d();
   }
 });
+ $("undo3d").addEventListener("click", undo3d);
+ $("redo3d").addEventListener("click", redo3d); 
   
 function addObject3d(kind){
   if(!init3d()) return;
