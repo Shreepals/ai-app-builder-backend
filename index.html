@@ -630,20 +630,28 @@ function sceneData3d(){
 }  
 
 function updateObjectList3d(){
-  const list=$("objectList");
+  const list = $("objectList");
+
+  const previouslySelected = Array.from(list.selectedOptions)
+    .map(option => objects3d[Number(option.value)])
+    .filter(Boolean);
+
+  if(selectedObject3d && objects3d.includes(selectedObject3d)){
+    previouslySelected.push(selectedObject3d);
+  }
+
+  const selectedSet = new Set(previouslySelected);
+
   list.replaceChildren();
 
-  objects3d.forEach((obj,i)=>{
-    const option=document.createElement("option");
-    option.value=String(i);
-    option.textContent=obj.name || ("Object "+(i+1));
+  objects3d.forEach((obj, i) => {
+    const option = document.createElement("option");
+    option.value = String(i);
+    option.textContent = obj.name || ("Object " + (i + 1));
+    option.selected = selectedSet.has(obj);
     list.append(option);
   });
-
-  if(selectedObject3d){
-    list.value=String(objects3d.indexOf(selectedObject3d));
   }
-}
 
 function selectObject3d(obj){
   selectedObject3d=obj;
