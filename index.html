@@ -551,6 +551,67 @@ function addObject3d(kind){
 
   status("status3d", obj.name + " जोड़ दिया गया।");
 }
+  let copiedObject3d = null;
+
+function copyObject3d(){
+  if(!selectedObject3d){
+    status("status3d","पहले ऑब्जेक्ट चुनें।");
+    return;
+  }
+
+  copiedObject3d = {
+    name: selectedObject3d.name,
+    kind: selectedObject3d.userData.kind || "cube",
+    color: selectedObject3d.material.color.getHex(),
+    position: selectedObject3d.position.toArray(),
+    rotation: selectedObject3d.rotation.toArray().slice(0,3),
+    scale: selectedObject3d.scale.toArray()
+  };
+
+  status("status3d","ऑब्जेक्ट Copy हो गया।");
+}
+
+function pasteObject3d(){
+  if(!copiedObject3d){
+    status("status3d","पहले कोई ऑब्जेक्ट Copy करें।");
+    return;
+  }
+
+  recordUndo3d();
+
+  const item = copiedObject3d;
+  let geometry;
+
+  if(item.kind === "sphere"){
+    geometry = new THREE.SphereGeometry(0.6,24,16);
+  } else if(item.kind === "ground"){
+    geometry = new THREE.BoxGeometry(8,0.2,8);
+  } else if(item.kind === "wall"){
+    geometry = new THREE.BoxGeometry(2,2,0.3);
+  } else {
+    geometry = new THREE.BoxGeometry(1,1,1);
+  }
+
+  const obj = new THREE.Mesh(
+    geometry,
+    new THREE.MeshStandardMaterial({color:item.color})
+  );
+
+  obj.name = item.name + " Copy";
+  obj.userData.kind = item.kind;
+  obj.position.fromArray(item.position);
+  obj.position.x += 1;
+
+  obj.rotation.set(...item.rotation);
+  obj.scale.fromArray(item.scale);
+
+  scene3dWorld.add(obj);
+  objects3d.push(obj);
+  selectObject3d(obj);
+
+  updateObjectList3d();
+  status("status3d","ऑब्जेक्ट Paste हो गया।");
+  }
 
 function sceneData3d(){
   return objects3d.map(obj => ({
