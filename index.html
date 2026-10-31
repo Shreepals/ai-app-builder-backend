@@ -1262,11 +1262,13 @@ $("objectList").addEventListener("change",()=>{
     .map(option => objects3d[Number(option.value)])
     .filter(Boolean);
 
-  if(selected.length > 1){
-    selectObject3d(selected[0]);
-    status("status3d", selected.length + " ऑब्जेक्ट चुने गए।");
-  } else {
-    selectObject3d(selected[0] || null);
+  selectedObjects3d = selected;
+
+if(selected.length > 0){
+  selectObject3d(selected[0]);
+  status("status3d", selected.length + " ऑब्जेक्ट चुने गए।");
+} else {
+  selectObject3d(null);
   }
 });
 
