@@ -809,6 +809,7 @@ function enableDrag3d(){
         if(axisName && mode){
           dragAxis = getAxis(axisName);
           dragging = selectedObject3d;
+          recordUndo3d();
           dragMode = mode;
 
           plane.setFromNormalAndCoplanarPoint(
@@ -865,6 +866,7 @@ function enableDrag3d(){
        obj.userData.kind === "wall") return;
 
     dragging = obj;
+    recordUndo3d();
     dragMode = "object";
     dragAxis = null;
 
