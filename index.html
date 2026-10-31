@@ -847,6 +847,7 @@ function enableDrag3d(){
   const objectStartRotation = new THREE.Vector3();
   const objectStartScale = new THREE.Vector3();
   const rotationStartVector = new THREE.Vector3();
+  let groupStartPositions3d = [];
 
   function getPointer(e){
     const rect = canvas.getBoundingClientRect();
