@@ -1,4 +1,4 @@
-mo<!DOCTYPE html>
+ymo<!DOCTYPE html>
 <html lang="hi">
 <head>
 <meta charset="UTF-8">
@@ -542,15 +542,15 @@ function createTransformGizmo3d(){
   ];
 
   axes.forEach(axis=>{
-    // Move Gizmo
-    const axisGroup = new THREE.Group();
-    axisGroup.userData.axis = axis.name;
-    axisGroup.userData.mode = "move";
-
     const material = new THREE.MeshBasicMaterial({
       color:axis.color,
       depthTest:false
     });
+
+    // MOVE GIZMO
+    const moveGroup = new THREE.Group();
+    moveGroup.userData.axis = axis.name;
+    moveGroup.userData.mode = "move";
 
     const line = new THREE.Mesh(
       new THREE.CylinderGeometry(0.025,0.025,1,8),
@@ -574,31 +574,28 @@ function createTransformGizmo3d(){
       axis.direction
     );
 
-    const hitMaterial = new THREE.MeshBasicMaterial({
+    const moveHitMaterial = new THREE.MeshBasicMaterial({
       transparent:true,
       opacity:0.001,
       depthWrite:false,
       colorWrite:false
     });
 
-    const hitArea = new THREE.Mesh(
+    const moveHit = new THREE.Mesh(
       new THREE.CylinderGeometry(0.18,0.18,1.3,12),
-      hitMaterial
+      moveHitMaterial
     );
 
-    hitArea.position.copy(
-      axis.direction.clone().multiplyScalar(0.65)
-    );
-
-    hitArea.quaternion.setFromUnitVectors(
+    moveHit.position.copy(axis.direction.clone().multiplyScalar(0.65));
+    moveHit.quaternion.setFromUnitVectors(
       new THREE.Vector3(0,1,0),
       axis.direction
     );
 
-    axisGroup.add(line,arrow,hitArea);
-    transformGizmo3d.add(axisGroup);
+    moveGroup.add(line,arrow,moveHit);
+    transformGizmo3d.add(moveGroup);
 
-    // Rotation Gizmo
+    // ROTATION GIZMO
     const rotationGroup = new THREE.Group();
     rotationGroup.userData.axis = axis.name;
     rotationGroup.userData.mode = "rotate";
@@ -615,39 +612,60 @@ function createTransformGizmo3d(){
       ringMaterial
     );
 
-    if(axis.name === "X"){
-      ring.rotation.y = Math.PI/2;
-    } else if(axis.name === "Y"){
-      ring.rotation.x = Math.PI/2;
-    }
-
-    rotationGroup.add(ring);
-
-    const ringHitMaterial = new THREE.MeshBasicMaterial({
-      transparent:true,
-      opacity:0.001,
-      colorWrite:false,
-      depthWrite:false
-    });
+    if(axis.name === "X") ring.rotation.y = Math.PI/2;
+    if(axis.name === "Y") ring.rotation.x = Math.PI/2;
 
     const ringHit = new THREE.Mesh(
       new THREE.TorusGeometry(1.35,0.13,8,80),
-      ringHitMaterial
+      new THREE.MeshBasicMaterial({
+        transparent:true,
+        opacity:0.001,
+        colorWrite:false,
+        depthWrite:false
+      })
     );
 
-    if(axis.name === "X"){
-      ringHit.rotation.y = Math.PI/2;
-    } else if(axis.name === "Y"){
-      ringHit.rotation.x = Math.PI/2;
-    }
+    if(axis.name === "X") ringHit.rotation.y = Math.PI/2;
+    if(axis.name === "Y") ringHit.rotation.x = Math.PI/2;
 
-    rotationGroup.add(ringHit);
+    rotationGroup.add(ring,ringHit);
     transformGizmo3d.add(rotationGroup);
+
+    // SCALE GIZMO
+    const scaleGroup = new THREE.Group();
+    scaleGroup.userData.axis = axis.name;
+    scaleGroup.userData.mode = "scale";
+
+    const scaleHandle = new THREE.Mesh(
+      new THREE.BoxGeometry(0.22,0.22,0.22),
+      material
+    );
+
+    scaleHandle.position.copy(
+      axis.direction.clone().multiplyScalar(1.55)
+    );
+
+    const scaleHit = new THREE.Mesh(
+      new THREE.SphereGeometry(0.27,12,12),
+      new THREE.MeshBasicMaterial({
+        transparent:true,
+        opacity:0.001,
+        colorWrite:false,
+        depthWrite:false
+      })
+    );
+
+    scaleHit.position.copy(
+      axis.direction.clone().multiplyScalar(1.55)
+    );
+
+    scaleGroup.add(scaleHandle,scaleHit);
+    transformGizmo3d.add(scaleGroup);
   });
 
   scene3dWorld.add(transformGizmo3d);
   transformGizmo3d.visible = false;
-  }
+}
 
 function updateTransformGizmo3d(){
   if(!transformGizmo3d || !selectedObject3d) return;
@@ -676,6 +694,7 @@ function enableDrag3d(){
   const objectStart = new THREE.Vector3();
   const pointerStart = new THREE.Vector3();
   const objectStartRotation = new THREE.Vector3();
+  const objectStartScale = new THREE.Vector3();
   const rotationStartVector = new THREE.Vector3();
 
   function getPointer(e){
@@ -700,11 +719,9 @@ function enableDrag3d(){
     getPointer(e);
     raycaster.setFromCamera(pointer,camera3d);
 
-    // Move and Rotation Gizmo selection
     if(transformGizmo3d && transformGizmo3d.visible){
       const hits = raycaster.intersectObjects(
-        transformGizmo3d.children,
-        true
+        transformGizmo3d.children,true
       );
 
       if(hits.length){
@@ -722,13 +739,15 @@ function enableDrag3d(){
           dragging = selectedObject3d;
           dragMode = mode;
 
+          plane.setFromNormalAndCoplanarPoint(
+            mode === "rotate"
+              ? dragAxis
+              : camera3d.getWorldDirection(new THREE.Vector3()),
+            dragging.position
+          );
+
           if(mode === "move"){
             objectStart.copy(dragging.position);
-
-            plane.setFromNormalAndCoplanarPoint(
-              camera3d.getWorldDirection(new THREE.Vector3()),
-              dragging.position
-            );
 
             if(raycaster.ray.intersectPlane(plane,hitPoint)){
               pointerStart.copy(hitPoint);
@@ -742,15 +761,18 @@ function enableDrag3d(){
               dragging.rotation.z
             );
 
-            plane.setFromNormalAndCoplanarPoint(
-              dragAxis,
-              dragging.position
-            );
-
             if(raycaster.ray.intersectPlane(plane,hitPoint)){
               rotationStartVector.copy(hitPoint)
                 .sub(dragging.position)
                 .normalize();
+            }
+          }
+
+          if(mode === "scale"){
+            objectStartScale.copy(dragging.scale);
+
+            if(raycaster.ray.intersectPlane(plane,hitPoint)){
+              pointerStart.copy(hitPoint);
             }
           }
 
@@ -762,7 +784,6 @@ function enableDrag3d(){
       }
     }
 
-    // Normal object drag
     const hits = raycaster.intersectObjects(objects3d,false);
     if(!hits.length) return;
 
@@ -822,7 +843,22 @@ function enableDrag3d(){
       if(dragAxis.y) dragging.rotation.y += angle;
       if(dragAxis.z) dragging.rotation.z += angle;
 
-    } else if(dragMode === "axis" && dragAxis){
+    } else if(dragMode === "scale" && dragAxis){
+      if(!raycaster.ray.intersectPlane(plane,hitPoint)) return;
+
+      const amount = hitPoint.clone()
+        .sub(pointerStart)
+        .dot(dragAxis);
+
+      const factor = Math.max(0.1,1 + amount);
+
+      dragging.scale.copy(objectStartScale);
+
+      if(dragAxis.x) dragging.scale.x *= factor;
+      if(dragAxis.y) dragging.scale.y *= factor;
+      if(dragAxis.z) dragging.scale.z *= factor;
+
+    } else if(dragMode === "move" && dragAxis){
       if(!raycaster.ray.intersectPlane(plane,hitPoint)) return;
 
       const amount = hitPoint.clone()
