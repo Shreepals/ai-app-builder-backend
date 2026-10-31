@@ -1061,6 +1061,27 @@ groupStartPositions3d = draggingGroup3d.map(obj => ({
       );
     }
 
+    if(
+  (dragMode === "move" || dragMode === "object") &&
+  draggingGroup3d.length > 1 &&
+  groupStartPositions3d.length === draggingGroup3d.length
+){
+  const anchor = groupStartPositions3d.find(
+    item => item.object === dragging
+  );
+
+  if(anchor){
+    const delta = dragging.position.clone()
+      .sub(anchor.position);
+
+    groupStartPositions3d.forEach(item => {
+      if(item.object !== dragging){
+        item.object.position.copy(item.position).add(delta);
+      }
+    });
+  }
+      }
+
     if(transformGizmo3d){
       transformGizmo3d.position.copy(dragging.position);
       transformGizmo3d.updateMatrixWorld(true);
