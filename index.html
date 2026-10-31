@@ -1290,7 +1290,61 @@ function getSelectedObjects3d(){
   return Array.from($("objectList").selectedOptions)
     .map(option => objects3d[Number(option.value)])
     .filter(Boolean);
-  }  
+  }
+ let objectGroups3d = [];
+
+function groupSelectedObjects3d(){
+  const selected = getSelectedObjects3d();
+
+  if(selected.length < 2){
+    status("status3d","Group बनाने के लिए कम से कम 2 ऑब्जेक्ट चुनें।");
+    return;
+  }
+
+  recordUndo3d();
+
+  const group = new THREE.Group();
+  group.name = "Group " + (objectGroups3d.length + 1);
+
+  scene3dWorld.add(group);
+
+  selected.forEach(obj => {
+    group.attach(obj);
+  });
+
+  objectGroups3d.push(group);
+
+  selectedObjects3d = selected;
+  selectObject3d(selected[0]);
+
+  updateObjectList3d();
+  status("status3d","Group सफलतापूर्वक बन गया।");
+}
+
+function ungroupSelectedObjects3d(){
+  const selected = getSelectedObjects3d();
+
+  const group = objectGroups3d.find(g =>
+    selected.some(obj => obj.parent === g)
+  );
+
+  if(!group){
+    status("status3d","पहले किसी Group का ऑब्जेक्ट चुनें।");
+    return;
+  }
+
+  recordUndo3d();
+
+  while(group.children.length){
+    scene3dWorld.attach(group.children[0]);
+  }
+
+  scene3dWorld.remove(group);
+  objectGroups3d = objectGroups3d.filter(g => g !== group);
+
+  updateObjectList3d();
+  status("status3d","Group खुल गया।");
+  } 
 
 $("addCube").addEventListener("click",()=>addObject3d("cube"));
 $("addSphere").addEventListener("click",()=>addObject3d("sphere"));
