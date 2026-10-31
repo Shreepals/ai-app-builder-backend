@@ -1244,6 +1244,14 @@ scene3dWorld.add(obj);objects3d.push(obj);
 });
 selectObject3d(objects3d[objects3d.length-1]||null);
 }
+  
+let selectedObjects3d = [];
+
+function getSelectedObjects3d(){
+  return Array.from($("objectList").selectedOptions)
+    .map(option => objects3d[Number(option.value)])
+    .filter(Boolean);
+  }  
 
 $("addCube").addEventListener("click",()=>addObject3d("cube"));
 $("addSphere").addEventListener("click",()=>addObject3d("sphere"));
