@@ -1240,7 +1240,18 @@ $("addCube").addEventListener("click",()=>addObject3d("cube"));
 $("addSphere").addEventListener("click",()=>addObject3d("sphere"));
 $("addGround").addEventListener("click",()=>addObject3d("ground"));
 $("addWall").addEventListener("click",()=>addObject3d("wall"));  
-$("objectList").addEventListener("change",()=>selectObject3d(objects3d[Number($("objectList").value)]||null));
+$("objectList").addEventListener("change",()=>{
+  const selected = Array.from($("objectList").selectedOptions)
+    .map(option => objects3d[Number(option.value)])
+    .filter(Boolean);
+
+  if(selected.length > 1){
+    selectObject3d(selected[0]);
+    status("status3d", selected.length + " ऑब्जेक्ट चुने गए।");
+  } else {
+    selectObject3d(selected[0] || null);
+  }
+});
 
 $("applyObject").addEventListener("click",()=>{
   if(!selectedObject3d){
