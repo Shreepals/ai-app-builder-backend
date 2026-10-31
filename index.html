@@ -493,6 +493,25 @@ function redo3d(){
   status("status3d","Redo: बदलाव दोबारा लागू किया गया।");
   }
   
+  document.addEventListener("keydown",e=>{
+  if(e.target && (
+    e.target.tagName === "INPUT" ||
+    e.target.tagName === "TEXTAREA" ||
+    e.target.tagName === "SELECT"
+  )) return;
+
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="z"){
+    e.preventDefault();
+    if(e.shiftKey) redo3d();
+    else undo3d();
+  }
+
+  if((e.ctrlKey || e.metaKey) && e.key.toLowerCase()==="y"){
+    e.preventDefault();
+    redo3d();
+  }
+});
+  
 function addObject3d(kind){
   if(!init3d()) return;
   recordUndo3d();
