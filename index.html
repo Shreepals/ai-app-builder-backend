@@ -889,6 +889,14 @@ function enableDrag3d(){
         if(axisName && mode){
           dragAxis = getAxis(axisName);
           dragging = selectedObject3d;
+          draggingGroup3d = selectedObjects3d.length > 1
+  ? selectedObjects3d.slice()
+  : [selectedObject3d];
+
+groupStartPositions3d = draggingGroup3d.map(obj => ({
+  object: obj,
+  position: obj.position.clone()
+}));
           recordUndo3d();
           dragMode = mode;
 
