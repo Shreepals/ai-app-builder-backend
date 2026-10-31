@@ -1195,6 +1195,7 @@ $("applyObject").addEventListener("click",()=>{
 
 $("delete3d").addEventListener("click",()=>{
 if(!selectedObject3d){status("status3d","पहले कोई ऑब्जेक्ट चुनें।");return}
+recordUndo3d();  
 scene3dWorld.remove(selectedObject3d);
 selectedObject3d.geometry.dispose();selectedObject3d.material.dispose();
 objects3d=objects3d.filter(o=>o!==selectedObject3d);selectedObject3d=null;
