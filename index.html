@@ -1654,12 +1654,20 @@ $("addScene3d").addEventListener("click",()=>{
 
 $("switchScene3d").addEventListener("click",()=>{
   try{
+    const nextScene = $("sceneSelect3d").value;
+
     saveCurrentScene3d();
 
-    currentScene3d = $("sceneSelect3d").value;
-    loadSceneData3d(scenes3d[currentScene3d] || []);
+    currentScene3d = nextScene;
 
+    const saved = localStorage.getItem("aiAppStudio3DScenes");
+    if(saved){
+      scenes3d = JSON.parse(saved);
+    }
+
+    loadSceneData3d(scenes3d[currentScene3d] || []);
     updateSceneSelect3d();
+
     status("status3d",currentScene3d + " खुल गया।");
   }catch(e){
     status("status3d","Scene नहीं बदला: " + e.message);
