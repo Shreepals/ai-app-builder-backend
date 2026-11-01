@@ -424,10 +424,29 @@ function importModel3d(file){
         recordUndo3d();
 
         const model = gltf.scene;
-        model.rotation.y = 0;
-        model.rotation.x = -Math.PI / 2;
-        model.rotation.z = 0;
         model.name = file.name.replace(/\.(glb|gltf)$/i,"");
+
+        // Model ka original center aur size nikalo
+        const box = new THREE.Box3().setFromObject(model);
+        const center = box.getCenter(new THREE.Vector3());
+        const size = box.getSize(new THREE.Vector3());
+
+        // Model ko center par lao
+        model.position.sub(center);
+
+        // Car ko seedha khada karo
+        model.rotation.set(0, 0, 0);
+
+        // Model ka size normalize karo
+        const maxSize = Math.max(size.x, size.y, size.z);
+        if(maxSize > 0){
+          const scale = 4 / maxSize;
+          model.scale.setScalar(scale);
+        }
+
+        // Ground ke upar rakho
+        const finalBox = new THREE.Box3().setFromObject(model);
+        model.position.y -= finalBox.min.y;
 
         scene3dWorld.add(model);
         objects3d.push(model);
@@ -435,7 +454,7 @@ function importModel3d(file){
         selectObject3d(model);
         updateObjectList3d();
 
-        status("status3d","3D Model सफलतापूर्वक Import हुआ।");
+        status("status3d","3D Model Import हुआ और center किया गया।");
       },
       function(error){
         status("status3d","Model लोड नहीं हुआ: " + error.message);
@@ -452,7 +471,7 @@ $("importModel3d").addEventListener("click",()=>{
 
 $("modelFile3d").addEventListener("change",event=>{
   importModel3d(event.target.files[0]);
-});  
+});
 
 function init3d(){
 if(threeStarted)return true;
