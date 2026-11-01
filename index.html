@@ -520,6 +520,7 @@ if(cameraFollow3d && selectedObject3d && selectedObject3d.userData.kind!=="groun
   camera3d.position.lerp(desired, 0.05);
   camera3d.lookAt(target);
 }
+runGameLogic3d();  
 renderer3d.render(scene3dWorld,camera3d);
 }
 renderLoop();
