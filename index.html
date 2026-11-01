@@ -743,14 +743,30 @@ function pasteObject3d(){
   } 
 
 function sceneData3d(){
-  return objects3d.map(obj => ({
-    name: obj.name,
-    kind: obj.userData.kind || "cube",
-    color: obj.material.color.getHex(),
-    position: obj.position.toArray(),
-    rotation: obj.rotation.toArray().slice(0, 3),
-    scale: obj.scale.toArray()
-  }));
+  return objects3d.map(obj => {
+    let color = 0x5685ff;
+
+    obj.traverse(child => {
+      if(!child.material) return;
+
+      const material = Array.isArray(child.material)
+        ? child.material[0]
+        : child.material;
+
+      if(material && material.color){
+        color = material.color.getHex();
+      }
+    });
+
+    return {
+      name: obj.name || "Object",
+      kind: obj.userData.kind || "model",
+      color: color,
+      position: obj.position.toArray(),
+      rotation: obj.rotation.toArray().slice(0, 3),
+      scale: obj.scale.toArray()
+    };
+  });
 }
   
 function updateObjectList3d(){
