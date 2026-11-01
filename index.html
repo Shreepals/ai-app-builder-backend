@@ -425,7 +425,7 @@ function importModel3d(file){
 
         const model = gltf.scene;
         model.rotation.y = 0;
-        model.rotation.x = 0;
+        model.rotation.x = -Math.PI / 2;
         model.rotation.z = 0;
         model.name = file.name.replace(/\.(glb|gltf)$/i,"");
 
