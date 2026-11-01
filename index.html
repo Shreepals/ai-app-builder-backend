@@ -435,7 +435,7 @@ function importModel3d(file){
         model.position.sub(center);
 
         // Car ko seedha khada karo
-        model.rotation.set(0, 0, 0);
+        model.rotation.set(-Math.PI / 2, 0, 0);
 
         // Model ka size normalize karo
         const maxSize = Math.max(size.x, size.y, size.z);
