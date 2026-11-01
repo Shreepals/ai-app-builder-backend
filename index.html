@@ -1582,24 +1582,13 @@ let scenes3d = {
 let currentScene3d = "Main Menu";
 
 function saveCurrentScene3d(){
-  const savedScenes3d = localStorage.getItem("aiAppStudio3DScenes");
-
-if(savedScenes3d){
-  try{
-    scenes3d = JSON.parse(savedScenes3d);
-  }catch(e){
-    scenes3d = {"Main Menu":[]};
-  }
-}
-
-if(!scenes3d["Main Menu"]){
-  scenes3d["Main Menu"] = [];
-}
-
-currentScene3d = "Main Menu";
   scenes3d[currentScene3d] = sceneData3d();
-  localStorage.setItem("aiAppStudio3DScenes", JSON.stringify(scenes3d));
-}
+
+  localStorage.setItem(
+    "aiAppStudio3DScenes",
+    JSON.stringify(scenes3d)
+  );
+  }
 
 function updateSceneSelect3d(){
   const select = $("sceneSelect3d");
