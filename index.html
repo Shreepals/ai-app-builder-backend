@@ -711,17 +711,36 @@ function pasteObject3d(){
   status("status3d","ऑब्जेक्ट Paste हो गया।");
   }
   
-function duplicateObject3d(){
+ function duplicateObject3d(){
   if(!selectedObject3d){
     status("status3d","पहले ऑब्जेक्ट चुनें।");
     return;
   }
 
-  copyObject3d();
-  pasteObject3d();
+  try{
+    recordUndo3d();
 
-  status("status3d","ऑब्जेक्ट Duplicate हो गया।");
-  }  
+    // पूरे 3D Model की असली कॉपी
+    const duplicate = selectedObject3d.clone(true);
+
+    duplicate.name = (selectedObject3d.name || "Object") + " Copy";
+
+    // कॉपी को थोड़ा दाईं तरफ रखें
+    duplicate.position.x += 1.5;
+
+    // Scene में जोड़ें
+    scene3dWorld.add(duplicate);
+    objects3d.push(duplicate);
+
+    selectObject3d(duplicate);
+    updateObjectList3d();
+
+    status("status3d","ऑब्जेक्ट की Duplicate कॉपी बन गई।");
+
+  }catch(error){
+    status("status3d","Duplicate Error: " + error.message);
+  }
+  } 
 
 function sceneData3d(){
   return objects3d.map(obj => ({
