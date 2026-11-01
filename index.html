@@ -1575,15 +1575,94 @@ $("jumpPlayer").addEventListener("click",()=>{
   }
 });
 
+let scenes3d = {
+  "Main Menu": []
+};
+
+let currentScene3d = "Main Menu";
+
+function saveCurrentScene3d(){
+  scenes3d[currentScene3d] = sceneData3d();
+  localStorage.setItem("aiAppStudio3DScenes", JSON.stringify(scenes3d));
+}
+
+function updateSceneSelect3d(){
+  const select = $("sceneSelect3d");
+  if(!select) return;
+
+  select.innerHTML = "";
+
+  Object.keys(scenes3d).forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    option.selected = name === currentScene3d;
+    select.appendChild(option);
+  });
+}
+
 $("save3d").addEventListener("click",()=>{
-try{localStorage.setItem("aiAppStudio3DScene",JSON.stringify(sceneData3d()));status("status3d","3D सीन ब्राउज़र में सेव हुआ।")}
-catch(e){status("status3d","सेव नहीं हुआ: "+e.message)}
+  try{
+    saveCurrentScene3d();
+    status("status3d", currentScene3d + " सेव हो गया।");
+  }catch(e){
+    status("status3d","सेव नहीं हुआ: " + e.message);
+  }
 });
 
 $("load3d").addEventListener("click",()=>{
-try{const data=JSON.parse(localStorage.getItem("aiAppStudio3DScene")||"[]");loadSceneData3d(data);status("status3d",data.length?"सेव किया हुआ सीन लोड हुआ।":"कोई सेव किया हुआ सीन नहीं मिला।")}
-catch(e){status("status3d","सीन लोड नहीं हुआ: "+e.message)}
+  try{
+    const saved = localStorage.getItem("aiAppStudio3DScenes");
+    if(saved) scenes3d = JSON.parse(saved);
+
+    const data = scenes3d[currentScene3d] || [];
+    loadSceneData3d(data);
+    updateSceneSelect3d();
+
+    status("status3d",currentScene3d + " लोड हो गया।");
+  }catch(e){
+    status("status3d","लोड नहीं हुआ: " + e.message);
+  }
 });
+
+$("addScene3d").addEventListener("click",()=>{
+  const name = prompt("नए Scene का नाम लिखें:");
+  if(!name || !name.trim()) return;
+
+  const sceneName = name.trim();
+
+  if(scenes3d[sceneName]){
+    status("status3d","इस नाम का Scene पहले से मौजूद है।");
+    return;
+  }
+
+  saveCurrentScene3d();
+
+  scenes3d[sceneName] = [];
+  currentScene3d = sceneName;
+
+  loadSceneData3d([]);
+  updateSceneSelect3d();
+
+  localStorage.setItem("aiAppStudio3DScenes",JSON.stringify(scenes3d));
+  status("status3d",sceneName + " बनाया गया।");
+});
+
+$("switchScene3d").addEventListener("click",()=>{
+  try{
+    saveCurrentScene3d();
+
+    currentScene3d = $("sceneSelect3d").value;
+    loadSceneData3d(scenes3d[currentScene3d] || []);
+
+    updateSceneSelect3d();
+    status("status3d",currentScene3d + " खुल गया।");
+  }catch(e){
+    status("status3d","Scene नहीं बदला: " + e.message);
+  }
+});
+
+updateSceneSelect3d();
 
 $("export3d").addEventListener("click",()=>{
   const data=sceneData3d();
