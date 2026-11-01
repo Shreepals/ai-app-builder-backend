@@ -632,10 +632,11 @@ function sceneData3d(){
     rotation: obj.rotation.toArray().slice(0, 3),
     scale: obj.scale.toArray()
   }));
-}  
-
+}
+  
 function updateObjectList3d(){
   const list = $("objectList");
+  const hierarchy = $("sceneHierarchy3d");
 
   const previouslySelected = Array.from(list.selectedOptions)
     .map(option => objects3d[Number(option.value)])
@@ -646,7 +647,6 @@ function updateObjectList3d(){
   }
 
   const selectedSet = new Set(previouslySelected);
-
   list.replaceChildren();
 
   objects3d.forEach((obj, i) => {
@@ -662,7 +662,27 @@ function updateObjectList3d(){
     option.selected = selectedSet.has(obj);
     list.append(option);
   });
-}
+
+  if(hierarchy){
+    hierarchy.replaceChildren();
+
+    objectGroups3d.forEach((group, groupIndex) => {
+      const heading = document.createElement("div");
+      heading.textContent = "📁 " + (group.name || ("Group " + (groupIndex + 1)));
+      heading.style.fontWeight = "bold";
+      heading.style.padding = "8px";
+
+      hierarchy.append(heading);
+
+      group.children.forEach(obj => {
+        const item = document.createElement("div");
+        item.textContent = "  ↳ " + (obj.name || "Object");
+        item.style.padding = "5px 8px";
+        hierarchy.append(item);
+      });
+    });
+  }
+  }
 
 function selectObject3d(obj){
   selectedObject3d=obj;
