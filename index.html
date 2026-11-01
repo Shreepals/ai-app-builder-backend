@@ -622,6 +622,18 @@ function pasteObject3d(){
   updateObjectList3d();
   status("status3d","ऑब्जेक्ट Paste हो गया।");
   }
+  
+function duplicateObject3d(){
+  if(!selectedObject3d){
+    status("status3d","पहले ऑब्जेक्ट चुनें।");
+    return;
+  }
+
+  copyObject3d();
+  pasteObject3d();
+
+  status("status3d","ऑब्जेक्ट Duplicate हो गया।");
+  }  
 
 function sceneData3d(){
   return objects3d.map(obj => ({
