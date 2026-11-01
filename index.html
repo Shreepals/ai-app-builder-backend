@@ -822,7 +822,25 @@ function selectObject3d(obj){
   $("objScale").value=obj.scale.x;
 
   if($("objName")) $("objName").value=obj.name || "";
-  if($("objColor")) $("objColor").value="#"+obj.material.color.getHexString();
+  if($("objColor")){
+  let objectColor = null;
+
+  obj.traverse(child=>{
+    if(!objectColor && child.material){
+      const material = Array.isArray(child.material)
+        ? child.material[0]
+        : child.material;
+
+      if(material && material.color){
+        objectColor = material.color;
+      }
+    }
+  });
+
+  $("objColor").value = objectColor
+    ? "#" + objectColor.getHexString()
+    : "#5685ff";
+  }
 
   if($("rotX")) $("rotX").value=THREE.MathUtils.radToDeg(obj.rotation.x);
   if($("rotY")) $("rotY").value=THREE.MathUtils.radToDeg(obj.rotation.y);
