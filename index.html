@@ -400,7 +400,54 @@ finally{buildBusy=false;btn.disabled=false}
 /* 3D Editor */
 let scene3dWorld=null,camera3d=null,renderer3d=null,objects3d=[],selectedObject3d=null,threeStarted=false,playMode3d=false,resizeObserver3d=null;
 let jumpVelocity3d = 0;
-let cameraFollow3d = true;  
+let cameraFollow3d = true;
+
+function importModel3d(file){
+  if(!file) return;
+
+  if(!window.THREE || !THREE.GLTFLoader){
+    status("status3d","3D Model Loader तैयार नहीं है।");
+    return;
+  }
+
+  const reader = new FileReader();
+
+  reader.onload = function(event){
+    const loader = new THREE.GLTFLoader();
+
+    loader.parse(
+      event.target.result,
+      "",
+      function(gltf){
+        recordUndo3d();
+
+        const model = gltf.scene;
+        model.name = file.name.replace(/\.(glb|gltf)$/i,"");
+
+        scene3dWorld.add(model);
+        objects3d.push(model);
+
+        selectObject3d(model);
+        updateObjectList3d();
+
+        status("status3d","3D Model सफलतापूर्वक Import हुआ।");
+      },
+      function(error){
+        status("status3d","Model लोड नहीं हुआ: " + error.message);
+      }
+    );
+  };
+
+  reader.readAsArrayBuffer(file);
+}
+
+$("importModel3d").addEventListener("click",()=>{
+  $("modelFile3d").click();
+});
+
+$("modelFile3d").addEventListener("change",event=>{
+  importModel3d(event.target.files[0]);
+});  
 
 function init3d(){
 if(threeStarted)return true;
