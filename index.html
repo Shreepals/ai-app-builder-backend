@@ -651,11 +651,17 @@ function updateObjectList3d(){
   objects3d.forEach((obj, i) => {
     const option = document.createElement("option");
     option.value = String(i);
-    option.textContent = obj.name || ("Object " + (i + 1));
+
+    const group = objectGroups3d.find(g => obj.parent === g);
+
+    option.textContent = group
+      ? "  ↳ " + (obj.name || ("Object " + (i + 1)))
+      : (obj.name || ("Object " + (i + 1)));
+
     option.selected = selectedSet.has(obj);
     list.append(option);
   });
-  }
+}
 
 function selectObject3d(obj){
   selectedObject3d=obj;
