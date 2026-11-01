@@ -5,6 +5,13 @@ ymo<!DOCTYPE html>
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <title>AI App Builder Studio</title>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/0.152.2/three.min.js" onerror="this.onerror=null;this.src='https://unpkg.com/three@0.152.2/build/three.min.js'"></script>
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.152.2/build/three.module.js"
+  }
+}
+</script>  
 <script type="module">
 import { GLTFLoader } from "https://cdn.jsdelivr.net/npm/three@0.152.2/examples/jsm/loaders/GLTFLoader.js";
 window.THREE.GLTFLoader = GLTFLoader;
