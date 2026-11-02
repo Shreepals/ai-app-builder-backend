@@ -572,7 +572,9 @@ return true;
 // NO-CODE GAME LOGIC ENGINE
 // ================================
 
-let gameEvents3d = [];
+let gameEvents3d = JSON.parse(
+  localStorage.getItem("gameEvents3d") || "[]"
+);
 
 let gameVariables3d = {
   score: 0,
