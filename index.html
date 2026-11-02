@@ -537,6 +537,96 @@ camera3d.updateProjectionMatrix();renderer3d.setSize(host.clientWidth,host.clien
 resizeObserver3d.observe(host);
 return true;
 }
+// ================================
+// NO-CODE GAME LOGIC ENGINE
+// ================================
+
+let gameEvents3d = [];
+
+let gameVariables3d = {
+  score: 0,
+  health: 100,
+  coins: 0,
+  level: 1
+};
+
+let gameLogicRunning3d = false;
+
+function runGameLogic3d(){
+
+  if(!playMode3d) return;
+
+  if(!Array.isArray(gameEvents3d)) return;
+
+  gameEvents3d.forEach(event => {
+
+    if(!event || event.enabled === false) return;
+
+    try{
+
+      let conditionPassed = true;
+
+      // Condition: हमेशा चलाएँ
+      if(event.condition === "always"){
+        conditionPassed = true;
+      }
+
+      // Condition: Score की जाँच
+      else if(event.condition === "score"){
+        conditionPassed =
+          Number(gameVariables3d.score) >=
+          Number(event.value || 0);
+      }
+
+      // Condition: Health की जाँच
+      else if(event.condition === "health"){
+        conditionPassed =
+          Number(gameVariables3d.health) <=
+          Number(event.value || 0);
+      }
+
+      if(!conditionPassed) return;
+
+      // Actions
+      if(event.action === "addScore"){
+        gameVariables3d.score += Number(event.value || 1);
+      }
+
+      else if(event.action === "removeHealth"){
+        gameVariables3d.health -= Number(event.value || 10);
+      }
+
+      else if(event.action === "addCoins"){
+        gameVariables3d.coins += Number(event.value || 1);
+      }
+
+      else if(event.action === "rotateObject"){
+        if(selectedObject3d){
+          selectedObject3d.rotation.y +=
+            Number(event.value || 0.1);
+        }
+      }
+
+      else if(event.action === "destroyObject"){
+        if(selectedObject3d){
+          scene3dWorld.remove(selectedObject3d);
+
+          objects3d = objects3d.filter(
+            obj => obj !== selectedObject3d
+          );
+
+          selectedObject3d = null;
+          updateObjectList3d();
+        }
+      }
+
+    }catch(error){
+      console.error("Game Logic Error:", error);
+    }
+
+  });
+
+  }  
   
 let undoHistory3d = [];
 let redoHistory3d = [];
