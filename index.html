@@ -147,6 +147,37 @@ iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);bord
 </div>
 <div id="scene3d" style="margin-top:15px"></div>
 <div id="playerControls" style="margin-top:12px;padding:12px;background:#10192c;border-radius:10px">
+<div id="gameLogicPanel3d" style="margin-top:15px;padding:12px;background:#10192c;border-radius:10px">
+  <h3>🧠 Game Logic - No Coding</h3>
+
+  <label>जब क्या हो?</label>
+  <select id="logicCondition3d">
+    <option value="always">हमेशा</option>
+    <option value="score">Score तय संख्या तक पहुँचे</option>
+    <option value="health">Health तय संख्या से कम हो</option>
+  </select>
+
+  <label>संख्या</label>
+  <input id="logicValue3d" type="number" value="10">
+
+  <label>तब क्या करें?</label>
+  <select id="logicAction3d">
+    <option value="addScore">Score बढ़ाएँ</option>
+    <option value="removeHealth">Health घटाएँ</option>
+    <option value="addCoins">Coins बढ़ाएँ</option>
+    <option value="rotateObject">Object घुमाएँ</option>
+    <option value="destroyObject">Selected Object हटाएँ</option>
+  </select>
+
+  <button class="btn green" id="addGameEvent3d">＋ Add Game Rule</button>
+
+  <h3>📋 Game Rules</h3>
+  <div id="gameEventsList3d">अभी कोई Rule नहीं है।</div>
+
+  <p id="gameVariablesStatus3d">
+    Score: 0 | Health: 100 | Coins: 0
+  </p>
+</div>  
   <h3>🎮 Player Controls</h3>
   <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:8px;max-width:320px;margin:auto">
     <span></span>
