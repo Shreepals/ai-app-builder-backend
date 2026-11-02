@@ -661,6 +661,16 @@ function runGameLogic3d(){
     }
 
   });
+  
+  function checkCollision3d(objectA, objectB){
+
+  if(!objectA || !objectB) return false;
+
+  const boxA = new THREE.Box3().setFromObject(objectA);
+  const boxB = new THREE.Box3().setFromObject(objectB);
+
+  return boxA.intersectsBox(boxB);
+  }
 
   }
   
