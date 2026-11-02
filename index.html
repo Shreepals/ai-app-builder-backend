@@ -665,6 +665,24 @@ function runGameLogic3d(){
 // GAME LOGIC PANEL FUNCTIONS
 // ================================
 
+// ================================
+// SAVE GAME LOGIC
+// ================================
+
+function saveGameLogic3d(){
+
+  localStorage.setItem(
+    "gameEvents3d",
+    JSON.stringify(gameEvents3d)
+  );
+
+  localStorage.setItem(
+    "gameVariables3d",
+    JSON.stringify(gameVariables3d)
+  );
+
+}  
+
 function updateGameEventsList3d(){
 
   const list = document.getElementById("gameEventsList3d");
