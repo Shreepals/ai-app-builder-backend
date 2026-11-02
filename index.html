@@ -617,6 +617,8 @@ function runGameLogic3d(){
       }
 
       if(!conditionPassed) return;
+      if(event.fired) return;
+      event.fired = true;
 
       // Actions
       if(event.action === "addScore"){
