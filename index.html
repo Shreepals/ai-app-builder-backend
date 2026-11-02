@@ -642,18 +642,7 @@ function runGameLogic3d(){
       else if(event.action === "removeHealth"){
         gameVariables3d.health -= Number(event.value || 10);
       }
-      
-      if(gameVariables3d.health <= 0){
-        gameVariables3d.health = 0;
-        gameOver3d = true;
-        playMode3d = false;
-
-        status(
-          "status3d",
-          "☠️ GAME OVER! Health खत्म हो गई।"
-        );
-      }  
-
+     
       else if(event.action === "addCoins"){
         gameVariables3d.coins += Number(event.value || 1);
       }
@@ -686,6 +675,17 @@ function runGameLogic3d(){
           selectedObject3d = null;
           updateObjectList3d();
         }
+      }
+      
+      if(gameVariables3d.health <= 0){
+        gameVariables3d.health = 0;
+        gameOver3d = true;
+        playMode3d = false;
+
+        status(
+          "status3d",
+          "☠️ GAME OVER! Health खत्म हो गई।"
+        );
       }
 
       saveGameLogic3d();
