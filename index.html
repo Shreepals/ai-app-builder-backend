@@ -729,6 +729,28 @@ function saveGameLogic3d(){
     JSON.stringify(gameVariables3d)
   );
 
+}
+  
+function restartGame3d(){
+
+  gameVariables3d.health = 100;
+  gameVariables3d.score = 0;
+  gameVariables3d.coins = 0;
+
+  gameEvents3d.forEach(event => {
+    event.fired = false;
+  });
+
+  gameOver3d = false;
+  playMode3d = true;
+
+  saveGameLogic3d();
+  updateGameEventsList3d();
+
+  status(
+    "status3d",
+    "🎮 गेम दोबारा शुरू हो गया!"
+  );
 }  
 
 function updateGameEventsList3d(){
