@@ -657,7 +657,85 @@ function runGameLogic3d(){
 
   });
 
-  }  
+  }
+  
+// ================================
+// GAME LOGIC PANEL FUNCTIONS
+// ================================
+
+function updateGameEventsList3d(){
+
+  const list = document.getElementById("gameEventsList3d");
+  const statusBox = document.getElementById("gameVariablesStatus3d");
+
+  if(!list || !statusBox) return;
+
+  if(gameEvents3d.length === 0){
+    list.textContent = "अभी कोई Rule नहीं है।";
+  }else{
+    list.innerHTML = "";
+
+    gameEvents3d.forEach((event,index)=>{
+
+      const item = document.createElement("div");
+
+      item.style.cssText =
+        "padding:10px;margin:8px 0;background:#1d2b45;border-radius:8px";
+
+      item.textContent =
+        "Rule " + (index+1) +
+        " | Condition: " + event.condition +
+        " | Value: " + event.value +
+        " | Action: " + event.action;
+
+      const deleteButton = document.createElement("button");
+      deleteButton.className = "btn red";
+      deleteButton.textContent = "Delete";
+
+      deleteButton.onclick = function(){
+        gameEvents3d.splice(index,1);
+        updateGameEventsList3d();
+      };
+
+      item.appendChild(deleteButton);
+      list.appendChild(item);
+    });
+  }
+
+  statusBox.textContent =
+    "Score: " + gameVariables3d.score +
+    " | Health: " + gameVariables3d.health +
+    " | Coins: " + gameVariables3d.coins;
+}
+
+function addGameEvent3d(){
+
+  const condition = document.getElementById("logicCondition3d");
+  const value = document.getElementById("logicValue3d");
+  const action = document.getElementById("logicAction3d");
+
+  if(!condition || !value || !action){
+    alert("Game Logic के विकल्प नहीं मिले।");
+    return;
+  }
+
+  gameEvents3d.push({
+    condition: condition.value,
+    value: Number(value.value) || 0,
+    action: action.value,
+    enabled: true,
+    fired: false
+  });
+
+  updateGameEventsList3d();
+
+  status("status3d","नया Game Rule जोड़ दिया गया।");
+}
+
+document.getElementById("addGameEvent3d")
+  ?.addEventListener("click",addGameEvent3d);
+
+updateGameEventsList3d();  
   
 let undoHistory3d = [];
 let redoHistory3d = [];
