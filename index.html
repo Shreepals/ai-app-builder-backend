@@ -714,6 +714,7 @@ function updateGameEventsList3d(){
 
       deleteButton.onclick = function(){
         gameEvents3d.splice(index,1);
+        saveGameLogic3d();
         updateGameEventsList3d();
       };
 
