@@ -648,6 +648,16 @@ function runGameLogic3d(){
         }
       }
 
+      else if(event.action === "collisionAction"){
+        if(objects3d.length >= 2 &&
+           checkCollision3d(objects3d[0], objects3d[1])){
+
+          gameVariables3d.score += 10;
+          gameVariables3d.coins += 1;
+
+        }
+      }  
+
       else if(event.action === "destroyObject"){
         if(selectedObject3d){
           scene3dWorld.remove(selectedObject3d);
