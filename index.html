@@ -653,6 +653,9 @@ function runGameLogic3d(){
         }
       }
 
+      saveGameLogic3d();
+      updateGameEventsList3d();
+
     }catch(error){
       console.error("Game Logic Error:", error);
     }
