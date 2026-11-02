@@ -617,6 +617,12 @@ function runGameLogic3d(){
           Number(event.value || 0);
       }
 
+      else if(event.condition === "collision"){
+        conditionPassed =
+          objects3d.length >= 2 &&
+          checkCollision3d(objects3d[0], objects3d[1]);
+      }
+
       if(!conditionPassed) return;
       if(event.fired) return;
       event.fired = true;
