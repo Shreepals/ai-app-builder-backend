@@ -589,6 +589,7 @@ let gameLogicRunning3d = false;
 function runGameLogic3d(){
 
   if(!playMode3d) return;
+  if(gameOver3d) return;
 
   if(!Array.isArray(gameEvents3d)) return;
 
