@@ -742,7 +742,8 @@ function restartGame3d(){
   });
 
   gameOver3d = false;
-  playMode3d = true;
+
+  document.getElementById("play3d")?.click();
 
   saveGameLogic3d();
   updateGameEventsList3d();
