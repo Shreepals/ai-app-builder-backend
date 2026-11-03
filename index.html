@@ -568,7 +568,7 @@ if(cameraFollow3d && selectedObject3d && selectedObject3d.userData.kind!=="groun
   camera3d.lookAt(target);
 }
   
-// ENEMY PATROL + CHASE + ATTACK SYSTEM
+// ENEMY PATROL + VISION + CHASE + ATTACK SYSTEM
 if(playMode3d && objects3d.length >= 2){
 
   const playerChoice =
@@ -603,27 +603,38 @@ if(playMode3d && objects3d.length >= 2){
     direction.y = 0;
 
     const distance = direction.length();
+
     // ENEMY VISION CONE - 90 DEGREE
-const enemyForward = new THREE.Vector3(0, 0, 1)
-  .applyQuaternion(enemy.quaternion);
+    const enemyForward = new THREE.Vector3(0, 0, -1)
+      .applyQuaternion(enemy.quaternion);
 
-enemyForward.y = 0;
-enemyForward.normalize();
+    enemyForward.y = 0;
+    enemyForward.normalize();
 
-const playerDirection = direction.clone().normalize();
+    const playerDirection = direction.clone();
 
-const visionDot = enemyForward.dot(playerDirection);
+    if(distance > 0){
+      playerDirection.normalize();
+    }
 
-const canSeePlayer =
-  visionDot >= Math.cos(Math.PI / 4);
+    const visionDot = enemyForward.dot(playerDirection);
 
-    if(canSeePlayer && distance <= 8 && distance > 0.8){
+    const canSeePlayer =
+      distance > 0 &&
+      visionDot >= Math.cos(Math.PI / 4);
+
+    // CHASE MODE
+    if(canSeePlayer && distance <= 8 && distance > 1.2){
 
       direction.normalize();
-      enemy.position.addScaledVector(direction, 0.025);
+
+      enemy.position.addScaledVector(direction, 0.035);
       enemy.lookAt(player.position);
 
-    }else if(canSeePlayer && distance <= 0.8){
+    }
+
+    // ATTACK MODE
+    else if(canSeePlayer && distance <= 1.2){
 
       enemy.lookAt(player.position);
 
@@ -653,8 +664,10 @@ const canSeePlayer =
           );
         }
       }
+    }
 
-    }else{
+    // PATROL MODE
+    else{
 
       enemy.userData.patrolAngle3d += 0.015;
 
@@ -667,8 +680,22 @@ const canSeePlayer =
         origin.z + Math.sin(angle) * 2
       );
 
-      enemy.position.lerp(patrolTarget, 0.025);
-      enemy.lookAt(patrolTarget);
+      const patrolDirection = new THREE.Vector3()
+        .subVectors(patrolTarget, enemy.position);
+
+      patrolDirection.y = 0;
+
+      if(patrolDirection.length() > 0.05){
+
+        patrolDirection.normalize();
+
+        enemy.position.addScaledVector(
+          patrolDirection,
+          0.02
+        );
+
+        enemy.lookAt(patrolTarget);
+      }
     }
   }
 }  
