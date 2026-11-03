@@ -635,9 +635,27 @@ function runGameLogic3d(){
       }
 
       else if(event.condition === "collision"){
+        const playerChoice =
+          document.getElementById("playerObject3d")?.value || "first";
+
+        const enemyChoice =
+          document.getElementById("enemyObject3d")?.value || "second";
+
+        const playerObject =
+          playerChoice === "selected"
+            ? selectedObject3d
+            : objects3d[0];
+
+        const enemyObject =
+          enemyChoice === "second"
+            ? objects3d[1]
+            : objects3d[0];
+
         conditionPassed =
-          objects3d.length >= 2 &&
-          checkCollision3d(objects3d[0], objects3d[1]);
+          !!playerObject &&
+          !!enemyObject &&
+          playerObject !== enemyObject &&
+          checkCollision3d(playerObject, enemyObject);
       }
 
       if(!conditionPassed) return;
