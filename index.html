@@ -604,7 +604,7 @@ if(playMode3d && objects3d.length >= 2){
 
     const distance = direction.length();
 
-    if(distance <= 5 && distance > 0.8){
+    if(distance <= 15 && distance > 0.8){
 
       direction.normalize();
       enemy.position.addScaledVector(direction, 0.025);
