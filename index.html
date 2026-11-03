@@ -598,6 +598,59 @@ if(playMode3d && objects3d.length >= 2){
 
   if(player && enemy && player !== enemy){
 
+    // ENEMY HEALTH BAR
+if(!enemy.userData.healthBar3d){
+
+  enemy.userData.health3d ??= 100;
+
+  const barCanvas = document.createElement("canvas");
+  barCanvas.width = 256;
+  barCanvas.height = 64;
+
+  const barTexture = new THREE.CanvasTexture(barCanvas);
+
+  const barMaterial = new THREE.SpriteMaterial({
+    map: barTexture,
+    transparent: true,
+    depthTest: false
+  });
+
+  const healthBar = new THREE.Sprite(barMaterial);
+  healthBar.scale.set(2, 0.5, 1);
+  healthBar.position.set(0, 1.5, 0);
+
+  enemy.add(healthBar);
+
+  enemy.userData.healthBar3d = healthBar;
+  enemy.userData.healthCanvas3d = barCanvas;
+  enemy.userData.healthTexture3d = barTexture;
+}
+
+// UPDATE ENEMY HEALTH BAR
+{
+  const health = enemy.userData.health3d ?? 100;
+  const canvas = enemy.userData.healthCanvas3d;
+  const ctx = canvas.getContext("2d");
+
+  ctx.clearRect(0, 0, 256, 64);
+
+  ctx.fillStyle = "#222";
+  ctx.fillRect(4, 4, 248, 56);
+
+  ctx.fillStyle = "#ff3333";
+  ctx.fillRect(8, 8, 240, 48);
+
+  ctx.fillStyle = "#22dd55";
+  ctx.fillRect(8, 8, 240 * health / 100, 48);
+
+  ctx.fillStyle = "white";
+  ctx.font = "bold 28px Arial";
+  ctx.textAlign = "center";
+  ctx.fillText(health + "/100", 128, 42);
+
+  enemy.userData.healthTexture3d.needsUpdate = true;
+}
+
     if(!enemy.userData.patrolOrigin3d){
       enemy.userData.patrolOrigin3d = {
         x: enemy.position.x,
