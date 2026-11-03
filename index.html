@@ -2296,6 +2296,55 @@ $("jumpPlayer").addEventListener("click",()=>{
     status("status3d","जंप चालू है!");
   }
 });
+ 
+$("attackPlayer3d").addEventListener("click",()=>{
+
+  if(!playMode3d){
+    status("status3d","पहले Play दबाएँ।");
+    return;
+  }
+
+  if(!selectedObject3d){
+    status("status3d","पहले Player Object चुनें।");
+    return;
+  }
+
+  const enemy =
+    document.getElementById("enemyObject3d")?.value === "second"
+      ? objects3d[1]
+      : objects3d[0];
+
+  if(!enemy || enemy === selectedObject3d){
+    status("status3d","Enemy Object नहीं मिला।");
+    return;
+  }
+
+  const distance =
+    selectedObject3d.position.distanceTo(enemy.position);
+
+  if(distance > 2.5){
+    status("status3d","Enemy बहुत दूर है। पास जाकर हमला करें।");
+    return;
+  }
+
+  enemy.userData.health3d ??= 100;
+  enemy.userData.health3d = Math.max(
+    0,
+    enemy.userData.health3d - 25
+  );
+
+  if(enemy.userData.health3d <= 0){
+    scene3dWorld.remove(enemy);
+    objects3d = objects3d.filter(o => o !== enemy);
+    status("status3d","⚔️ Enemy हार गया!");
+    updateObjectList3d();
+  }else{
+    status(
+      "status3d",
+      "Enemy Health: " + enemy.userData.health3d + "/100"
+    );
+  }
+}); 
 
 let scenes3d = {
   "Main Menu": []
