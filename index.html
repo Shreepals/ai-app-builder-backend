@@ -568,7 +568,7 @@ if(cameraFollow3d && selectedObject3d && selectedObject3d.userData.kind!=="groun
   camera3d.lookAt(target);
 }
   
-// ENEMY PATROL + VISION + CHASE + ATTACK SYSTEM
+// ENEMY PATROL + VISION + CHASE + ATTACK + SEARCH SYSTEM
 if(playMode3d && objects3d.length >= 2){
 
   const playerChoice =
@@ -604,7 +604,7 @@ if(playMode3d && objects3d.length >= 2){
 
     const distance = direction.length();
 
-    // ENEMY VISION CONE - 90 DEGREE
+    // ENEMY VISION CONE
     const enemyForward = new THREE.Vector3(0, 0, 1)
       .applyQuaternion(enemy.quaternion);
 
@@ -623,12 +623,21 @@ if(playMode3d && objects3d.length >= 2){
       distance > 0 &&
       visionDot >= Math.cos(Math.PI / 4);
 
+    // PLAYER SEEN: REMEMBER LAST POSITION
+    if(canSeePlayer && distance <= 8){
+
+      enemy.userData.lastSeenPosition3d =
+        player.position.clone();
+
+      enemy.userData.lastSeenAt3d = Date.now();
+    }
+
     // CHASE MODE
     if(canSeePlayer && distance <= 8 && distance > 1.2){
 
       direction.normalize();
 
-      enemy.position.addScaledVector(direction, 0.055);
+      enemy.position.addScaledVector(direction, 0.02);
       enemy.lookAt(player.position);
 
     }
@@ -666,6 +675,45 @@ if(playMode3d && objects3d.length >= 2){
       }
     }
 
+    // SEARCH MODE
+    else if(enemy.userData.lastSeenPosition3d){
+
+      const searchTarget =
+        enemy.userData.lastSeenPosition3d;
+
+      const searchDirection = new THREE.Vector3()
+        .subVectors(searchTarget, enemy.position);
+
+      searchDirection.y = 0;
+
+      if(searchDirection.length() > 0.25){
+
+        searchDirection.normalize();
+
+        enemy.position.addScaledVector(
+          searchDirection,
+          0.02
+        );
+
+        enemy.lookAt(searchTarget);
+
+      }else{
+
+        // SEARCH FOR 3 SECONDS
+        if(!enemy.userData.searchStartedAt3d){
+          enemy.userData.searchStartedAt3d = Date.now();
+        }
+
+        enemy.rotation.y += 0.025;
+
+        if(Date.now() - enemy.userData.searchStartedAt3d >= 3000){
+
+          enemy.userData.lastSeenPosition3d = null;
+          enemy.userData.searchStartedAt3d = null;
+        }
+      }
+    }
+
     // PATROL MODE
     else{
 
@@ -698,7 +746,7 @@ if(playMode3d && objects3d.length >= 2){
       }
     }
   }
-}  
+}
 runGameLogic3d();  
 renderer3d.render(scene3dWorld,camera3d);
 }
