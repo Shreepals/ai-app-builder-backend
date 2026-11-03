@@ -568,7 +568,7 @@ if(cameraFollow3d && selectedObject3d && selectedObject3d.userData.kind!=="groun
   camera3d.lookAt(target);
 }
   
-// ENEMY AI MOVEMENT
+// ENEMY PATROL + CHASE + ATTACK SYSTEM
 if(playMode3d && objects3d.length >= 2){
 
   const playerChoice =
@@ -589,6 +589,14 @@ if(playMode3d && objects3d.length >= 2){
 
   if(player && enemy && player !== enemy){
 
+    if(!enemy.userData.patrolOrigin3d){
+      enemy.userData.patrolOrigin3d = {
+        x: enemy.position.x,
+        z: enemy.position.z
+      };
+      enemy.userData.patrolAngle3d = 0;
+    }
+
     const direction = new THREE.Vector3()
       .subVectors(player.position, enemy.position);
 
@@ -596,13 +604,15 @@ if(playMode3d && objects3d.length >= 2){
 
     const distance = direction.length();
 
-    if(distance > 0.8){
+    if(distance <= 5 && distance > 0.8){
 
       direction.normalize();
       enemy.position.addScaledVector(direction, 0.025);
       enemy.lookAt(player.position);
 
-    }else{
+    }else if(distance <= 0.8){
+
+      enemy.lookAt(player.position);
 
       const now = Date.now();
       const lastAttack = enemy.userData.lastAttackAt || 0;
@@ -630,9 +640,25 @@ if(playMode3d && objects3d.length >= 2){
           );
         }
       }
+
+    }else{
+
+      enemy.userData.patrolAngle3d += 0.015;
+
+      const origin = enemy.userData.patrolOrigin3d;
+      const angle = enemy.userData.patrolAngle3d;
+
+      const patrolTarget = new THREE.Vector3(
+        origin.x + Math.cos(angle) * 2,
+        enemy.position.y,
+        origin.z + Math.sin(angle) * 2
+      );
+
+      enemy.position.lerp(patrolTarget, 0.025);
+      enemy.lookAt(patrolTarget);
     }
   }
-    }  
+}  
 runGameLogic3d();  
 renderer3d.render(scene3dWorld,camera3d);
 }
