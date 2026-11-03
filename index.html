@@ -2121,6 +2121,7 @@ updateObjectList3d();status("status3d","ऑब्जेक्ट हटा द�
 
 $("play3d").addEventListener("click",()=>{if(!init3d())return;playMode3d=true;status("status3d","Play चालू: चुना हुआ ऑब्जेक्ट घूमेगा।")});
 $("stop3d").addEventListener("click",()=>{playMode3d=false;status("status3d","Play रोक दिया गया।")});
+
 function movePlayer3d(dx,dy,dz){
   if(!init3d()) return;
 
@@ -2136,22 +2137,11 @@ function movePlayer3d(dx,dy,dz){
     (obj.userData.kind==="sphere" ? 0.6 : 0.5) * obj.scale.y;
 
   const ground = objects3d.find(
-  o => o.userData.kind === "ground"
-);
+    o => o.userData.kind === "ground"
+  );
 
-const groundSizeX = ground
-  ? 8 * ground.scale.x
-  : 8;
-
-const groundSizeZ = ground
-  ? 8 * ground.scale.z
-  : 8;
-
-const halfWidth = 0.5 * obj.scale.x;
-const halfDepth = 0.5 * obj.scale.z;
-
-const limitX = Math.max(0, 10 * (ground ? ground.scale.x : 1) - halfWidth);
-const limitZ = Math.max(0, 10 * (ground ? ground.scale.z : 1) - halfDepth);
+  const limitX = Math.max(0, 10 * (ground ? ground.scale.x : 1) - 0.5 * obj.scale.x);
+  const limitZ = Math.max(0, 10 * (ground ? ground.scale.z : 1) - 0.5 * obj.scale.z);
 
   const oldPosition = obj.position.clone();
 
@@ -2193,18 +2183,24 @@ const limitZ = Math.max(0, 10 * (ground ? ground.scale.z : 1) - halfDepth);
     obj.position.y = halfHeight;
     jumpVelocity3d = 0;
   }
-  
+
+  // PLAYER HEARING SIGNAL
+  if(obj.position.distanceTo(oldPosition) > 0.01){
+    obj.userData.lastNoisePosition3d = obj.position.clone();
+    obj.userData.lastNoiseAt3d = Date.now();
+  }
+
   if(transformGizmo3d){
-  transformGizmo3d.position.copy(obj.position);
-  transformGizmo3d.visible = !playMode3d;
-  transformGizmo3d.updateMatrixWorld(true);
+    transformGizmo3d.position.copy(obj.position);
+    transformGizmo3d.visible = !playMode3d;
+    transformGizmo3d.updateMatrixWorld(true);
   }
 
   $("posX").value = obj.position.x.toFixed(1);
   $("posY").value = obj.position.y.toFixed(1);
   $("posZ").value = obj.position.z.toFixed(1);
-}
-
+  }
+  
 $("moveForward").addEventListener("click",()=>movePlayer3d(0,0,-1));
 $("moveBack").addEventListener("click",()=>movePlayer3d(0,0,1));
 $("moveLeft").addEventListener("click",()=>movePlayer3d(-1,0,0));
