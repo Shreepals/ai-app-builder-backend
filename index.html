@@ -639,13 +639,25 @@ if(playMode3d && objects3d.length >= 2){
 
       enemy.userData.lastSeenAt3d = Date.now();
     }
+ 
+    // ENEMY DIFFICULTY SETTINGS
+    const difficulty =
+      document.getElementById("enemyDifficulty3d")?.value || "medium";
+
+    const chaseSpeed =
+      difficulty === "easy" ? 0.01 :
+      difficulty === "hard" ? 0.04 : 0.02;
+
+    const attackInterval =
+      difficulty === "easy" ? 2000 :
+      difficulty === "hard" ? 500 : 1000;
 
     // CHASE MODE
     if(canSeePlayer && distance <= 8 && distance > 1.2){
 
       direction.normalize();
 
-      enemy.position.addScaledVector(direction, 0.02);
+      enemy.position.addScaledVector(direction, chaseSpeed);
       enemy.lookAt(player.position);
 
     }
@@ -658,7 +670,7 @@ if(playMode3d && objects3d.length >= 2){
       const now = Date.now();
       const lastAttack = enemy.userData.lastAttackAt || 0;
 
-      if(now - lastAttack >= 1000){
+      if(now - lastAttack >= attackInterval){
 
         enemy.userData.lastAttackAt = now;
 
@@ -681,7 +693,7 @@ if(playMode3d && objects3d.length >= 2){
           );
         }
       }
-    }
+  }
 
     // ENEMY HEARING MODE
     else if(player.userData.lastNoisePosition3d &&
