@@ -605,7 +605,7 @@ if(playMode3d && objects3d.length >= 2){
     const distance = direction.length();
 
     // ENEMY VISION CONE - 90 DEGREE
-    const enemyForward = new THREE.Vector3(0, 0, -1)
+    const enemyForward = new THREE.Vector3(0, 0, 1)
       .applyQuaternion(enemy.quaternion);
 
     enemyForward.y = 0;
