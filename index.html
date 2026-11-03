@@ -675,7 +675,61 @@ if(playMode3d && objects3d.length >= 2){
       }
     }
 
-    // SEARCH MODE
+    // ENEMY HEARING MODE
+    else if(player.userData.lastNoisePosition3d &&
+      player.userData.lastNoiseAt3d &&
+      player.userData.lastNoiseAt3d > (enemy.userData.lastHeardNoiseAt3d || 0) &&
+      enemy.position.distanceTo(player.userData.lastNoisePosition3d) <= 10){
+
+      enemy.userData.heardNoisePosition3d =
+        player.userData.lastNoisePosition3d.clone();
+
+      enemy.userData.lastHeardNoiseAt3d =
+        player.userData.lastNoiseAt3d;
+
+      enemy.userData.hearingSearchStartedAt3d = null;
+    }
+
+    // MOVE TO HEARD NOISE
+    else if(enemy.userData.heardNoisePosition3d){
+
+      const hearingTarget =
+        enemy.userData.heardNoisePosition3d;
+
+      const hearingDirection = new THREE.Vector3()
+        .subVectors(hearingTarget, enemy.position);
+
+      hearingDirection.y = 0;
+
+      if(hearingDirection.length() > 0.25){
+
+        hearingDirection.normalize();
+
+        enemy.position.addScaledVector(
+          hearingDirection,
+          0.02
+        );
+
+        enemy.lookAt(hearingTarget);
+
+      }else{
+
+        // SEARCH AT SOUND LOCATION FOR 3 SECONDS
+        if(!enemy.userData.hearingSearchStartedAt3d){
+          enemy.userData.hearingSearchStartedAt3d = Date.now();
+        }
+
+        enemy.rotation.y += 0.025;
+
+        if(Date.now() - enemy.userData.hearingSearchStartedAt3d >= 3000){
+
+          enemy.userData.heardNoisePosition3d = null;
+          enemy.userData.hearingSearchStartedAt3d = null;
+        }
+      }
+    }
+
+    // SEARCH MODE - LAST SEEN PLAYER
     else if(enemy.userData.lastSeenPosition3d){
 
       const searchTarget =
@@ -699,7 +753,6 @@ if(playMode3d && objects3d.length >= 2){
 
       }else{
 
-        // SEARCH FOR 3 SECONDS
         if(!enemy.userData.searchStartedAt3d){
           enemy.userData.searchStartedAt3d = Date.now();
         }
@@ -747,6 +800,7 @@ if(playMode3d && objects3d.length >= 2){
     }
   }
 }
+ 
 runGameLogic3d();  
 renderer3d.render(scene3dWorld,camera3d);
 }
