@@ -594,10 +594,42 @@ if(playMode3d && objects3d.length >= 2){
 
     direction.y = 0;
 
-    if(direction.length() > 0.8){
+    const distance = direction.length();
+
+    if(distance > 0.8){
+
       direction.normalize();
       enemy.position.addScaledVector(direction, 0.025);
       enemy.lookAt(player.position);
+
+    }else{
+
+      const now = Date.now();
+      const lastAttack = enemy.userData.lastAttackAt || 0;
+
+      if(now - lastAttack >= 1000){
+
+        enemy.userData.lastAttackAt = now;
+
+        gameVariables3d.health = Math.max(
+          0,
+          gameVariables3d.health - 10
+        );
+
+        saveGameLogic3d();
+        updateGameEventsList3d();
+
+        if(gameVariables3d.health <= 0){
+
+          gameOver3d = true;
+          playMode3d = false;
+
+          status(
+            "status3d",
+            "☠️ GAME OVER! Enemy ने आपको हरा दिया।"
+          );
+        }
+      }
     }
   }
     }  
