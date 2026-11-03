@@ -617,13 +617,13 @@ const visionDot = enemyForward.dot(playerDirection);
 const canSeePlayer =
   visionDot >= Math.cos(Math.PI / 4);
 
-    if(distance <= 8 && distance > 0.8){
+    if(canSeePlayer && distance <= 8 && distance > 0.8){
 
       direction.normalize();
       enemy.position.addScaledVector(direction, 0.025);
       enemy.lookAt(player.position);
 
-    }else if(distance <= 0.8){
+    }else if(canSeePlayer && distance <= 0.8){
 
       enemy.lookAt(player.position);
 
