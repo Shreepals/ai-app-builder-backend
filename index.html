@@ -631,8 +631,26 @@ function runGameLogic3d(){
       }
 
       if(!conditionPassed) return;
-      if(event.fired) return;
-      event.fired = true;
+      const isEnemyDamage =
+        event.condition === "collision" &&
+        event.action === "removeHealth";
+
+      if(isEnemyDamage){
+
+        const now = Date.now();
+
+        if(now - (event.lastDamageAt || 0) < 1000){
+          return;
+        }
+
+        event.lastDamageAt = now;
+
+     }else{
+
+       if(event.fired) return;
+       event.fired = true;
+
+     }
 
       // Actions
       if(event.action === "addScore"){
