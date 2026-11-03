@@ -567,6 +567,40 @@ if(cameraFollow3d && selectedObject3d && selectedObject3d.userData.kind!=="groun
   camera3d.position.lerp(desired, 0.05);
   camera3d.lookAt(target);
 }
+  
+// ENEMY AI MOVEMENT
+if(playMode3d && objects3d.length >= 2){
+
+  const playerChoice =
+    document.getElementById("playerObject3d")?.value || "first";
+
+  const enemyChoice =
+    document.getElementById("enemyObject3d")?.value || "second";
+
+  const player =
+    playerChoice === "selected"
+      ? selectedObject3d
+      : objects3d[0];
+
+  const enemy =
+    enemyChoice === "second"
+      ? objects3d[1]
+      : objects3d[0];
+
+  if(player && enemy && player !== enemy){
+
+    const direction = new THREE.Vector3()
+      .subVectors(player.position, enemy.position);
+
+    direction.y = 0;
+
+    if(direction.length() > 0.8){
+      direction.normalize();
+      enemy.position.addScaledVector(direction, 0.025);
+      enemy.lookAt(player.position);
+    }
+  }
+    }  
 runGameLogic3d();  
 renderer3d.render(scene3dWorld,camera3d);
 }
