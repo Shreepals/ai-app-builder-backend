@@ -1300,9 +1300,11 @@ function addObject3d(kind){
   let copiedObject3d = null;
 
 function copyObject3d(){
-  if(!selectedObject3d){
-    status("status3d","पहले ऑब्जेक्ट चुनें।");
-    return;
+  const player = objects3d[0];
+
+if(!player){
+  status("status3d","पहला Player Object नहीं मिला।");
+  return;
   }
 
   copiedObject3d = {
