@@ -1415,6 +1415,7 @@ function sceneData3d(){
     return {
       name: obj.name || "Object",
       kind: obj.userData.kind || "model",
+      importedModel: obj.userData.importedModel || false,
       color: color,
       position: obj.position.toArray(),
       rotation: obj.rotation.toArray().slice(0, 3),
