@@ -479,6 +479,7 @@ function importModel3d(file){
         recordUndo3d();
 
         const model = gltf.scene;
+        model.userData.importedModel = true;
         model.name = file.name.replace(/\.(glb|gltf)$/i,"");
 
         // Model ka original center aur size nikalo
