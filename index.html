@@ -2391,6 +2391,31 @@ $("attackPlayer3d").addEventListener("click",()=>{
   if(enemy.userData.health3d <= 0){
 
   enemy.userData.dead3d = true;
+  // ENEMY DEATH SOUND
+  try {
+  const audio = new AudioContext();
+  const oscillator = audio.createOscillator();
+  const gain = audio.createGain();
+
+  oscillator.type = "sawtooth";
+  oscillator.frequency.setValueAtTime(220, audio.currentTime);
+  oscillator.frequency.exponentialRampToValueAtTime(
+    45, audio.currentTime + 0.5
+  );
+
+  gain.gain.setValueAtTime(0.3, audio.currentTime);
+  gain.gain.exponentialRampToValueAtTime(
+    0.001, audio.currentTime + 0.5
+  );
+
+  oscillator.connect(gain);
+  gain.connect(audio.destination);
+
+  oscillator.start();
+  oscillator.stop(audio.currentTime + 0.5);
+} catch (error) {
+  console.log("Death sound unavailable", error);
+}  
 
   status("status3d","⚔️ Enemy हार गया!");
 
