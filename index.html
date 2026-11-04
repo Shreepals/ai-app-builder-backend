@@ -1408,17 +1408,28 @@ function sceneData3d(){
       }
     });
 
+    const parentGroup = objectGroups3d.find(
+      group => obj.parent === group
+    );
+
     return {
       name: obj.name || "Object",
       kind: obj.userData.kind || "model",
       color: color,
       position: obj.position.toArray(),
       rotation: obj.rotation.toArray().slice(0, 3),
-      scale: obj.scale.toArray()
+      scale: obj.scale.toArray(),
+
+      group: parentGroup ? {
+        name: parentGroup.name,
+        position: parentGroup.position.toArray(),
+        rotation: parentGroup.rotation.toArray().slice(0, 3),
+        scale: parentGroup.scale.toArray()
+      } : null
     };
   });
-}
-  
+  }
+    
 function updateObjectList3d(){
   const list = $("objectList");
   const hierarchy = $("sceneHierarchy3d");
