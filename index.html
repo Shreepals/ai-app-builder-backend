@@ -480,6 +480,9 @@ function importModel3d(file){
 
         const model = gltf.scene;
         model.userData.importedModel = true;
+        model.userData.modelData = Array.from(
+          new Uint8Array(event.target.result)
+        );
         model.name = file.name.replace(/\.(glb|gltf)$/i,"");
 
         // Model ka original center aur size nikalo
