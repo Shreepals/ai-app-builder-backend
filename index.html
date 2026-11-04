@@ -483,6 +483,7 @@ function importModel3d(file){
         model.userData.modelData = Array.from(
           new Uint8Array(event.target.result)
         );
+        model.userData.modelType = file.name.split(".").pop().toLowerCase();
         model.name = file.name.replace(/\.(glb|gltf)$/i,"");
 
         // Model ka original center aur size nikalo
