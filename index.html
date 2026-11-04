@@ -2389,10 +2389,32 @@ $("attackPlayer3d").addEventListener("click",()=>{
   );
 
   if(enemy.userData.health3d <= 0){
-    scene3dWorld.remove(enemy);
-    objects3d = objects3d.filter(o => o !== enemy);
-    status("status3d","⚔️ Enemy हार गया!");
-    updateObjectList3d();
+
+  enemy.userData.dead3d = true;
+
+  status("status3d","⚔️ Enemy हार गया!");
+
+  const deathAnimation = () => {
+
+    if(!enemy.userData.dead3d) return;
+
+    enemy.rotation.y += 0.15;
+    enemy.scale.multiplyScalar(0.94);
+
+    if(enemy.scale.x < 0.08){
+
+      scene3dWorld.remove(enemy);
+      objects3d = objects3d.filter(o => o !== enemy);
+      updateObjectList3d();
+
+      return;
+    }
+
+    requestAnimationFrame(deathAnimation);
+  };
+
+  deathAnimation();
+
   }else{
     status(
       "status3d",
