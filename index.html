@@ -2642,7 +2642,7 @@ $("save3d").addEventListener("click",()=>{
   }
 });
 
-$("load3d").addEventListener("click",()=>{
+$("load3d").addEventListener("click",async()=>{
   try{
     const saved = localStorage.getItem("aiAppStudio3DScenes");
     if(saved) scenes3d = JSON.parse(saved);
