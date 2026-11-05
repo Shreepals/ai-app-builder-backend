@@ -2396,12 +2396,60 @@ $("applyObject").addEventListener("click",()=>{
 });
 
 $("delete3d").addEventListener("click",()=>{
-if(!selectedObject3d){status("status3d","पहले कोई ऑब्जेक्ट चुनें।");return}
-recordUndo3d();  
-scene3dWorld.remove(selectedObject3d);
-selectedObject3d.geometry.dispose();selectedObject3d.material.dispose();
-objects3d=objects3d.filter(o=>o!==selectedObject3d);selectedObject3d=null;
-updateObjectList3d();status("status3d","ऑब्जेक्ट हटा दिया गया।");
+
+  if(!selectedObject3d){
+    status("status3d","पहले कोई ऑब्जेक्ट चुनें।");
+    return;
+  }
+
+  recordUndo3d();
+
+  const obj = selectedObject3d;
+  const parent = obj.parent;
+
+  if(parent){
+    parent.remove(obj);
+  }
+
+  obj.traverse(child=>{
+
+    if(child.geometry){
+      child.geometry.dispose();
+    }
+
+    if(child.material){
+
+      const materials = Array.isArray(child.material)
+        ? child.material
+        : [child.material];
+
+      materials.forEach(material=>{
+
+        if(material.map) material.map.dispose();
+        if(material.normalMap) material.normalMap.dispose();
+        if(material.roughnessMap) material.roughnessMap.dispose();
+        if(material.metalnessMap) material.metalnessMap.dispose();
+
+        material.dispose();
+      });
+    }
+  });
+
+  if(parent && parent.isGroup && parent.children.length===0){
+    if(parent.parent){
+      parent.parent.remove(parent);
+    }
+
+    objectGroups3d = objectGroups3d.filter(g=>g!==parent);
+  }
+
+  objects3d = objects3d.filter(o=>o!==obj);
+
+  selectedObject3d = null;
+
+  updateObjectList3d();
+
+  status("status3d","ऑब्जेक्ट हटा दिया गया।");
 });
 
 $("play3d").addEventListener("click",()=>{if(!init3d())return;playMode3d=true;status("status3d","Play चालू: चुना हुआ ऑब्जेक्ट घूमेगा।")});
