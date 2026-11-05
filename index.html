@@ -1224,7 +1224,7 @@ function recordUndo3d(){
   status("status3d","Undo: पिछला बदलाव वापस किया गया।");
 }
 
-function redo3d(){
+async function redo3d(){
   if(!redoHistory3d.length){
     status("status3d","दोबारा करने के लिए कोई बदलाव नहीं है।");
     return;
@@ -1235,11 +1235,12 @@ function redo3d(){
   );
 
   const next = redoHistory3d.pop();
-  loadSceneData3d(next);
+
+  await loadSceneData3d(next);
 
   updateObjectList3d();
   status("status3d","Redo: बदलाव दोबारा लागू किया गया।");
-  }
+}
   
   document.addEventListener("keydown",e=>{
   if(e.target && (
