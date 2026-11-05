@@ -2158,7 +2158,7 @@ function clearObjects3d(){
   updateObjectList3d();
 }
 
-function loadSceneData3d(data){
+async function loadSceneData3d(data){
   if(!init3d()) return;
 
   clearObjects3d();
@@ -2166,26 +2166,89 @@ function loadSceneData3d(data){
 
   const groupsMap = new Map();
 
-  (Array.isArray(data) ? data : []).forEach(item => {
-    let g;
+  function getGroup(item){
+    if(!item.group) return null;
 
-    if(item.kind === "sphere"){
-      g = new THREE.SphereGeometry(.6,24,16);
-    } else if(item.kind === "ground"){
-      g = new THREE.BoxGeometry(8,.2,8);
-    } else {
-      g = new THREE.BoxGeometry(1,1,1);
+    const groupName = item.group.name || "Group";
+
+    let group = groupsMap.get(groupName);
+
+    if(!group){
+      group = new THREE.Group();
+      group.name = groupName;
+
+      group.position.fromArray(item.group.position || [0,0,0]);
+
+      if(item.group.rotation){
+        group.rotation.set(...item.group.rotation);
+      }
+
+      group.scale.fromArray(item.group.scale || [1,1,1]);
+
+      scene3dWorld.add(group);
+      groupsMap.set(groupName, group);
+      objectGroups3d.push(group);
     }
 
-    const obj = new THREE.Mesh(
-      g,
-      new THREE.MeshStandardMaterial({
-        color: item.color ?? 0x5685ff
-      })
-    );
+    return group;
+  }
 
-    obj.name = item.name || item.kind;
-    obj.userData.kind = item.kind || "cube";
+  for(const item of (Array.isArray(data) ? data : [])){
+
+    let obj;
+
+    if(item.importedModel && Array.isArray(item.modelData)){
+
+      try{
+        const loader = new THREE.GLTFLoader();
+
+        const buffer = new Uint8Array(item.modelData).buffer;
+
+        const gltf = await new Promise((resolve, reject) => {
+          loader.parse(
+            buffer,
+            "",
+            resolve,
+            reject
+          );
+        });
+
+        obj = gltf.scene;
+
+        obj.userData.importedModel = true;
+        obj.userData.modelData = item.modelData;
+        obj.userData.modelType = item.modelType || "glb";
+        obj.userData.kind = item.kind || "model";
+
+      }catch(error){
+        console.error("GLB Load Error:", error);
+        status("status3d","3D मॉडल लोड नहीं हुआ: " + error.message);
+        continue;
+      }
+
+    }else{
+
+      let g;
+
+      if(item.kind === "sphere"){
+        g = new THREE.SphereGeometry(.6,24,16);
+      }else if(item.kind === "ground"){
+        g = new THREE.BoxGeometry(8,.2,8);
+      }else{
+        g = new THREE.BoxGeometry(1,1,1);
+      }
+
+      obj = new THREE.Mesh(
+        g,
+        new THREE.MeshStandardMaterial({
+          color: item.color ?? 0x5685ff
+        })
+      );
+
+      obj.userData.kind = item.kind || "cube";
+    }
+
+    obj.name = item.name || item.kind || "Object";
 
     obj.position.fromArray(item.position || [0,1,0]);
 
@@ -2195,39 +2258,20 @@ function loadSceneData3d(data){
 
     obj.scale.fromArray(item.scale || [1,1,1]);
 
-    if(item.group){
-      const groupName = item.group.name || "Group";
+    const group = getGroup(item);
 
-      let group = groupsMap.get(groupName);
-
-      if(!group){
-        group = new THREE.Group();
-        group.name = groupName;
-
-        group.position.fromArray(item.group.position || [0,0,0]);
-
-        if(item.group.rotation){
-          group.rotation.set(...item.group.rotation);
-        }
-
-        group.scale.fromArray(item.group.scale || [1,1,1]);
-
-        scene3dWorld.add(group);
-        groupsMap.set(groupName, group);
-        objectGroups3d.push(group);
-      }
-
+    if(group){
       group.add(obj);
-    } else {
+    }else{
       scene3dWorld.add(obj);
     }
 
     objects3d.push(obj);
-  });
+  }
 
   selectObject3d(objects3d[objects3d.length-1] || null);
   updateObjectList3d();
-}
+  }  
   
 let selectedObjects3d = [];
 
