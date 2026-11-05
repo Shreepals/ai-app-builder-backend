@@ -464,6 +464,11 @@ finally{buildBusy=false;btn.disabled=false}
 let scene3dWorld=null,camera3d=null,renderer3d=null,objects3d=[],selectedObject3d=null,threeStarted=false,playMode3d=false,resizeObserver3d=null;
 let jumpVelocity3d = 0;
 let cameraFollow3d = true;
+let ammo3d = 30;
+let maxAmmo3d = 30;
+let bullets3d = [];
+let gun3d = null;
+let bulletLoopStarted3d = false;  
 
 function importModel3d(file){
   if(!file) return;
