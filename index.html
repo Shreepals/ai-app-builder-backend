@@ -2648,7 +2648,7 @@ $("load3d").addEventListener("click",async()=>{
     if(saved) scenes3d = JSON.parse(saved);
 
     const data = scenes3d[currentScene3d] || [];
-    loadSceneData3d(data);
+    await loadSceneData3d(data);
     updateSceneSelect3d();
 
     status("status3d",currentScene3d + " लोड हो गया।");
