@@ -468,7 +468,40 @@ let ammo3d = 30;
 let maxAmmo3d = 30;
 let bullets3d = [];
 let gun3d = null;
-let bulletLoopStarted3d = false;  
+let bulletLoopStarted3d = false;
+
+function createGun3d(){
+
+  if(!selectedObject3d){
+    status("status3d","पहले Player Object चुनें।");
+    return;
+  }
+
+  if(gun3d){
+    gun3d.parent?.remove(gun3d);
+  }
+
+  gun3d = new THREE.Group();
+
+  const body = new THREE.Mesh(
+    new THREE.BoxGeometry(0.18,0.18,0.65),
+    new THREE.MeshStandardMaterial({color:0x222222})
+  );
+
+  body.position.set(0.35,0.25,-0.45);
+
+  const handle = new THREE.Mesh(
+    new THREE.BoxGeometry(0.13,0.3,0.16),
+    new THREE.MeshStandardMaterial({color:0x555555})
+  );
+
+  handle.position.set(0.35,0.05,-0.25);
+
+  gun3d.add(body,handle);
+  selectedObject3d.add(gun3d);
+
+  status("status3d","🔫 Player के हाथ में Gun तैयार है।");
+}  
 
 function importModel3d(file){
   if(!file) return;
