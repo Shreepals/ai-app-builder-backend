@@ -2670,7 +2670,19 @@ $("clear3d").addEventListener("click",()=>{
   status("status3d","Scene के सभी Objects हटा दिए गए।");
 });  
 
-$("play3d").addEventListener("click",()=>{if(!init3d())return;playMode3d=true;status("status3d","Play चालू: चुना हुआ ऑब्जेक्ट घूमेगा।")});
+$("play3d").addEventListener("click",()=>{
+  if(!init3d())return;
+
+  if(!selectedObject3d){
+    status("status3d","पहले Player Object चुनें।");
+    return;
+  }
+
+  playMode3d=true;
+  createGun3d();
+
+  status("status3d","🔫 Play चालू! Gun तैयार है।");
+});
 $("stop3d").addEventListener("click",()=>{playMode3d=false;status("status3d","Play रोक दिया गया।")});
 
 function movePlayer3d(dx,dy,dz){
