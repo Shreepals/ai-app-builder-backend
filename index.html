@@ -501,7 +501,106 @@ function createGun3d(){
   selectedObject3d.add(gun3d);
 
   status("status3d","🔫 Player के हाथ में Gun तैयार है।");
-}  
+}
+
+function fireGun3d(){
+
+  if(!playMode3d){
+    status("status3d","पहले Play दबाएँ।");
+    return;
+  }
+
+  if(!selectedObject3d){
+    status("status3d","पहले Player चुनें।");
+    return;
+  }
+
+  if(ammo3d <= 0){
+    status("status3d","गोली खत्म! Reload करें।");
+    return;
+  }
+
+  if(!gun3d || gun3d.parent !== selectedObject3d){
+    createGun3d();
+  }
+
+  const bullet = new THREE.Mesh(
+    new THREE.SphereGeometry(0.09,12,12),
+    new THREE.MeshBasicMaterial({color:0xffff00})
+  );
+
+  const start = new THREE.Vector3();
+  gun3d.getWorldPosition(start);
+
+  const direction = new THREE.Vector3(0,0,1)
+    .applyQuaternion(selectedObject3d.getWorldQuaternion(new THREE.Quaternion()))
+    .normalize();
+
+  bullet.position.copy(start);
+  scene3dWorld.add(bullet);
+
+  bullets3d.push({
+    mesh: bullet,
+    velocity: direction.multiplyScalar(0.5),
+    life: 60
+  });
+
+  ammo3d--;
+
+  $("ammoCount3d").textContent =
+    "Ammo: " + ammo3d + " / " + maxAmmo3d;
+
+  status("status3d","🔫 गोली चलाई गई!");
+
+  if(!bulletLoopStarted3d){
+    bulletLoopStarted3d = true;
+    updateBullets3d();
+  }
+}
+
+function updateBullets3d(){
+
+  requestAnimationFrame(updateBullets3d);
+
+  for(let i = bullets3d.length - 1; i >= 0; i--){
+
+    const bullet = bullets3d[i];
+
+    bullet.mesh.position.add(bullet.velocity);
+    bullet.life--;
+
+    const enemyChoice =
+      $("enemyObject3d")?.value || "second";
+
+    const enemy =
+      enemyChoice === "second" ? objects3d[1] : objects3d[0];
+
+    if(enemy && enemy !== selectedObject3d &&
+       bullet.mesh.position.distanceTo(enemy.position) < 0.8){
+
+      enemy.userData.health3d ??= 100;
+      enemy.userData.health3d = Math.max(
+        0, enemy.userData.health3d - 20
+      );
+
+      scene3dWorld.remove(bullet.mesh);
+      bullets3d.splice(i,1);
+
+      status("status3d",
+        "🎯 Enemy Health: " + enemy.userData.health3d + "/100"
+      );
+
+      continue;
+    }
+
+    if(bullet.life <= 0){
+      scene3dWorld.remove(bullet.mesh);
+      bullets3d.splice(i,1);
+    }
+  }
+}
+
+$("fireGun3d").addEventListener("click",fireGun3d);  
 
 function importModel3d(file){
   if(!file) return;
