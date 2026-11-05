@@ -600,7 +600,17 @@ function updateBullets3d(){
   }
 }
 
-$("fireGun3d").addEventListener("click",fireGun3d);  
+$("fireGun3d").addEventListener("click",fireGun3d);
+
+$("reloadGun3d").addEventListener("click",()=>{
+
+  ammo3d = maxAmmo3d;
+
+  $("ammoCount3d").textContent =
+    "Ammo: " + ammo3d + " / " + maxAmmo3d;
+
+  status("status3d","🔄 Gun Reload हो गई!");
+});  
 
 function importModel3d(file){
   if(!file) return;
