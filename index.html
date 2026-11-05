@@ -1206,7 +1206,7 @@ function recordUndo3d(){
   redoHistory3d = [];
 }
 
-function undo3d(){
+  async function undo3d(){
   if(!undoHistory3d.length){
     status("status3d","वापस करने के लिए कोई बदलाव नहीं है।");
     return;
@@ -1217,7 +1217,8 @@ function undo3d(){
   );
 
   const previous = undoHistory3d.pop();
-  loadSceneData3d(previous);
+
+  await loadSceneData3d(previous);
 
   updateObjectList3d();
   status("status3d","Undo: पिछला बदलाव वापस किया गया।");
