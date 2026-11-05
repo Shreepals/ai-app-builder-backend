@@ -1441,8 +1441,11 @@ function sceneData3d(){
   }
     
 function updateObjectList3d(){
+
   const list = $("objectList");
   const hierarchy = $("sceneHierarchy3d");
+
+  if(!list) return;
 
   const previouslySelected = Array.from(list.selectedOptions)
     .map(option => objects3d[Number(option.value)])
@@ -1453,41 +1456,81 @@ function updateObjectList3d(){
   }
 
   const selectedSet = new Set(previouslySelected);
+
   list.replaceChildren();
 
-  objects3d.forEach((obj, i) => {
+  objects3d.forEach((obj,i)=>{
+
     const option = document.createElement("option");
     option.value = String(i);
 
-    const group = objectGroups3d.find(g => obj.parent === g);
+    const group = objectGroups3d.find(g=>obj.parent===g);
 
     option.textContent = group
-      ? "  ↳ " + (obj.name || ("Object " + (i + 1)))
-      : (obj.name || ("Object " + (i + 1)));
+      ? "  ↳ " + (obj.name || "Object")
+      : (obj.name || ("Object " + (i+1)));
 
     option.selected = selectedSet.has(obj);
+
     list.append(option);
   });
 
-  if(hierarchy){
-    hierarchy.replaceChildren();
+  if(!hierarchy) return;
 
-    objectGroups3d.forEach((group, groupIndex) => {
-      const heading = document.createElement("div");
-      heading.textContent = "📁 " + (group.name || ("Group " + (groupIndex + 1)));
-      heading.style.fontWeight = "bold";
-      heading.style.padding = "8px";
+  hierarchy.replaceChildren();
 
-      hierarchy.append(heading);
+  function createItem(obj,label){
 
-      group.children.forEach(obj => {
-        const item = document.createElement("div");
-        item.textContent = "  ↳ " + (obj.name || "Object");
-        item.style.padding = "5px 8px";
-        hierarchy.append(item);
-      });
+    const item = document.createElement("button");
+
+    item.type = "button";
+    item.textContent = label;
+    item.style.display = "block";
+    item.style.width = "100%";
+    item.style.textAlign = "left";
+    item.style.padding = "8px";
+    item.style.margin = "2px 0";
+    item.style.border = "0";
+    item.style.borderRadius = "6px";
+    item.style.cursor = "pointer";
+
+    if(obj === selectedObject3d){
+      item.style.background = "#315ea8";
+      item.style.color = "white";
+    }
+
+    item.addEventListener("click",()=>{
+      selectObject3d(obj);
     });
+
+    hierarchy.append(item);
   }
+
+  objectGroups3d.forEach((group,groupIndex)=>{
+
+    const heading = document.createElement("div");
+
+    heading.textContent =
+      "📁 " + (group.name || ("Group " + (groupIndex+1)));
+
+    heading.style.fontWeight = "bold";
+    heading.style.padding = "8px";
+
+    hierarchy.append(heading);
+
+    group.children.forEach(obj=>{
+      createItem(obj,"↳ 📦 " + (obj.name || "Object"));
+    });
+  });
+
+  objects3d.forEach(obj=>{
+
+    if(!objectGroups3d.some(g=>obj.parent===g)){
+      createItem(obj,"📦 " + (obj.name || "Object"));
+    }
+
+  });
+
   }
 
 function selectObject3d(obj){
