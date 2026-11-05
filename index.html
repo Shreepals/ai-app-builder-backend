@@ -2114,8 +2114,48 @@ $("grow3d").addEventListener("click", () => {
 });
 
 function clearObjects3d(){
-objects3d.forEach(o=>{scene3dWorld.remove(o);o.geometry.dispose();o.material.dispose()});
-objects3d=[];selectedObject3d=null;updateObjectList3d();
+
+  objects3d.forEach(obj => {
+
+    if(obj.parent){
+      obj.parent.remove(obj);
+    }
+
+    obj.traverse(child => {
+
+      if(child.geometry){
+        child.geometry.dispose();
+      }
+
+      if(child.material){
+
+        const materials = Array.isArray(child.material)
+          ? child.material
+          : [child.material];
+
+        materials.forEach(material => {
+
+          if(material.map) material.map.dispose();
+          if(material.normalMap) material.normalMap.dispose();
+          if(material.roughnessMap) material.roughnessMap.dispose();
+          if(material.metalnessMap) material.metalnessMap.dispose();
+
+          material.dispose();
+        });
+      }
+    });
+  });
+
+  objectGroups3d.forEach(group => {
+    if(group.parent){
+      group.parent.remove(group);
+    }
+  });
+
+  objects3d = [];
+  selectedObject3d = null;
+
+  updateObjectList3d();
 }
 
 function loadSceneData3d(data){
