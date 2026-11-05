@@ -2455,6 +2455,26 @@ $("delete3d").addEventListener("click",()=>{
   status("status3d","ऑब्जेक्ट हटा दिया गया।");
 });
 
+$("clear3d").addEventListener("click",()=>{
+
+  if(!objects3d.length){
+    status("status3d","Scene पहले से खाली है।");
+    return;
+  }
+
+  recordUndo3d();
+
+  clearObjects3d();
+
+  objectGroups3d = [];
+
+  selectedObject3d = null;
+
+  updateObjectList3d();
+
+  status("status3d","Scene के सभी Objects हटा दिए गए।");
+});  
+
 $("play3d").addEventListener("click",()=>{if(!init3d())return;playMode3d=true;status("status3d","Play चालू: चुना हुआ ऑब्जेक्ट घूमेगा।")});
 $("stop3d").addEventListener("click",()=>{playMode3d=false;status("status3d","Play रोक दिया गया।")});
 
