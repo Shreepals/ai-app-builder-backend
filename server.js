@@ -144,7 +144,30 @@ Color must be a decimal integer, not a hex string.
 
 The first object must be the Player.
 Add Enemy objects when the game requires enemies.
-Add ground, walls, obstacles and other objects according to the user's game idea.
+Create a detailed 3D game scene based on the user's exact game idea.
+
+Do not create only Player, Ground and one Wall.
+
+For every 3D game, generate at least 12 to 20 scene objects whenever appropriate.
+
+For a Zombie Survival game, include:
+- 1 Player
+- At least 3 Zombie enemies
+- 1 large Ground
+- Multiple buildings and houses made from cubes
+- Trees made from cubes and spheres
+- Walls and fences
+- Roads and obstacles
+- Additional environment objects
+
+For racing games, create roads, vehicles, barriers and track objects.
+For shooting games, create enemies, buildings, cover walls and obstacles.
+For adventure games, create terrain, trees, rocks, buildings and objects.
+
+Give every object a meaningful unique name, suitable color, position, rotation and scale.
+
+Place objects at different positions so they do not overlap.
+Create a playable environment that matches the user's game idea.
 
 For non-game apps, return an empty scene3d array.
 
