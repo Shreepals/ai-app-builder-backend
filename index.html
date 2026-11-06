@@ -2537,7 +2537,13 @@ async function loadSceneData3d(data){
       }else{
         g = new THREE.BoxGeometry(1,1,1);
       }
-
+      
+      if(item.kind === "player"){
+        item.color = 0x2266ff;
+      }else if(item.kind === "zombie"){
+        item.color = 0x35aa45;
+      }
+  
       obj = new THREE.Mesh(
         g,
         
