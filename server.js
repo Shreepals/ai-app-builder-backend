@@ -119,10 +119,36 @@ Return ONLY valid JSON with these fields:
   "summary": "string",
   "features": ["string"],
   "engine": "string",
-  "html": "complete standalone HTML document"
+  "html": "complete standalone HTML document",
+  "scene3d": [
+    {
+      "name": "Player",
+      "kind": "cube",
+      "color": 5660927,
+      "position": [0, 0.5, 0],
+      "rotation": [0, 0, 0],
+      "scale": [1, 1, 1]
+    }
+  ]
 }
 
-The html field must contain the entire HTML document.
+For every game, scene3d must contain the actual 3D game objects needed for its initial scene.
+
+Use only these kind values:
+"cube", "sphere", "ground", "wall".
+
+Every scene3d object must include:
+name, kind, color, position, rotation, scale.
+
+Color must be a decimal integer, not a hex string.
+
+The first object must be the Player.
+Add Enemy objects when the game requires enemies.
+Add ground, walls, obstacles and other objects according to the user's game idea.
+
+For non-game apps, return an empty scene3d array.
+
+The html field must contain the complete standalone HTML document.
 Do not return a partial page, explanation, Markdown, or code fences.
 Escape JSON strings correctly.
 
