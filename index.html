@@ -404,8 +404,15 @@ currentApp={id:Date.now().toString(),appName:data.appName||appName,idea,theme,en
 projects.unshift(currentApp);
 saveProjects();
 renderPreview();
-status("generateStatus","ऐप बन गया! Preview पेज खोलकर देखें।");
-navigate("preview");
+
+if(Array.isArray(data.scene3d) && data.scene3d.length > 0){
+  await loadSceneData3d(data.scene3d);
+  status("generateStatus","AI ने 3D गेम और Scene बना दिया!");
+  navigate("editor3d");
+}else{
+  status("generateStatus","ऐप बन गया! Preview पेज खोलकर देखें।");
+  navigate("preview");
+}
 }catch(error){status("generateStatus","ऐप नहीं बना: "+error.message)}
 finally{btn.disabled=false}
 });
