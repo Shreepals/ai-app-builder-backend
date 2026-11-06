@@ -638,7 +638,10 @@ app.post("/api/generate", async (req, res) => {
         ? generated.features
         : [],
       engine: actualEngine,
-      html
+      html,
+      scene3d: Array.isArray(generated.scene3d)
+        ? generated.scene3d
+        : []
     });
   } catch (error) {
     console.error("Generate error:", error);
