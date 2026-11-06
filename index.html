@@ -2531,9 +2531,9 @@ async function loadSceneData3d(data){
 
       if(kind === "sphere"){
         g = new THREE.SphereGeometry(.6,24,16);
-      }else if(item.kind === "ground"){
+      }else if(kind === "ground"){
         g = new THREE.BoxGeometry(8,.2,8);
-      }else if(item.kind === "wall"){
+      }else if(kind === "wall"){
         g = new THREE.BoxGeometry(2,2,.3);
       }else{
         g = new THREE.BoxGeometry(1,1,1);
