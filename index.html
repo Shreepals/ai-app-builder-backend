@@ -2516,6 +2516,7 @@ async function loadSceneData3d(data){
 
       let g;
       const kind = (item.kind || "").toLowerCase();
+      const modelKind = kind.replace(/[^a-z]/g, "");
 
       if(kind === "tree"){
         g = new THREE.ConeGeometry(1,3,8);
