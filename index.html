@@ -2539,9 +2539,9 @@ async function loadSceneData3d(data){
         g = new THREE.BoxGeometry(1,1,1);
       }
       
-      if(item.kind === "player"){
+      if(kind === "player"){
         item.color = 0x2266ff;
-      }else if(item.kind === "zombie"){
+      }else if(kind === "zombie"){
         item.color = 0x35aa45;
       }
   
