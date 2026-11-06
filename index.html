@@ -2555,7 +2555,7 @@ async function loadSceneData3d(data){
         })
       );
 
-      obj.userData.kind = item.kind || "cube";
+      obj.userData.kind = kind || "cube";
     }
 
     obj.name = item.name || item.kind || "Object";
