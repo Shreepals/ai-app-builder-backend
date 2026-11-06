@@ -2756,7 +2756,7 @@ status(
 );
   createGun3d();
 
-  status("status3d","🔫 Play चालू! Gun तैयार है।");
+  status("status3d","🎮 " + selectedGameType.toUpperCase() + " गेम शुरू! 🔫 Gun तैयार है।");
 });
 $("stop3d").addEventListener("click",()=>{playMode3d=false;status("status3d","Play रोक दिया गया।")});
 
