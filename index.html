@@ -776,11 +776,7 @@ renderer3d=new THREE.WebGLRenderer({
 });
 renderer3d.shadowMap.enabled=true;
 renderer3d.shadowMap.type=THREE.PCFSoftShadowMap;
-renderer3d.shadowMap.autoUpdate = true;
-light.shadow.mapSize.width = 2048;
-light.shadow.mapSize.height = 2048;
-light.shadow.camera.near = 0.5;
-light.shadow.camera.far = 100;  
+renderer3d.shadowMap.autoUpdate = true;  
 renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer3d.setSize(w,h);host.replaceChildren(renderer3d.domElement);
 scene3dWorld.add(new THREE.HemisphereLight(0xffffff,0x334466,1.5));
