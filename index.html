@@ -1525,6 +1525,9 @@ function addObject3d(kind){
     geometry,
     new THREE.MeshStandardMaterial({color})
   );
+  
+  obj.castShadow = true;
+  obj.receiveShadow = true;
 
   obj.name = kind.charAt(0).toUpperCase() + kind.slice(1);
   obj.userData.kind = kind;
