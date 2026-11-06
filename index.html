@@ -770,7 +770,12 @@ scene3dWorld=new THREE.Scene();
 scene3dWorld.background=new THREE.Color(0x10192c);
 camera3d=new THREE.PerspectiveCamera(60,w/h,.1,1000);
 camera3d.position.set(6,5,8);camera3d.lookAt(0,0,0);
-renderer3d=new THREE.WebGLRenderer({antialias:true});
+renderer3d=new THREE.WebGLRenderer({
+  antialias:true,
+  alpha:false
+});
+renderer3d.shadowMap.enabled=true;
+renderer3d.shadowMap.type=THREE.PCFSoftShadowMap;
 renderer3d.setPixelRatio(Math.min(window.devicePixelRatio||1,2));
 renderer3d.setSize(w,h);host.replaceChildren(renderer3d.domElement);
 scene3dWorld.add(new THREE.HemisphereLight(0xffffff,0x334466,2));
