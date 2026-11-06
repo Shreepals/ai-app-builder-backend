@@ -2529,6 +2529,8 @@ async function loadSceneData3d(data){
     }
 
     obj.name = item.name || item.kind || "Object";
+    obj.castShadow = true;
+    obj.receiveShadow = true;
 
     obj.position.fromArray(item.position || [0,1,0]);
 
