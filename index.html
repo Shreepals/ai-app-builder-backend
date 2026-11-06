@@ -2558,7 +2558,7 @@ async function loadSceneData3d(data){
       obj.userData.kind = kind || "cube";
     }
 
-    obj.name = item.name || kind || "Object";
+    obj.name = item.name || item.kind || "Object";
     obj.castShadow = true;
     obj.receiveShadow = true;
     
