@@ -400,7 +400,7 @@ try{
 const data=await request("/api/generate",{appName,idea,theme,engine});
 const html=extractHtml(data);
 if(!html||!html.includes("<"))throw new Error("AI ने पूरा HTML ऐप नहीं लौटाया।");
-currentApp={id:Date.now().toString(),appName:data.appName||appName,idea,theme,engine,html,summary:data.summary||"",features:data.features||[],createdAt:new Date().toISOString()};
+currentApp={id:Date.now().toString(),appName:data.appName||appName,idea,theme,engine,html,summary:data.summary||"",features:data.features||[],scene3d:Array.isArray(data.scene3d)?data.scene3d:[],createdAt:new Date().toISOString()};
 projects.unshift(currentApp);
 saveProjects();
 renderPreview();
