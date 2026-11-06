@@ -583,6 +583,35 @@ function updateBullets3d(){
         0, enemy.userData.health3d - 20
       );
 
+      // ENEMY HIT EFFECT
+const hitEffect = new THREE.Mesh(
+  new THREE.SphereGeometry(0.25, 12, 12),
+  new THREE.MeshBasicMaterial({
+    color: 0xff6600,
+    transparent: true,
+    opacity: 1
+  })
+);
+
+hitEffect.position.copy(bullet.mesh.position);
+scene3dWorld.add(hitEffect);
+
+const hitAnimation = () => {
+  hitEffect.scale.multiplyScalar(1.15);
+  hitEffect.material.opacity -= 0.12;
+
+  if(hitEffect.material.opacity <= 0){
+    scene3dWorld.remove(hitEffect);
+    hitEffect.geometry.dispose();
+    hitEffect.material.dispose();
+    return;
+  }
+
+  requestAnimationFrame(hitAnimation);
+};
+
+hitAnimation();
+
       scene3dWorld.remove(bullet.mesh);
       bullets3d.splice(i,1);
 
