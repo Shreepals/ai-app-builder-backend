@@ -2747,6 +2747,13 @@ $("play3d").addEventListener("click",()=>{
   }
 
   playMode3d=true;
+  const selectedGameType =
+  $("gameType3d")?.value || "openworld";
+
+status(
+  "status3d",
+  "🎮 " + selectedGameType.toUpperCase() + " गेम शुरू!"
+);
   createGun3d();
 
   status("status3d","🔫 Play चालू! Gun तैयार है।");
