@@ -547,6 +547,34 @@ function fireGun3d(){
 
   ammo3d--;
 
+  // GUN SHOT SOUND
+  try {
+  const audio = new AudioContext();
+  const oscillator = audio.createOscillator();
+  const gain = audio.createGain();
+
+  oscillator.type = "sawtooth";
+  oscillator.frequency.setValueAtTime(180, audio.currentTime);
+  oscillator.frequency.exponentialRampToValueAtTime(
+    50, audio.currentTime + 0.15
+  );
+
+  gain.gain.setValueAtTime(0.25, audio.currentTime);
+  gain.gain.exponentialRampToValueAtTime(
+    0.001, audio.currentTime + 0.15
+  );
+
+  oscillator.connect(gain);
+  gain.connect(audio.destination);
+
+  oscillator.start();
+  oscillator.stop(audio.currentTime + 0.15);
+
+  oscillator.onended = () => audio.close();
+} catch(error) {
+  console.log("Gun sound unavailable", error);
+}
+
   $("ammoCount3d").textContent =
     "Ammo: " + ammo3d + " / " + maxAmmo3d;
 
