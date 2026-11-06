@@ -2528,8 +2528,11 @@ async function loadSceneData3d(data){
 
       obj = new THREE.Mesh(
         g,
+        
         new THREE.MeshStandardMaterial({
-          color: item.color ?? 0x5685ff
+          color: item.color ?? 0x5685ff,
+          roughness: 0.75,
+          metalness: 0.15
         })
       );
 
