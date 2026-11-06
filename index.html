@@ -2529,7 +2529,7 @@ async function loadSceneData3d(data){
         g = new THREE.CapsuleGeometry(0.4,1.1,4,8);
       }
 
-      if(item.kind === "sphere"){
+      if(kind === "sphere"){
         g = new THREE.SphereGeometry(.6,24,16);
       }else if(item.kind === "ground"){
         g = new THREE.BoxGeometry(8,.2,8);
