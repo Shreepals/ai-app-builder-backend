@@ -3175,7 +3175,13 @@ obj.traverse(child=>{
     : [child.material];
 
   materials.forEach(mat=>{
-    if(mat.color) mat.color.set("#ffffff");
+    if(mat.color){
+      mat.color.set(
+        ["wood","stone","grass","metal"].includes(preset)
+          ? "#ffffff"
+          : color
+      );
+    }
     if(mat.map){
       mat.map.dispose();
       mat.map = null;
