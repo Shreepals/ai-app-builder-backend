@@ -2945,6 +2945,16 @@ obj.traverse(child=>{
 
   materials.forEach(mat=>{
     if(mat.color) mat.color.set(color);
+    if(mat.map){
+      mat.map.dispose();
+      mat.map = null;
+   }
+
+   if(["wood","stone","grass","metal"].includes(preset)){
+     mat.map = createMaterialTexture3d(preset,color);
+  }
+
+  mat.needsUpdate = true;
     if("roughness" in mat) mat.roughness = finalRoughness;
     if("metalness" in mat) mat.metalness = finalMetalness;
     mat.needsUpdate = true;
