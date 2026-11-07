@@ -1144,20 +1144,33 @@ function setupTerrainPaint3d(){
     colors.needsUpdate = true;
   }
 
-  canvas.addEventListener("pointerdown",event=>{
+ canvas.addEventListener("pointerdown",event=>{
     if(!terrainPaintActive3d) return;
+
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
     terrainPaintPointerDown3d = true;
+
+    if(canvas.setPointerCapture){
+      canvas.setPointerCapture(event.pointerId);
+    }
+
     paintAt(event);
-  });
+  },true);
 
   canvas.addEventListener("pointermove",event=>{
-    if(terrainPaintPointerDown3d) paintAt(event);
-  });
+    if(!terrainPaintActive3d || !terrainPaintPointerDown3d) return;
 
-  window.addEventListener("pointerup",()=>{
+    event.preventDefault();
+    event.stopImmediatePropagation();
+
+    paintAt(event);
+  },true);
+
+  window.addEventListener("pointerup",event=>{
     terrainPaintPointerDown3d = false;
-  });
-  }  
+  },true);  
 
 function init3d(){
 if(threeStarted)return true;
