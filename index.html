@@ -2895,6 +2895,24 @@ obj.traverse(child=>{
   status("status3d","Name, Color, Position, Size और Rotation लागू हो गए।");
 });
 
+$("materialPreset3d").addEventListener("change",()=>{
+  const preset = $("materialPreset3d").value;
+
+  const settings = {
+    standard: [0.75, 0.15],
+    metal: [0.25, 0.9],
+    wood: [0.85, 0],
+    stone: [0.95, 0],
+    grass: [1, 0],
+    plastic: [0.3, 0]
+  };
+
+  const values = settings[preset] || settings.standard;
+
+  $("roughness3d").value = values[0];
+  $("metalness3d").value = values[1];
+});  
+
 $("delete3d").addEventListener("click",()=>{
 
   if(!selectedObject3d){
