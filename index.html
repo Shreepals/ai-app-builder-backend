@@ -993,6 +993,8 @@ function generateTerrain3d(){
   });
 
   const terrain = new THREE.Mesh(geometry,material);
+  terrain.userData.paintCanvas = terrainTextureCanvas;
+  terrain.userData.paintTexture = terrainTexture;
 
   terrain.rotation.x = -Math.PI/2;
   terrain.name = "Generated Terrain";
