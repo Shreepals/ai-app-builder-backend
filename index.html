@@ -260,7 +260,36 @@ iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);bord
   <option value="stone">Stone</option>
   <option value="grass">Grass</option>
   <option value="plastic">Plastic</option>
-</select>  
+</select>
+  
+<h3>🏔️ Terrain Editor</h3>
+
+<label for="terrainSize3d">Terrain Size</label>
+<input id="terrainSize3d" type="range" min="10" max="100" value="40" step="5">
+
+<label for="terrainHeight3d">Mountain Height</label>
+<input id="terrainHeight3d" type="range" min="0" max="20" value="8" step="1">
+
+<label for="terrainDetail3d">Terrain Detail</label>
+<select id="terrainDetail3d">
+  <option value="16">Low</option>
+  <option value="32" selected>Medium</option>
+  <option value="64">High</option>
+</select>
+
+<label for="terrainType3d">Terrain Type</label>
+<select id="terrainType3d">
+  <option value="mountain">Mountains</option>
+  <option value="hills">Hills</option>
+  <option value="flat">Flat Land</option>
+  <option value="desert">Desert</option>
+</select>
+
+<button class="btn" id="generateTerrain3d">
+  🏔️ Generate Terrain
+</button>
+
+<p class="small" id="terrainStatus3d">Terrain बनाने के लिए बटन दबाएँ।</p>  
 
 <label for="rotX">Rotation X</label>
 <input id="rotX" type="number" step="5" value="0">
