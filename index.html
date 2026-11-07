@@ -2817,6 +2817,73 @@ if(selected.length > 0){
   selectObject3d(null);
   }
 });
+  
+function createMaterialTexture3d(preset, baseColor){
+
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 256;
+
+  const ctx = canvas.getContext("2d");
+
+  ctx.fillStyle = baseColor;
+  ctx.fillRect(0,0,256,256);
+
+  if(preset === "wood"){
+
+    for(let i=0;i<180;i++){
+      ctx.beginPath();
+      ctx.strokeStyle = i%2
+        ? "rgba(60,30,10,0.22)"
+        : "rgba(255,210,130,0.18)";
+      ctx.lineWidth = Math.random()*3+1;
+      ctx.moveTo(0,Math.random()*256);
+      ctx.bezierCurveTo(
+        80,Math.random()*256,
+        170,Math.random()*256,
+        256,Math.random()*256
+      );
+      ctx.stroke();
+    }
+
+  }else if(preset === "stone"){
+
+    for(let i=0;i<1800;i++){
+      ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.12})`;
+      ctx.fillRect(Math.random()*256,Math.random()*256,2,2);
+    }
+
+  }else if(preset === "grass"){
+
+    for(let i=0;i<1800;i++){
+      ctx.beginPath();
+      ctx.strokeStyle = i%2
+        ? "rgba(20,90,15,0.45)"
+        : "rgba(170,220,70,0.4)";
+      ctx.lineWidth = 1.5;
+      const x=Math.random()*256;
+      const y=Math.random()*256;
+      ctx.moveTo(x,y);
+      ctx.lineTo(x+Math.random()*8-4,y-3-Math.random()*12);
+      ctx.stroke();
+    }
+
+  }else if(preset === "metal"){
+
+    for(let i=0;i<100;i++){
+      ctx.fillStyle="rgba(255,255,255,0.12)";
+      ctx.fillRect(0,Math.random()*256,256,1);
+    }
+  }
+
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  texture.wrapS = THREE.RepeatWrapping;
+  texture.wrapT = THREE.RepeatWrapping;
+  texture.repeat.set(2,2);
+
+  return texture;
+  }  
 
 $("applyObject").addEventListener("click",()=>{
   if(!selectedObject3d){
