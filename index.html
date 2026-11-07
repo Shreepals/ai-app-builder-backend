@@ -953,24 +953,125 @@ function createTerrainTextureCanvas3d(type,size=1024){
 
   }else if(prompt.includes("car") || prompt.includes("गाड़ी")){
 
-    addMesh(
-      new THREE.BoxGeometry(3,0.8,1.5),
-      0,0.8,0,0xd52b2b
-    );
+  const bodyShape = new THREE.Shape();
+  bodyShape.moveTo(-2,0.45);
+  bodyShape.lineTo(2,0.45);
+  bodyShape.lineTo(2,1.05);
+  bodyShape.lineTo(1.4,1.25);
+  bodyShape.lineTo(-1.5,1.25);
+  bodyShape.lineTo(-2,0.95);
+  bodyShape.closePath();
 
-    addMesh(
-      new THREE.BoxGeometry(1.6,0.8,1.2),
-      0,1.5,0,0x4488bb
-    );
+  const bodyGeo = new THREE.ExtrudeGeometry(bodyShape,{
+    depth:1.5,
+    bevelEnabled:true,
+    bevelSegments:4,
+    steps:1,
+    bevelSize:0.07,
+    bevelThickness:0.07
+  });
 
-    [-1,1].forEach(x=>{
-      [-0.7,0.7].forEach(z=>{
-        addMesh(
-          new THREE.CylinderGeometry(0.35,0.35,0.2,16),
-          x,0.35,z,0x222222
-        );
-      });
+  const body = new THREE.Mesh(
+    bodyGeo,
+    new THREE.MeshStandardMaterial({
+      color:0xc71925,
+      metalness:0.65,
+      roughness:0.3
+    })
+  );
+  body.position.z=-0.75;
+  body.castShadow=true;
+  group.add(body);
+
+  const cabinShape = new THREE.Shape();
+  cabinShape.moveTo(-1.15,1.2);
+  cabinShape.lineTo(-0.65,2.05);
+  cabinShape.lineTo(0.65,2.05);
+  cabinShape.lineTo(1.35,1.2);
+  cabinShape.closePath();
+
+  const cabinGeo = new THREE.ExtrudeGeometry(cabinShape,{
+    depth:1.25,
+    bevelEnabled:true,
+    bevelSegments:3,
+    bevelSize:0.04,
+    bevelThickness:0.04
+  });
+
+  const cabin = new THREE.Mesh(
+    cabinGeo,
+    new THREE.MeshStandardMaterial({
+      color:0x182d43,
+      metalness:0.6,
+      roughness:0.18
+    })
+  );
+  cabin.position.z=-0.625;
+  cabin.castShadow=true;
+  group.add(cabin);
+
+  // चार पहिए और सिल्वर रिम
+  [-1.25,1.25].forEach(x=>{
+    [-0.82,0.82].forEach(z=>{
+
+      const wheel = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.43,0.43,0.28,32),
+        new THREE.MeshStandardMaterial({
+          color:0x151515,
+          roughness:0.85
+        })
+      );
+
+      wheel.rotation.x=Math.PI/2;
+      wheel.position.set(x,0.48,z);
+      wheel.castShadow=true;
+      group.add(wheel);
+
+      const rim = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.24,0.24,0.30,24),
+        new THREE.MeshStandardMaterial({
+          color:0xbfc5cc,
+          metalness:0.9,
+          roughness:0.2
+        })
+      );
+
+      rim.rotation.x=Math.PI/2;
+      rim.position.set(x,0.48,z);
+      group.add(rim);
     });
+  });
+
+  // आगे और पीछे के बंपर
+  addMesh(new THREE.BoxGeometry(0.16,0.22,1.65),
+    2,0.58,0,0xaaaaaa);
+
+  addMesh(new THREE.BoxGeometry(0.16,0.22,1.65),
+    -2,0.58,0,0xaaaaaa);
+
+  // हेडलाइट
+  [-0.48,0.48].forEach(z=>{
+    addMesh(
+      new THREE.BoxGeometry(0.08,0.22,0.32),
+      2.04,0.95,z,0xffffcc
+    );
+  });
+
+  // पीछे की लाल लाइट
+  [-0.48,0.48].forEach(z=>{
+    addMesh(
+      new THREE.BoxGeometry(0.08,0.18,0.3),
+      -2.04,0.95,z,0xff2222
+    );
+  });
+
+  // साइड मिरर
+  [-0.82,0.82].forEach(z=>{
+    addMesh(
+      new THREE.BoxGeometry(0.3,0.12,0.18),
+      0.95,1.3,z,0x222222
+    );
+  });
 
   }else if(prompt.includes("house") || prompt.includes("घर")){
 
