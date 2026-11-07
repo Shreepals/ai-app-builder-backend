@@ -1827,6 +1827,30 @@ function selectObject3d(obj){
     ? "#" + objectColor.getHexString()
     : "#5685ff";
   }
+  
+    let roughness = 0.75;
+  let metalness = 0.15;
+
+  obj.traverse(child=>{
+    if(child.isMesh && child.material){
+      const mat = Array.isArray(child.material)
+        ? child.material[0]
+        : child.material;
+
+      if(mat && mat.roughness !== undefined){
+        roughness = mat.roughness;
+        metalness = mat.metalness ?? 0;
+      }
+    }
+  });
+
+  if($("roughness3d")){
+    $("roughness3d").value = roughness;
+  }
+
+  if($("metalness3d")){
+    $("metalness3d").value = metalness;
+  }
 
   if($("rotX")) $("rotX").value=THREE.MathUtils.radToDeg(obj.rotation.x);
   if($("rotY")) $("rotY").value=THREE.MathUtils.radToDeg(obj.rotation.y);
