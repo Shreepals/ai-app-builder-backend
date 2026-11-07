@@ -288,6 +288,29 @@ iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);bord
 <button class="btn" id="generateTerrain3d">
   🏔️ Generate Terrain
 </button>
+  
+<h3>🖌️ Terrain Sculpting</h3>
+
+<label for="sculptMode3d">Sculpt Mode</label>
+<select id="sculptMode3d">
+  <option value="raise">Raise Land</option>
+  <option value="lower">Lower Land</option>
+  <option value="smooth">Smooth Land</option>
+</select>
+
+<label for="sculptBrush3d">Brush Size</label>
+<input id="sculptBrush3d" type="range" min="1" max="10" value="3">
+
+<label for="sculptStrength3d">Brush Strength</label>
+<input id="sculptStrength3d" type="range" min="0.1" max="3" step="0.1" value="1">
+
+<button class="btn" id="sculptTerrain3d">
+  🖌️ Enable Sculpting
+</button>
+
+<p class="small" id="sculptStatus3d">
+  Sculpting शुरू करने के लिए बटन दबाएँ।
+  </p>  
 
 <p class="small" id="terrainStatus3d">Terrain बनाने के लिए बटन दबाएँ।</p>  
 
