@@ -1079,6 +1079,7 @@ function setupTerrainPaint3d(){
   if(!renderer3d || !scene3dWorld || !camera3d) return;
 
   const canvas = renderer3d.domElement;
+  canvas.style.touchAction = "none";
 
   if(canvas.dataset.paintReady === "yes") return;
   canvas.dataset.paintReady = "yes";
