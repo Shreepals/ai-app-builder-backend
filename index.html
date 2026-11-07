@@ -406,6 +406,7 @@ saveProjects();
 renderPreview();
 
 if(Array.isArray(data.scene3d) && data.scene3d.length > 0){
+  console.log("AI SCENE DATA:", data.scene3d);
   await loadSceneData3d(data.scene3d);
   status("generateStatus","AI ने 3D गेम और Scene बना दिया!");
   navigate("editor3d");
