@@ -805,6 +805,116 @@ $("importModel3d").addEventListener("click",()=>{
 $("modelFile3d").addEventListener("change",event=>{
   importModel3d(event.target.files[0]);
 });
+  
+function generateTerrain3d(){
+
+  if(!init3d()) return;
+
+  const size = Number($("terrainSize3d").value);
+  const height = Number($("terrainHeight3d").value);
+  const detail = Number($("terrainDetail3d").value);
+  const type = $("terrainType3d").value;
+
+  recordUndo3d();
+
+  // Remove old generated terrain
+  const old = scene3dWorld.getObjectByName("Generated Terrain");
+
+  if(old){
+    scene3dWorld.remove(old);
+    old.geometry.dispose();
+    old.material.dispose();
+  }
+
+  const geometry = new THREE.PlaneGeometry(
+    size,
+    size,
+    detail,
+    detail
+  );
+
+  const positions = geometry.attributes.position;
+
+  for(let i=0;i<positions.count;i++){
+
+    const x = positions.getX(i);
+    const y = positions.getY(i);
+
+    let h = 0;
+
+    if(type === "mountain"){
+      h = (
+        Math.sin(x*0.18) * Math.cos(y*0.18) +
+        Math.sin(x*0.35+y*0.2)*0.5
+      ) * height;
+    }
+
+    else if(type === "hills"){
+      h = (
+        Math.sin(x*0.12) +
+        Math.cos(y*0.12)
+      ) * height * 0.35;
+    }
+
+    else if(type === "desert"){
+      h = Math.sin(x*0.2+y*0.08)*height*0.12;
+    }
+
+    positions.setZ(i,h);
+  }
+
+  geometry.computeVertexNormals();
+
+  const colors = [];
+  const color = new THREE.Color();
+
+  for(let i=0;i<positions.count;i++){
+
+    const h = positions.getZ(i);
+
+    if(type === "desert"){
+      color.set("#c69b5b");
+    }else if(h > height*0.45){
+      color.set("#777777");
+    }else if(h > height*0.12){
+      color.set("#66804b");
+    }else{
+      color.set("#397b39");
+    }
+
+    colors.push(color.r,color.g,color.b);
+  }
+
+  geometry.setAttribute(
+    "color",
+    new THREE.Float32BufferAttribute(colors,3)
+  );
+
+  const material = new THREE.MeshStandardMaterial({
+    vertexColors:true,
+    roughness:0.95,
+    metalness:0
+  });
+
+  const terrain = new THREE.Mesh(geometry,material);
+
+  terrain.rotation.x = -Math.PI/2;
+  terrain.name = "Generated Terrain";
+  terrain.receiveShadow = true;
+  terrain.castShadow = true;
+
+  scene3dWorld.add(terrain);
+  objects3d.push(terrain);
+
+  updateObjectList3d();
+
+  if($("terrainStatus3d")){
+    $("terrainStatus3d").textContent =
+      "Terrain सफलतापूर्वक बन गया!";
+  }
+
+  status("status3d","🏔️ नया Terrain तैयार है!");
+}  
 
 function init3d(){
 if(threeStarted)return true;
