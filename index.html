@@ -1168,9 +1168,11 @@ function setupTerrainPaint3d(){
     paintAt(event);
   },true);
 
-  window.addEventListener("pointerup",event=>{
+    window.addEventListener("pointerup",event=>{
     terrainPaintPointerDown3d = false;
-  },true);  
+  },true);
+
+}
 
 function init3d(){
 if(threeStarted)return true;
