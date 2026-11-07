@@ -908,7 +908,127 @@ function createTerrainTextureCanvas3d(type,size=1024){
   return canvas;
   }  
   
-function generateTerrain3d(){
+  function generateAsset3d(){
+
+  if(!init3d()) return;
+
+  const prompt = $("assetPrompt3d").value.trim().toLowerCase();
+
+  if(!prompt){
+    $("assetStatus3d").textContent = "पहले मॉडल का नाम लिखें।";
+    return;
+  }
+
+  recordUndo3d();
+
+  const group = new THREE.Group();
+  const material = new THREE.MeshStandardMaterial({
+    color: 0x397b39,
+    roughness: 0.8
+  });
+
+  function addMesh(geometry, x, y, z, color){
+    const mesh = new THREE.Mesh(
+      geometry,
+      material.clone()
+    );
+    mesh.material.color.set(color);
+    mesh.position.set(x,y,z);
+    mesh.castShadow = true;
+    mesh.receiveShadow = true;
+    group.add(mesh);
+  }
+
+  if(prompt.includes("tree") || prompt.includes("पेड़")){
+
+    addMesh(
+      new THREE.CylinderGeometry(0.25,0.35,2,8),
+      0,1,0,0x79502b
+    );
+
+    addMesh(
+      new THREE.ConeGeometry(1.2,2.5,8),
+      0,3,0,0x258b38
+    );
+
+  }else if(prompt.includes("car") || prompt.includes("गाड़ी")){
+
+    addMesh(
+      new THREE.BoxGeometry(3,0.8,1.5),
+      0,0.8,0,0xd52b2b
+    );
+
+    addMesh(
+      new THREE.BoxGeometry(1.6,0.8,1.2),
+      0,1.5,0,0x4488bb
+    );
+
+    [-1,1].forEach(x=>{
+      [-0.7,0.7].forEach(z=>{
+        addMesh(
+          new THREE.CylinderGeometry(0.35,0.35,0.2,16),
+          x,0.35,z,0x222222
+        );
+      });
+    });
+
+  }else if(prompt.includes("house") || prompt.includes("घर")){
+
+    addMesh(
+      new THREE.BoxGeometry(3,2.5,3),
+      0,1.25,0,0xd9b47b
+    );
+
+    addMesh(
+      new THREE.ConeGeometry(2.5,1.8,4),
+      0,3.4,0,0x9b392b
+    );
+
+  }else if(prompt.includes("robot")){
+
+    addMesh(
+      new THREE.BoxGeometry(1.5,1.5,1),
+      0,2,0,0x888888
+    );
+
+    addMesh(
+      new THREE.BoxGeometry(1,1,1),
+      0,3.3,0,0x4488cc
+    );
+
+    addMesh(
+      new THREE.CylinderGeometry(0.15,0.15,1.5,8),
+      -0.9,2,0,0x888888
+    );
+
+    addMesh(
+      new THREE.CylinderGeometry(0.15,0.15,1.5,8),
+      0.9,2,0,0x888888
+    );
+
+  }else{
+
+    $("assetStatus3d").textContent =
+      "अभी Tree, Car, House या Robot लिखकर कोशिश करें।";
+
+    return;
+  }
+
+  group.position.set(0,0,0);
+  group.name = "Generated " + prompt;
+
+  scene3dWorld.add(group);
+  objects3d.push(group);
+
+  updateObjectList3d();
+
+  $("assetStatus3d").textContent =
+    "3D मॉडल तैयार हो गया: " + prompt;
+
+  status("status3d","🤖 नया 3D मॉडल तैयार है!");
+  }
+  
+  function generateTerrain3d(){
 
   if(!init3d()) return;
 
