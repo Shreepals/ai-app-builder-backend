@@ -2944,7 +2944,7 @@ obj.traverse(child=>{
     : [child.material];
 
   materials.forEach(mat=>{
-    if(mat.color) mat.color.set(color);
+    if(mat.color) mat.color.set("#ffffff");
     if(mat.map){
       mat.map.dispose();
       mat.map = null;
