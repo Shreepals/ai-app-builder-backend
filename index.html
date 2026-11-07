@@ -2819,10 +2819,46 @@ $("applyObject").addEventListener("click",()=>{
     obj.name=$("objName").value.trim();
   }
 
-  // Color
-  if(obj.material && obj.material.color){
-    obj.material.color.set($("objColor").value);
-  }
+  // Color and Material
+const color = $("objColor").value;
+const roughness = Number($("roughness3d").value);
+const metalness = Number($("metalness3d").value);
+const preset = $("materialPreset3d").value;
+
+let finalRoughness = roughness;
+let finalMetalness = metalness;
+
+if(preset === "metal"){
+  finalRoughness = 0.25;
+  finalMetalness = 0.9;
+}else if(preset === "wood"){
+  finalRoughness = 0.85;
+  finalMetalness = 0;
+}else if(preset === "stone"){
+  finalRoughness = 0.95;
+  finalMetalness = 0;
+}else if(preset === "grass"){
+  finalRoughness = 1;
+  finalMetalness = 0;
+}else if(preset === "plastic"){
+  finalRoughness = 0.3;
+  finalMetalness = 0;
+}
+
+obj.traverse(child=>{
+  if(!child.isMesh || !child.material) return;
+
+  const materials = Array.isArray(child.material)
+    ? child.material
+    : [child.material];
+
+  materials.forEach(mat=>{
+    if(mat.color) mat.color.set(color);
+    if("roughness" in mat) mat.roughness = finalRoughness;
+    if("metalness" in mat) mat.metalness = finalMetalness;
+    mat.needsUpdate = true;
+  });
+});
 
   // Rotation
   obj.rotation.set(
