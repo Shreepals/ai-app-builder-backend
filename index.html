@@ -1144,85 +1144,60 @@ function setupTerrainPaint3d(){
 
   function paintAt(event){
 
-    if(!terrainPaintActive3d) return;
+  if(!terrainPaintActive3d) return;
 
-    const rect = canvas.getBoundingClientRect();
+  const rect = canvas.getBoundingClientRect();
 
-    mouse.x = ((event.clientX-rect.left)/rect.width)*2-1;
-    mouse.y = -((event.clientY-rect.top)/rect.height)*2+1;
+  mouse.x = ((event.clientX-rect.left)/rect.width)*2-1;
+  mouse.y = -((event.clientY-rect.top)/rect.height)*2+1;
 
-    raycaster.setFromCamera(mouse,camera3d);
+  raycaster.setFromCamera(mouse,camera3d);
 
-    const terrain = scene3dWorld.getObjectByName("Generated Terrain");
+  const terrain = scene3dWorld.getObjectByName("Generated Terrain");
 
-    if(!terrain) return;
+  if(!terrain) return;
 
-    const hits = raycaster.intersectObject(terrain);
+  const hits = raycaster.intersectObject(terrain);
 
-    if(!hits.length) return;
+  if(!hits.length) return;
 
-    const point = terrain.worldToLocal(hits[0].point.clone());
+  const uv = hits[0].uv;
 
-    const positions = terrain.geometry.attributes.position;
-    const colors = terrain.geometry.attributes.color;
+  if(!uv) return;
 
-    if(!colors) return;
+  const paintCanvas = terrain.userData.paintCanvas;
+  const paintTexture = terrain.userData.paintTexture;
 
-    const brush = Number($("terrainPaintBrush3d").value);
-    const type = $("terrainPaintType3d").value;
+  if(!paintCanvas || !paintTexture) return;
 
-    const paintColors = {
-      grass: new THREE.Color("#397b39"),
-      sand: new THREE.Color("#c69b5b"),
-      rock: new THREE.Color("#777777")
-    };
+  const ctx = paintCanvas.getContext("2d");
 
-    const selectedColor = paintColors[type] || paintColors.grass;
+  const brush = Number($("terrainPaintBrush3d").value)*12;
+  const type = $("terrainPaintType3d").value;
 
-    for(let i=0;i<positions.count;i++){
+  const colors = {
+    grass: "#397b39",
+    sand: "#c69b5b",
+    rock: "#777777"
+  };
 
-      const x = positions.getX(i);
-      const y = positions.getY(i);
+  const x = uv.x*paintCanvas.width;
+  const y = (1-uv.y)*paintCanvas.height;
 
-      const distance = Math.hypot(x-point.x,y-point.y);
+  ctx.save();
 
-      if(distance > brush) continue;
+  ctx.beginPath();
+  ctx.arc(x,y,brush,0,Math.PI*2);
+  ctx.clip();
 
-      const falloff = 1-distance/brush;
-      const oldColor = new THREE.Color().fromBufferAttribute(colors,i);
+  ctx.fillStyle = colors[type] || colors.grass;
+  ctx.fillRect(x-brush,y-brush,brush*2,brush*2);
 
-      oldColor.lerp(selectedColor,falloff*0.8);
+  ctx.restore();
 
-      colors.setXYZ(i,oldColor.r,oldColor.g,oldColor.b);
-    }
-
-    colors.needsUpdate = true;
-  }
-
- canvas.addEventListener("pointerdown",event=>{
-    if(!terrainPaintActive3d) return;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    terrainPaintPointerDown3d = true;
-
-    if(canvas.setPointerCapture){
-      canvas.setPointerCapture(event.pointerId);
-    }
-
-    paintAt(event);
-  },true);
-
-  canvas.addEventListener("pointermove",event=>{
-    if(!terrainPaintActive3d || !terrainPaintPointerDown3d) return;
-
-    event.preventDefault();
-    event.stopImmediatePropagation();
-
-    paintAt(event);
-  },true);
-
+  paintTexture.needsUpdate = true;
+}   
+  
     window.addEventListener("pointerup",event=>{
     terrainPaintPointerDown3d = false;
   },true);
