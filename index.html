@@ -975,10 +975,21 @@ function generateTerrain3d(){
     new THREE.Float32BufferAttribute(colors,3)
   );
 
+  const terrainTextureCanvas = createTerrainTextureCanvas3d("grass");
+
+  const terrainTexture = new THREE.CanvasTexture(
+    terrainTextureCanvas
+  );
+
+  terrainTexture.wrapS = THREE.RepeatWrapping;
+  terrainTexture.wrapT = THREE.RepeatWrapping;
+  terrainTexture.colorSpace = THREE.SRGBColorSpace;
+
   const material = new THREE.MeshStandardMaterial({
-    vertexColors:true,
-    roughness:0.95,
-    metalness:0
+    map: terrainTexture,
+    vertexColors: false,
+    roughness: 0.95,
+    metalness: 0
   });
 
   const terrain = new THREE.Mesh(geometry,material);
