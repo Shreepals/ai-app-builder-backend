@@ -3364,6 +3364,30 @@ $("materialPreset3d").addEventListener("change",()=>{
   
 $("generateTerrain3d").addEventListener("click",()=>{
   generateTerrain3d();
+});
+  
+$("sculptTerrain3d").addEventListener("click",()=>{
+
+  if(!init3d()) return;
+
+  const terrain = scene3dWorld.getObjectByName("Generated Terrain");
+
+  if(!terrain){
+    status("status3d","पहले Generate Terrain बनाएँ।");
+    return;
+  }
+
+  setupTerrainSculpting3d();
+
+  terrainSculptingActive3d = !terrainSculptingActive3d;
+
+  $("sculptStatus3d").textContent = terrainSculptingActive3d
+    ? "अब जमीन पर उंगली या माउस से दबाकर Sculpt करें।"
+    : "Sculpting बंद है।";
+
+  $("sculptTerrain3d").textContent = terrainSculptingActive3d
+    ? "⏹️ Disable Sculpting"
+    : "🖌️ Enable Sculpting";
 });  
 
 $("delete3d").addEventListener("click",()=>{
