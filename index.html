@@ -310,6 +310,26 @@ iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);bord
 
 <p class="small" id="sculptStatus3d">
   Sculpting शुरू करने के लिए बटन दबाएँ।
+  </p>
+  
+<h3>🎨 Paint Terrain</h3>
+
+<label for="terrainPaintType3d">Paint Material</label>
+<select id="terrainPaintType3d">
+  <option value="grass">🌿 Grass</option>
+  <option value="sand">🏜️ Sand</option>
+  <option value="rock">🪨 Rock</option>
+</select>
+
+<label for="terrainPaintBrush3d">Brush Size</label>
+<input id="terrainPaintBrush3d" type="range" min="1" max="10" value="3">
+
+<button class="btn" id="paintTerrain3d">
+  🎨 Enable Terrain Paint
+</button>
+
+<p class="small" id="paintTerrainStatus3d">
+  Paint करने के लिए बटन दबाएँ।
   </p>  
 
 <p class="small" id="terrainStatus3d">Terrain बनाने के लिए बटन दबाएँ।</p>  
