@@ -2821,69 +2821,161 @@ if(selected.length > 0){
 function createMaterialTexture3d(preset, baseColor){
 
   const canvas = document.createElement("canvas");
-  canvas.width = 256;
-  canvas.height = 256;
+  canvas.width = 512;
+  canvas.height = 512;
 
   const ctx = canvas.getContext("2d");
 
   ctx.fillStyle = baseColor;
-  ctx.fillRect(0,0,256,256);
+  ctx.fillRect(0,0,512,512);
 
+  // WOOD TEXTURE
   if(preset === "wood"){
 
-    for(let i=0;i<180;i++){
+    for(let i=0;i<260;i++){
       ctx.beginPath();
+
       ctx.strokeStyle = i%2
-        ? "rgba(60,30,10,0.22)"
-        : "rgba(255,210,130,0.18)";
+        ? "rgba(55,25,5,0.55)"
+        : "rgba(255,210,140,0.45)";
+
       ctx.lineWidth = Math.random()*3+1;
-      ctx.moveTo(0,Math.random()*256);
+
+      const y=Math.random()*512;
+
+      ctx.moveTo(0,y);
+
       ctx.bezierCurveTo(
-        80,Math.random()*256,
-        170,Math.random()*256,
-        256,Math.random()*256
+        120,y+Math.random()*35-17,
+        350,y+Math.random()*35-17,
+        512,y+Math.random()*35-17
       );
+
       ctx.stroke();
     }
 
-  }else if(preset === "stone"){
+    // Wood knots
+    for(let i=0;i<7;i++){
+      const x=Math.random()*512;
+      const y=Math.random()*512;
 
-    for(let i=0;i<1800;i++){
-      ctx.fillStyle = `rgba(255,255,255,${Math.random()*0.12})`;
-      ctx.fillRect(Math.random()*256,Math.random()*256,2,2);
-    }
-
-  }else if(preset === "grass"){
-
-    for(let i=0;i<1800;i++){
       ctx.beginPath();
-      ctx.strokeStyle = i%2
-        ? "rgba(20,90,15,0.45)"
-        : "rgba(170,220,70,0.4)";
-      ctx.lineWidth = 1.5;
-      const x=Math.random()*256;
-      const y=Math.random()*256;
-      ctx.moveTo(x,y);
-      ctx.lineTo(x+Math.random()*8-4,y-3-Math.random()*12);
+      ctx.ellipse(x,y,12,5,0,0,Math.PI*2);
+      ctx.strokeStyle="rgba(55,25,5,0.65)";
+      ctx.lineWidth=2;
       ctx.stroke();
     }
 
-  }else if(preset === "metal"){
+  }
 
-    for(let i=0;i<100;i++){
+  // STONE TEXTURE
+  else if(preset === "stone"){
+
+    for(let i=0;i<160;i++){
+
+      const x=Math.random()*512;
+      const y=Math.random()*512;
+      const r=8+Math.random()*35;
+
+      ctx.beginPath();
+
+      for(let j=0;j<7;j++){
+        const angle=j/7*Math.PI*2;
+        const radius=r*(0.65+Math.random()*0.7);
+
+        const px=x+Math.cos(angle)*radius;
+        const py=y+Math.sin(angle)*radius;
+
+        if(j===0) ctx.moveTo(px,py);
+        else ctx.lineTo(px,py);
+      }
+
+      ctx.closePath();
+
+      ctx.fillStyle = i%2
+        ? "rgba(255,255,255,0.16)"
+        : "rgba(0,0,0,0.20)";
+
+      ctx.fill();
+
+      ctx.strokeStyle="rgba(0,0,0,0.30)";
+      ctx.lineWidth=1.5;
+      ctx.stroke();
+    }
+
+    // Stone cracks
+    for(let i=0;i<35;i++){
+
+      let x=Math.random()*512;
+      let y=Math.random()*512;
+
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+
+      for(let j=0;j<4;j++){
+        x+=Math.random()*30-15;
+        y+=Math.random()*30-15;
+        ctx.lineTo(x,y);
+      }
+
+      ctx.strokeStyle="rgba(0,0,0,0.45)";
+      ctx.lineWidth=1.5;
+      ctx.stroke();
+    }
+
+  }
+
+  // GRASS TEXTURE
+  else if(preset === "grass"){
+
+    for(let i=0;i<3500;i++){
+
+      const x=Math.random()*512;
+      const y=Math.random()*512;
+
+      ctx.beginPath();
+      ctx.moveTo(x,y);
+      ctx.quadraticCurveTo(
+        x+Math.random()*15-7,
+        y-12,
+        x+Math.random()*20-10,
+        y-20-Math.random()*25
+      );
+
+      ctx.strokeStyle = i%2
+        ? "rgba(15,75,10,0.8)"
+        : "rgba(180,230,75,0.75)";
+
+      ctx.lineWidth=1+Math.random()*2;
+      ctx.stroke();
+    }
+
+  }
+
+  // METAL TEXTURE
+  else if(preset === "metal"){
+
+    for(let i=0;i<300;i++){
       ctx.fillStyle="rgba(255,255,255,0.12)";
-      ctx.fillRect(0,Math.random()*256,256,1);
+      ctx.fillRect(
+        0,
+        Math.random()*512,
+        512,
+        1+Math.random()*2
+      );
     }
   }
 
   const texture = new THREE.CanvasTexture(canvas);
+
   texture.colorSpace = THREE.SRGBColorSpace;
   texture.wrapS = THREE.RepeatWrapping;
   texture.wrapT = THREE.RepeatWrapping;
   texture.repeat.set(2,2);
+  texture.needsUpdate = true;
 
   return texture;
-  }  
+  }
 
 $("applyObject").addEventListener("click",()=>{
   if(!selectedObject3d){
