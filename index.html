@@ -937,7 +937,119 @@ function generateTerrain3d(){
   }
 
   status("status3d","🏔️ नया Terrain तैयार है!");
-}  
+}
+  
+let terrainSculptingActive3d = false;
+let terrainSculptPointerDown3d = false;
+
+function setupTerrainSculpting3d(){
+
+  if(!renderer3d || !scene3dWorld || !camera3d) return;
+
+  const canvas = renderer3d.domElement;
+
+  if(canvas.dataset.sculptReady === "yes") return;
+  canvas.dataset.sculptReady = "yes";
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function sculptAt(event){
+
+    if(!terrainSculptingActive3d) return;
+
+    const rect = canvas.getBoundingClientRect();
+
+    mouse.x = ((event.clientX-rect.left)/rect.width)*2-1;
+    mouse.y = -((event.clientY-rect.top)/rect.height)*2+1;
+
+    raycaster.setFromCamera(mouse,camera3d);
+
+    const terrain = scene3dWorld.getObjectByName("Generated Terrain");
+
+    if(!terrain) return;
+
+    const hits = raycaster.intersectObject(terrain);
+
+    if(!hits.length) return;
+
+    const point = terrain.worldToLocal(hits[0].point.clone());
+
+    const geometry = terrain.geometry;
+    const positions = geometry.attributes.position;
+    const mode = $("sculptMode3d").value;
+
+    const radius = Number($("sculptBrush3d").value);
+    const strength = Number($("sculptStrength3d").value);
+
+    const original = Array.from(positions.array);
+    const segments = Math.round(Math.sqrt(positions.count))-1;
+    const rowSize = segments+1;
+
+    for(let i=0;i<positions.count;i++){
+
+      const x=positions.getX(i);
+      const y=positions.getY(i);
+
+      const distance=Math.hypot(x-point.x,y-point.y);
+
+      if(distance>radius) continue;
+
+      const falloff=1-distance/radius;
+      const index=i*3;
+
+      if(mode==="raise"){
+        positions.array[index+2] += strength*0.08*falloff;
+      }
+
+      else if(mode==="lower"){
+        positions.array[index+2] -= strength*0.08*falloff;
+      }
+
+      else if(mode==="smooth"){
+
+        const neighbors=[
+          i-1,i+1,i-rowSize,i+rowSize
+        ].filter(n=>
+          n>=0 &&
+          n<positions.count &&
+          Math.abs(Math.floor(n/rowSize)-Math.floor(i/rowSize))<=1
+        );
+
+        if(neighbors.length){
+          let average=0;
+
+          neighbors.forEach(n=>{
+            average+=original[n*3+2];
+          });
+
+          average/=neighbors.length;
+
+          positions.array[index+2] +=
+            (average-original[index+2])*0.25*falloff;
+        }
+      }
+    }
+
+    positions.needsUpdate=true;
+    geometry.computeVertexNormals();
+    geometry.attributes.position.needsUpdate=true;
+  }
+
+  canvas.addEventListener("pointerdown",event=>{
+    if(!terrainSculptingActive3d) return;
+    terrainSculptPointerDown3d=true;
+    sculptAt(event);
+  });
+
+  canvas.addEventListener("pointermove",event=>{
+    if(terrainSculptPointerDown3d) sculptAt(event);
+  });
+
+  window.addEventListener("pointerup",()=>{
+    terrainSculptPointerDown3d=false;
+  });
+  }  
 
 function init3d(){
 if(threeStarted)return true;
