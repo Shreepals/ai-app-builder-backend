@@ -1069,6 +1069,93 @@ function setupTerrainSculpting3d(){
   window.addEventListener("pointerup",()=>{
     terrainSculptPointerDown3d=false;
   });
+  }
+  
+let terrainPaintActive3d = false;
+let terrainPaintPointerDown3d = false;
+
+function setupTerrainPaint3d(){
+
+  if(!renderer3d || !scene3dWorld || !camera3d) return;
+
+  const canvas = renderer3d.domElement;
+
+  if(canvas.dataset.paintReady === "yes") return;
+  canvas.dataset.paintReady = "yes";
+
+  const raycaster = new THREE.Raycaster();
+  const mouse = new THREE.Vector2();
+
+  function paintAt(event){
+
+    if(!terrainPaintActive3d) return;
+
+    const rect = canvas.getBoundingClientRect();
+
+    mouse.x = ((event.clientX-rect.left)/rect.width)*2-1;
+    mouse.y = -((event.clientY-rect.top)/rect.height)*2+1;
+
+    raycaster.setFromCamera(mouse,camera3d);
+
+    const terrain = scene3dWorld.getObjectByName("Generated Terrain");
+
+    if(!terrain) return;
+
+    const hits = raycaster.intersectObject(terrain);
+
+    if(!hits.length) return;
+
+    const point = terrain.worldToLocal(hits[0].point.clone());
+
+    const positions = terrain.geometry.attributes.position;
+    const colors = terrain.geometry.attributes.color;
+
+    if(!colors) return;
+
+    const brush = Number($("terrainPaintBrush3d").value);
+    const type = $("terrainPaintType3d").value;
+
+    const paintColors = {
+      grass: new THREE.Color("#397b39"),
+      sand: new THREE.Color("#c69b5b"),
+      rock: new THREE.Color("#777777")
+    };
+
+    const selectedColor = paintColors[type] || paintColors.grass;
+
+    for(let i=0;i<positions.count;i++){
+
+      const x = positions.getX(i);
+      const y = positions.getY(i);
+
+      const distance = Math.hypot(x-point.x,y-point.y);
+
+      if(distance > brush) continue;
+
+      const falloff = 1-distance/brush;
+      const oldColor = new THREE.Color().fromBufferAttribute(colors,i);
+
+      oldColor.lerp(selectedColor,falloff*0.8);
+
+      colors.setXYZ(i,oldColor.r,oldColor.g,oldColor.b);
+    }
+
+    colors.needsUpdate = true;
+  }
+
+  canvas.addEventListener("pointerdown",event=>{
+    if(!terrainPaintActive3d) return;
+    terrainPaintPointerDown3d = true;
+    paintAt(event);
+  });
+
+  canvas.addEventListener("pointermove",event=>{
+    if(terrainPaintPointerDown3d) paintAt(event);
+  });
+
+  window.addEventListener("pointerup",()=>{
+    terrainPaintPointerDown3d = false;
+  });
   }  
 
 function init3d(){
