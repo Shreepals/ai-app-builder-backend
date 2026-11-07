@@ -3495,6 +3495,32 @@ $("sculptTerrain3d").addEventListener("click",()=>{
   $("sculptTerrain3d").textContent = terrainSculptingActive3d
     ? "⏹️ Disable Sculpting"
     : "🖌️ Enable Sculpting";
+});
+  
+$("paintTerrain3d").addEventListener("click",()=>{
+
+  if(!init3d()) return;
+
+  const terrain = scene3dWorld.getObjectByName("Generated Terrain");
+
+  if(!terrain){
+    status("status3d","पहले Generate Terrain बनाएँ।");
+    return;
+  }
+
+  setupTerrainPaint3d();
+
+  terrainPaintActive3d = !terrainPaintActive3d;
+
+  terrainPaintPointerDown3d = false;
+
+  $("paintTerrainStatus3d").textContent = terrainPaintActive3d
+    ? "अब जमीन पर उंगली से दबाकर Paint करें।"
+    : "Terrain Paint बंद है।";
+
+  $("paintTerrain3d").textContent = terrainPaintActive3d
+    ? "⏹️ Disable Terrain Paint"
+    : "🎨 Enable Terrain Paint";
 });  
 
 $("delete3d").addEventListener("click",()=>{
