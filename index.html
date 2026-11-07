@@ -848,6 +848,48 @@ $("importModel3d").addEventListener("click",()=>{
 $("modelFile3d").addEventListener("change",event=>{
   importModel3d(event.target.files[0]);
 });
+function createTerrainTextureCanvas3d(type,size=1024){
+
+  const canvas = document.createElement("canvas");
+  canvas.width = size;
+  canvas.height = size;
+
+  const ctx = canvas.getContext("2d");
+
+  const baseColors = {
+    grass: "#397b39",
+    sand: "#c69b5b",
+    rock: "#777777"
+  };
+
+  ctx.fillStyle = baseColors[type] || baseColors.grass;
+  ctx.fillRect(0,0,size,size);
+
+  for(let i=0;i<7000;i++){
+
+    const x = Math.random()*size;
+    const y = Math.random()*size;
+    const radius = Math.random()*3+1;
+
+    const colors = {
+      grass: ["#285d28","#579447","#78a94d"],
+      sand: ["#a98249","#dfbd7b","#ead09a"],
+      rock: ["#555555","#999999","#b0aaa0"]
+    };
+
+    const palette = colors[type] || colors.grass;
+
+    ctx.fillStyle = palette[
+      Math.floor(Math.random()*palette.length)
+    ];
+
+    ctx.beginPath();
+    ctx.arc(x,y,radius,radius,0,Math.PI*2);
+    ctx.fill();
+  }
+
+  return canvas;
+  }  
   
 function generateTerrain3d(){
 
