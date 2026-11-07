@@ -1064,6 +1064,24 @@ function createTerrainTextureCanvas3d(type,size=1024){
       -2.04,0.95,z,0xff2222
     );
   });
+    
+  // कार के दरवाजों की लाइन
+  [-0.77,0.77].forEach(z=>{
+    [-0.25,0.85].forEach(x=>{
+      addMesh(
+        new THREE.BoxGeometry(0.025,0.65,0.025),
+        x,0.88,z,0x551515
+      );
+    });
+
+    // दरवाजों के हैंडल
+    [-0.25,0.85].forEach(x=>{
+      addMesh(
+        new THREE.BoxGeometry(0.28,0.07,0.04),
+        x,1.12,z,0xd0d0d0
+      );
+    });
+  });  
 
   // साइड मिरर
   [-0.82,0.82].forEach(z=>{
