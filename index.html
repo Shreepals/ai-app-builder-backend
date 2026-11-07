@@ -246,6 +246,21 @@ iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);bord
 
 <label for="objColor">Object Color</label>
 <input id="objColor" type="color" value="#22aaff">
+<label for="roughness3d">Surface Roughness</label>
+<input id="roughness3d" type="range" min="0" max="1" step="0.05" value="0.75">
+
+<label for="metalness3d">Metalness</label>
+<input id="metalness3d" type="range" min="0" max="1" step="0.05" value="0.15">
+
+<label for="materialPreset3d">Material Preset</label>
+<select id="materialPreset3d">
+  <option value="standard">Standard</option>
+  <option value="metal">Metal</option>
+  <option value="wood">Wood</option>
+  <option value="stone">Stone</option>
+  <option value="grass">Grass</option>
+  <option value="plastic">Plastic</option>
+</select>  
 
 <label for="rotX">Rotation X</label>
 <input id="rotX" type="number" step="5" value="0">
