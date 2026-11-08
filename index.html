@@ -1010,15 +1010,18 @@ function createTerrainTextureCanvas3d(type,size=1024){
   cabin.castShadow=true;
   group.add(cabin);
 
-  // चार पहिए और सिल्वर रिम
+  // Realistic Alloy Wheels and Tyre Tread
   [-1.25,1.25].forEach(x=>{
     [-0.82,0.82].forEach(z=>{
 
+      const side = z > 0 ? 1 : -1;
+
+      // Black rubber tyre
       const wheel = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.43,0.43,0.28,32),
+        new THREE.CylinderGeometry(0.43,0.43,0.32,48),
         new THREE.MeshStandardMaterial({
-          color:0x151515,
-          roughness:0.85
+          color:0x101010,
+          roughness:0.92
         })
       );
 
@@ -1027,18 +1030,80 @@ function createTerrainTextureCanvas3d(type,size=1024){
       wheel.castShadow=true;
       group.add(wheel);
 
-      const rim = new THREE.Mesh(
-        new THREE.CylinderGeometry(0.24,0.24,0.30,24),
+      // Alloy outer ring
+      const alloyRing = new THREE.Mesh(
+        new THREE.TorusGeometry(0.27,0.035,12,40),
         new THREE.MeshStandardMaterial({
-          color:0xbfc5cc,
-          metalness:0.9,
-          roughness:0.2
+          color:0xc9d0d8,
+          metalness:0.95,
+          roughness:0.18
         })
       );
 
-      rim.rotation.x=Math.PI/2;
-      rim.position.set(x,0.48,z);
-      group.add(rim);
+      alloyRing.position.set(x,0.48,z+side*0.17);
+      group.add(alloyRing);
+
+      // Five silver alloy spokes
+      for(let i=0;i<5;i++){
+
+        const angle=i*Math.PI*2/5;
+
+        const spoke = new THREE.Mesh(
+          new THREE.BoxGeometry(0.075,0.34,0.045),
+          new THREE.MeshStandardMaterial({
+            color:0xe0e5eb,
+            metalness:0.95,
+            roughness:0.2
+          })
+        );
+
+        spoke.position.set(
+          x+Math.sin(angle)*0.15,
+          0.48+Math.cos(angle)*0.15,
+          z+side*0.17
+        );
+
+        spoke.rotation.z=-angle;
+        group.add(spoke);
+      }
+
+      // Centre hub
+      const hub = new THREE.Mesh(
+        new THREE.CylinderGeometry(0.09,0.09,0.06,24),
+        new THREE.MeshStandardMaterial({
+          color:0xeeeeee,
+          metalness:1,
+          roughness:0.15
+        })
+      );
+
+      hub.rotation.x=Math.PI/2;
+      hub.position.set(x,0.48,z+side*0.19);
+      group.add(hub);
+
+      // Tyre tread grooves
+      for(let i=0;i<28;i++){
+
+        const angle=i*Math.PI*2/28;
+
+        const tread = new THREE.Mesh(
+          new THREE.BoxGeometry(0.055,0.12,0.30),
+          new THREE.MeshStandardMaterial({
+            color:0x303030,
+            roughness:1
+          })
+        );
+
+        tread.position.set(
+          x+Math.sin(angle)*0.415,
+          0.48+Math.cos(angle)*0.415,
+          z
+        );
+
+        tread.rotation.z=-angle;
+        group.add(tread);
+      }
+
     });
   });
 
