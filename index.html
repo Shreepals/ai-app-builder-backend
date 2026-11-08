@@ -906,7 +906,29 @@ function createTerrainTextureCanvas3d(type,size=1024){
   }
 
   return canvas;
-  }  
+  } 
+  
+  let soldierAnimation3d = null;
+  let soldierAnimationTime3d = 0;
+
+function animateSoldier3d(group, mode = "walk"){
+
+  if(!group) return;
+
+  soldierAnimation3d = {
+    group: group,
+    mode: mode,
+    time: 0
+  };
+
+  group.traverse(obj=>{
+    if(obj.isMesh && obj.geometry){
+      obj.userData.originalPosition = obj.position.clone();
+    }
+  });
+
+  status("status3d","🪖 Soldier Animation तैयार है!");
+}
   
   function generateAsset3d(){
 
