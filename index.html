@@ -1113,6 +1113,50 @@ function createTerrainTextureCanvas3d(type,size=1024){
 
   addMesh(new THREE.BoxGeometry(0.16,0.22,1.65),
     -2,0.58,0,0xaaaaaa);
+    
+  // Front Grill
+  addMesh(
+    new THREE.BoxGeometry(0.08,0.32,0.85),
+    2.10,0.72,0,0x151515
+  );
+
+  // Grill की सिल्वर पट्टियाँ
+  for(let i=0;i<5;i++){
+    addMesh(
+      new THREE.BoxGeometry(0.035,0.025,0.78),
+      2.15,0.62+i*0.05,0,0xbfc5cc
+    );
+  }
+
+  // Front Company Style Logo
+  const logo = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.13,0.13,0.045,32),
+    new THREE.MeshStandardMaterial({
+      color:0xe5e5e5,
+      metalness:1,
+      roughness:0.15
+    })
+  );
+
+  logo.rotation.z=Math.PI/2;
+  logo.position.set(2.18,0.82,0);
+  group.add(logo);
+
+  // Rear Exhaust Pipes
+  [-0.48,0.48].forEach(z=>{
+    const exhaust = new THREE.Mesh(
+      new THREE.CylinderGeometry(0.09,0.09,0.28,20),
+      new THREE.MeshStandardMaterial({
+        color:0x888888,
+        metalness:0.9,
+        roughness:0.25
+      })
+    );
+
+    exhaust.rotation.z=Math.PI/2;
+    exhaust.position.set(-2.12,0.38,z);
+    group.add(exhaust);
+  });  
 
   // हेडलाइट
   [-0.48,0.48].forEach(z=>{
