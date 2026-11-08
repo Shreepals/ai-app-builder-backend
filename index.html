@@ -1565,16 +1565,26 @@ function animateSoldier3d(group, mode = "walk"){
     rightArm: rightArmPivot
   };
 
-    // Rifle barrel and body
-    addMesh(new THREE.BoxGeometry(0.12,0.13,1.25),
-      0.42,1.95,0.38,0x252525);
+  // RIFLE ATTACHED TO RIGHT ARM
 
-    addMesh(new THREE.BoxGeometry(0.18,0.2,0.45),
-      0.42,1.95,0.05,0x424242);
+  addLimbMesh(
+    rightArmPivot,
+    new THREE.BoxGeometry(0.12,0.13,1.25),
+    -0.15,-0.70,0.38,0x252525
+  );
 
-    // Rifle stock
-    addMesh(new THREE.BoxGeometry(0.13,0.15,0.38),
-      0.42,1.95,-0.35,0x65452b);
+  addLimbMesh(
+    rightArmPivot,
+    new THREE.BoxGeometry(0.18,0.2,0.45),
+    -0.15,-0.70,0.05,0x424242
+  );
+
+  // Rifle Stock
+  addLimbMesh(
+    rightArmPivot,
+    new THREE.BoxGeometry(0.13,0.15,0.38),
+    -0.15,-0.70,-0.35,0x65452b
+  );  
 
     // SOLDIER LEG ANIMATION PIVOTS
 
