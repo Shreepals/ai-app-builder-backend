@@ -4496,7 +4496,22 @@ status(
 
   status("status3d","🎮 " + selectedGameType.toUpperCase() + " गेम शुरू! 🔫 Gun तैयार है।");
 });
-$("stop3d").addEventListener("click",()=>{playMode3d=false;status("status3d","Play रोक दिया गया।")});
+$("stop3d").addEventListener("click",()=>{
+
+  playMode3d = false;
+  soldierAnimation3d = null;
+
+  const joints = selectedObject3d?.userData?.soldierJoints3d;
+
+  if(joints){
+    joints.leftArm.rotation.set(0,0,0);
+    joints.rightArm.rotation.set(0,0,0);
+    joints.leftLeg.rotation.set(0,0,0);
+    joints.rightLeg.rotation.set(0,0,0);
+  }
+
+  status("status3d","⏹️ गेम रोक दिया गया।");
+});
 
 function movePlayer3d(dx,dy,dz){
   if(!init3d()) return;
