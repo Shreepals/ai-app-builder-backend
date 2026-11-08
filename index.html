@@ -682,6 +682,17 @@ function fireGun3d(){
   setTimeout(()=>{
     scene3dWorld.remove(muzzleFlash3d);
   },80);
+
+  // GUN RECOIL
+  const rifle = selectedObject3d.userData.rifleGroup3d;
+
+  if(rifle){
+    rifle.position.z = -0.12;
+
+    setTimeout(()=>{
+      rifle.position.z = 0;
+    },100);
+  }
   
   scene3dWorld.add(bullet);
 
