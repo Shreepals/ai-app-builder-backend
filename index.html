@@ -494,7 +494,7 @@ rename.addEventListener("click",()=>{
 });  
 const remove=document.createElement("button");remove.className="btn red";remove.textContent="हटाएँ";
 remove.addEventListener("click",()=>{projects.splice(index,1);if(currentApp?.id===project.id)currentApp=null;saveProjects();updateInfo()});
-actions.append(open,remove);row.append(details,actions);list.append(row);
+actions.append(open,rename,remove);row.append(details,actions);list.append(row);
 });
 }
 
