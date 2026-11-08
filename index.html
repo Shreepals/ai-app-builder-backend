@@ -913,7 +913,7 @@ function createTerrainTextureCanvas3d(type,size=1024){
 
 function animateSoldier3d(group, mode = "walk"){
 
-  if(!group) return;
+  if(!group || !group.userData.soldierJoints3d) return;
 
   soldierAnimation3d = {
     group: group,
@@ -921,13 +921,14 @@ function animateSoldier3d(group, mode = "walk"){
     time: 0
   };
 
-  group.traverse(obj=>{
-    if(obj.isMesh && obj.geometry){
-      obj.userData.originalPosition = obj.position.clone();
-    }
-  });
+  const joints = group.userData.soldierJoints3d;
 
-  status("status3d","🪖 Soldier Animation तैयार है!");
+  joints.leftArm.rotation.set(0,0,0);
+  joints.rightArm.rotation.set(0,0,0);
+  joints.leftLeg.rotation.set(0,0,0);
+  joints.rightLeg.rotation.set(0,0,0);
+
+  status("status3d","🪖 Soldier Animation शुरू करने के लिए तैयार!");
 }
   
   function generateAsset3d(){
