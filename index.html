@@ -4496,10 +4496,18 @@ function movePlayer3d(dx,dy,dz){
 
   const oldPosition = obj.position.clone();
  
-  // SOLDIER WALK ANIMATION
+  // SOLDIER WALK / RUN ANIMATION
   if(obj.userData.soldierJoints3d){
-  animateSoldier3d(obj,"walk");
-  }
+
+  const moveDistance = Math.sqrt(
+    dx * dx + dz * dz
+  );
+
+  animateSoldier3d(
+    obj,
+    moveDistance > 1.5 ? "run" : "walk"
+  );
+}
 
   obj.position.x = Math.max(
     -limitX,
