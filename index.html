@@ -665,6 +665,8 @@ function fireGun3d(){
 
   const start = new THREE.Vector3();
   gun3d.getWorldPosition(start);
+  start.y += 0.25;
+  start.z += 0.5;
 
   const direction = new THREE.Vector3(0,0,1)
     .applyQuaternion(selectedObject3d.getWorldQuaternion(new THREE.Quaternion()))
