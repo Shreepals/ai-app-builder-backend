@@ -4619,9 +4619,18 @@ $("attackPlayer3d").addEventListener("click",()=>{
   }
 
   if(!selectedObject3d){
-    status("status3d","पहले Player Object चुनें।");
-    return;
-  }
+  selectedObject3d =
+    objects3d.find(obj => obj.userData.soldierJoints3d) ||
+    objects3d.find(obj =>
+      obj.userData.kind !== "ground" &&
+      obj.userData.kind !== "wall"
+    );
+}
+
+ if(!selectedObject3d){
+  status("status3d","पहले Soldier या Player बनाएँ।");
+  return;
+}
 
   const enemy =
     document.getElementById("enemyObject3d")?.value === "second"
