@@ -1499,24 +1499,59 @@ function animateSoldier3d(group, mode = "walk"){
         x,2.65,0,0x45513b);
     });
 
-    // Arms
-    [-0.68,0.68].forEach(x=>{
-      addMesh(new THREE.BoxGeometry(0.23,0.65,0.28),
-        x,2.25,0,0x45513b);
+    // SOLDIER ARM ANIMATION PIVOTS
 
-      addMesh(new THREE.CylinderGeometry(0.12,0.1,0.48,16),
-        x,1.7,0,0xc18b65);
+    const leftArmPivot = new THREE.Group();
+    leftArmPivot.position.set(-0.57,2.65,0);
+    group.add(leftArmPivot);
 
-      // Hands
-      addMesh(new THREE.SphereGeometry(0.13,16,16),
-        x,1.4,0,0xc18b65);
+    const rightArmPivot = new THREE.Group();
+    rightArmPivot.position.set(0.57,2.65,0);
+    group.add(rightArmPivot);
 
-      // Fingers
-      [-0.07,0,0.07].forEach(f=>{
-        addMesh(new THREE.SphereGeometry(0.035,10,10),
-          x+f,1.3,0.03,0xc18b65);
-      });
-    });
+   // Left Arm
+   addLimbMesh(
+     leftArmPivot,
+     new THREE.BoxGeometry(0.23,0.65,0.28),
+     -0.11,-0.4,0,0x45513b
+   );
+
+   addLimbMesh(
+     leftArmPivot,
+     new THREE.CylinderGeometry(0.12,0.1,0.48,16),
+     -0.11,-0.95,0,0xc18b65
+   );
+
+   addLimbMesh(
+     leftArmPivot,
+     new THREE.SphereGeometry(0.13,16,16),
+     -0.11,-1.25,0,0xc18b65
+   );
+
+   // Right Arm
+   addLimbMesh(
+     rightArmPivot,
+     new THREE.BoxGeometry(0.23,0.65,0.28),
+     0.11,-0.4,0,0x45513b
+   );
+
+   addLimbMesh(
+     rightArmPivot,
+     new THREE.CylinderGeometry(0.12,0.1,0.48,16),
+     0.11,-0.95,0,0xc18b65
+   );
+
+   addLimbMesh(
+     rightArmPivot,
+     new THREE.SphereGeometry(0.13,16,16),
+     0.11,-1.25,0,0xc18b65
+   );
+
+  // Save Animation Joints
+  group.userData.soldierJoints3d = {
+    leftArm: leftArmPivot,
+    rightArm: rightArmPivot
+  };
 
     // Rifle barrel and body
     addMesh(new THREE.BoxGeometry(0.12,0.13,1.25),
