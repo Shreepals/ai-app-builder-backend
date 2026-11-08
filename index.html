@@ -960,6 +960,23 @@ function animateSoldier3d(group, mode = "walk"){
     mesh.receiveShadow = true;
     group.add(mesh);
   }
+    
+  function addLimbMesh(parent, geometry, x, y, z, color){
+
+  const mesh = new THREE.Mesh(
+    geometry,
+    material.clone()
+  );
+
+  mesh.material.color.set(color);
+  mesh.position.set(x,y,z);
+  mesh.castShadow = true;
+  mesh.receiveShadow = true;
+
+  parent.add(mesh);
+
+  return mesh;
+  }  
 
   if(prompt.includes("tree") || prompt.includes("पेड़")){
 
