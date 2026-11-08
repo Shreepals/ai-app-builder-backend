@@ -1083,7 +1083,45 @@ function createTerrainTextureCanvas3d(type,size=1024){
         x,1.13,z,0xffffff
       );
     });
-  });  
+  });
+    
+  // पारदर्शी साइड विंडो
+  const glassMaterial = new THREE.MeshStandardMaterial({
+    color: 0x65c9ed,
+    metalness: 0.35,
+    roughness: 0.12,
+    transparent: true,
+    opacity: 0.65,
+    side: THREE.DoubleSide
+  });
+
+  [-0.64,0.64].forEach(z=>{
+
+    const windowShape = new THREE.Shape();
+    windowShape.moveTo(-1.0,1.3);
+    windowShape.lineTo(-0.58,1.95);
+    windowShape.lineTo(0.55,1.95);
+    windowShape.lineTo(1.15,1.3);
+    windowShape.closePath();
+
+    const windowMesh = new THREE.Mesh(
+      new THREE.ShapeGeometry(windowShape),
+      glassMaterial.clone()
+    );
+
+    windowMesh.position.z = z;
+    group.add(windowMesh);
+  });
+
+  // आगे का विंडशील्ड
+  const windshield = new THREE.Mesh(
+    new THREE.PlaneGeometry(1.05,0.65),
+    glassMaterial.clone()
+  );
+
+  windshield.rotation.y = Math.PI/2;
+  windshield.position.set(1.35,1.62,0);
+  group.add(windshield);  
 
   // साइड मिरर
   [-0.82,0.82].forEach(z=>{
