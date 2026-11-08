@@ -2009,7 +2009,7 @@ if(!renderer3d)return;
 requestAnimationFrame(renderLoop);
 if(playMode3d && selectedObject3d && selectedObject3d.userData.kind!=="ground"){
   const obj = selectedObject3d;
-  obj.rotation.y += 0.008;
+// PLAYER ROTATION अब Movement की दिशा से नियंत्रित होगी
 
   const halfHeight = (obj.userData.kind==="sphere" ? 0.6 : 0.5) * obj.scale.y;
   const groundY = halfHeight;
