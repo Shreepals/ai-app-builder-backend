@@ -1113,29 +1113,39 @@ function createTerrainTextureCanvas3d(type,size=1024){
     group.add(windowMesh);
   });
 
-  // बॉडी से जुड़ा हुआ आगे का विंडशील्ड
-  const windshieldShape = new THREE.Shape();
+  // पूरा पारदर्शी आगे का विंडशील्ड
+  const windshieldGeometry = new THREE.BufferGeometry();
 
-  windshieldShape.moveTo(0.72,1.96);
-  windshieldShape.lineTo(1.28,1.30);
-  windshieldShape.lineTo(1.28,1.34);
-  windshieldShape.lineTo(0.76,1.96);
-  windshieldShape.closePath();
+  const windshieldVertices = new Float32Array([
+    0.74,1.97,-0.64,
+    1.30,1.30,-0.64,
+    1.30,1.30,0.64,
 
-  const windshieldGeo = new THREE.ExtrudeGeometry(
-    windshieldShape,
-    {
-      depth:1.16,
-      bevelEnabled:false
-    }
+    0.74,1.97,-0.64,
+    1.30,1.30,0.64,
+    0.74,1.97,0.64
+  ]);
+
+  windshieldGeometry.setAttribute(
+    "position",
+    new THREE.BufferAttribute(windshieldVertices,3)
   );
+
+  windshieldGeometry.computeVertexNormals();
+
+  const windshieldMaterial = new THREE.MeshBasicMaterial({
+    color:0x70dfff,
+    transparent:true,
+    opacity:0.55,
+    side:THREE.DoubleSide,
+    depthWrite:false
+  });
 
   const windshield = new THREE.Mesh(
-    windshieldGeo,
-    glassMaterial.clone()
+    windshieldGeometry,
+    windshieldMaterial
   );
 
-  windshield.position.z = -0.58;
   group.add(windshield);
 
   // साइड मिरर
