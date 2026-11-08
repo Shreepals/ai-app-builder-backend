@@ -1392,40 +1392,118 @@ function createTerrainTextureCanvas3d(type,size=1024){
       addMesh(new THREE.BoxGeometry(0.32,0.17,0.52),
         x,0.23,0.12,0x171717);
     });
-    
-
-  }else if(
+     
+ }else if(
     prompt.includes("enemy") ||
     prompt.includes("zombie") ||
-    prompt.includes("दुश्मन")
+    prompt.includes("दुश्मन") ||
+    prompt.includes("soldier") ||
+    prompt.includes("सैनिक")
   ){
 
-    // Enemy body
-    addMesh(new THREE.BoxGeometry(1,1.3,0.5),
-      0,2.15,0,0x70452b);
+    // Soldier body
+    addMesh(new THREE.BoxGeometry(0.95,1.2,0.48),
+      0,2.15,0,0x45513b);
 
-    // Enemy head
-    addMesh(new THREE.SphereGeometry(0.4,24,24),
-      0,3.15,0,0x668044);
+    // Bulletproof vest
+    addMesh(new THREE.BoxGeometry(0.82,0.9,0.16),
+      0,2.2,0.3,0x30392b);
 
-    // Red eyes
-    [-0.14,0.14].forEach(x=>{
-      addMesh(new THREE.SphereGeometry(0.07,12,12),
-        x,3.22,0.34,0xff0000);
+    // Vest pockets
+    [-0.23,0,0.23].forEach(x=>{
+      addMesh(new THREE.BoxGeometry(0.18,0.22,0.08),
+        x,2.15,0.4,0x596344);
+    });
+
+    // Neck
+    addMesh(new THREE.CylinderGeometry(0.13,0.14,0.22,16),
+      0,2.88,0,0xc18b65);
+
+    // Face
+    addMesh(new THREE.SphereGeometry(0.36,32,32),
+      0,3.22,0,0xc18b65);
+
+    // Helmet
+    addMesh(new THREE.SphereGeometry(0.4,32,20,0,Math.PI*2,0,Math.PI/2),
+      0,3.42,0,0x34472c);
+
+    // Helmet lower rim
+    addMesh(new THREE.CylinderGeometry(0.39,0.39,0.09,24),
+      0,3.39,0,0x283720);
+
+    // Eyes
+    [-0.13,0.13].forEach(x=>{
+      addMesh(new THREE.SphereGeometry(0.045,12,12),
+        x,3.25,0.32,0xffffff);
+
+      addMesh(new THREE.SphereGeometry(0.022,12,12),
+        x,3.25,0.36,0x171717);
+    });
+
+    // Nose
+    addMesh(new THREE.SphereGeometry(0.055,12,12),
+      0,3.16,0.35,0xb47b59);
+
+    // Ears
+    [-0.36,0.36].forEach(x=>{
+      addMesh(new THREE.SphereGeometry(0.08,12,12),
+        x,3.22,0,0xc18b65);
+    });
+
+    // Backpack
+    addMesh(new THREE.BoxGeometry(0.65,0.8,0.28),
+      0,2.25,-0.36,0x35432c);
+
+    // Shoulders
+    [-0.57,0.57].forEach(x=>{
+      addMesh(new THREE.SphereGeometry(0.2,16,16),
+        x,2.65,0,0x45513b);
     });
 
     // Arms
-    [-0.72,0.72].forEach(x=>{
-      addMesh(new THREE.CylinderGeometry(0.14,0.12,1.1,12),
-        x,2.15,0,0x668044);
+    [-0.68,0.68].forEach(x=>{
+      addMesh(new THREE.BoxGeometry(0.23,0.65,0.28),
+        x,2.25,0,0x45513b);
+
+      addMesh(new THREE.CylinderGeometry(0.12,0.1,0.48,16),
+        x,1.7,0,0xc18b65);
+
+      // Hands
+      addMesh(new THREE.SphereGeometry(0.13,16,16),
+        x,1.4,0,0xc18b65);
+
+      // Fingers
+      [-0.07,0,0.07].forEach(f=>{
+        addMesh(new THREE.SphereGeometry(0.035,10,10),
+          x+f,1.3,0.03,0xc18b65);
+      });
     });
+
+    // Rifle barrel and body
+    addMesh(new THREE.BoxGeometry(0.12,0.13,1.25),
+      0.42,1.95,0.38,0x252525);
+
+    addMesh(new THREE.BoxGeometry(0.18,0.2,0.45),
+      0.42,1.95,0.05,0x424242);
+
+    // Rifle stock
+    addMesh(new THREE.BoxGeometry(0.13,0.15,0.38),
+      0.42,1.95,-0.35,0x65452b);
 
     // Legs
-    [-0.28,0.28].forEach(x=>{
-      addMesh(new THREE.CylinderGeometry(0.17,0.14,1.1,12),
-        x,0.95,0,0x443322);
-    });
+    [-0.25,0.25].forEach(x=>{
+      addMesh(new THREE.BoxGeometry(0.32,0.95,0.34),
+        x,0.85,0,0x303c2c);
 
+      // Knee pads
+      addMesh(new THREE.SphereGeometry(0.18,16,12),
+        x,0.85,0.19,0x414b36);
+
+      // Combat boots
+      addMesh(new THREE.BoxGeometry(0.34,0.22,0.5),
+        x,0.25,0.12,0x24251f);
+    });
+    
   }else{
     
     $("assetStatus3d").textContent =
