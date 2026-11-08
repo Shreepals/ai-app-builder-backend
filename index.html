@@ -741,15 +741,25 @@ function updateBullets3d(){
        bullet.mesh.position.distanceTo(enemy.position) < 0.8){
 
       enemy.userData.health3d ??= 100;
-      enemy.userData.health3d = Math.max(
+      // RIFLE RECOIL ANIMATION
+      const rifle = selectedObject3d.userData.rifleGroup3d;
+
+      if(rifle){
+        rifle.position.z = -0.12;
+
+        setTimeout(()=>{
+          rifle.position.z = 0;
+        },100);
+      }
+        enemy.userData.health3d = Math.max(
         0, enemy.userData.health3d - 20
       );
 
       // ENEMY HIT EFFECT
-const hitEffect = new THREE.Mesh(
-  new THREE.SphereGeometry(0.25, 12, 12),
-  new THREE.MeshBasicMaterial({
-    color: 0xff6600,
+     const hitEffect = new THREE.Mesh(
+       new THREE.SphereGeometry(0.25, 12, 12),
+      new THREE.MeshBasicMaterial({
+       color: 0xff6600,
     transparent: true,
     opacity: 1
   })
