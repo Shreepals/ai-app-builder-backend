@@ -935,6 +935,8 @@ function animateSoldier3d(group, mode = "walk"){
   const joints = group.userData.soldierJoints3d;
 
   joints.leftArm.rotation.set(0,0,0);
+  // LEFT HAND RIFLE HOLDING POSITION
+  joints.leftArm.rotation.z = 0.7;
   joints.rightArm.rotation.set(0,0,0);
   joints.leftLeg.rotation.set(0,0,0);
   joints.rightLeg.rotation.set(0,0,0);
