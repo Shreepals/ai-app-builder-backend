@@ -4464,10 +4464,24 @@ $("clear3d").addEventListener("click",()=>{
 $("play3d").addEventListener("click",()=>{
   if(!init3d())return;
 
-  if(!selectedObject3d){
-    status("status3d","पहले Player Object चुनें।");
-    return;
-  }
+// AUTO SELECT PLAYER
+const autoPlayer3d =
+  objects3d.find(obj => obj.userData.soldierJoints3d) ||
+  objects3d.find(obj =>
+    obj.userData.kind !== "ground" &&
+    obj.userData.kind !== "wall"
+  );
+
+if(autoPlayer3d){
+  selectedObject3d = autoPlayer3d;
+}
+
+if(!selectedObject3d){
+  status("status3d","पहले Scene में Soldier या Player बनाएँ।");
+  return;
+}
+
+updateObjectList3d();
 
   playMode3d=true;
   animateSoldier3d(selectedObject3d,"idle");
