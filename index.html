@@ -4582,6 +4582,19 @@ function movePlayer3d(dx,dy,dz){
     obj.position.z = oldPosition.z;
     status("status3d","दीवार से टक्कर! आगे रास्ता बंद है।");
   }
+   // SOLDIER AUTO ROTATION
+   if(
+    obj.userData.soldierJoints3d &&
+    obj.position.distanceTo(oldPosition) > 0.01
+  ){
+    const directionX = obj.position.x - oldPosition.x;
+    const directionZ = obj.position.z - oldPosition.z;
+
+    obj.rotation.y = Math.atan2(
+      -directionX,
+      -directionZ
+    );
+  }
 
   if(obj.position.y < halfHeight){
     obj.position.y = halfHeight;
