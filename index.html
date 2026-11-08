@@ -2331,6 +2331,34 @@ if(!enemy.userData.healthBar3d){
     }
   }
 }
+  
+// SOLDIER IDLE / WALK / RUN ANIMATION
+if(soldierAnimation3d){
+
+  const anim = soldierAnimation3d;
+  const group = anim.group;
+  const joints = group?.userData?.soldierJoints3d;
+
+  if(joints){
+
+    anim.time += anim.mode === "run" ? 0.12 : 0.07;
+
+    const speed =
+      anim.mode === "idle" ? 0.04 :
+      anim.mode === "run" ? 0.95 : 0.55;
+
+    const swing = Math.sin(anim.time) * speed;
+
+    // Arms movement
+    joints.leftArm.rotation.x = swing;
+    joints.rightArm.rotation.x = -swing;
+
+    // Legs movement
+    joints.leftLeg.rotation.x = -swing;
+    joints.rightLeg.rotation.x = swing;
+
+  }
+}  
  
 runGameLogic3d();  
 renderer3d.render(scene3dWorld,camera3d);
