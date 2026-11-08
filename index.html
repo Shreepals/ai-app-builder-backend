@@ -480,6 +480,18 @@ details.append(name,desc);
 const actions=document.createElement("div");actions.className="actions";
 const open=document.createElement("button");open.className="btn";open.textContent="खोलें";
 open.addEventListener("click",()=>{currentApp=project;updateInfo();renderPreview();navigate("preview")});
+const rename=document.createElement("button");
+rename.className="btn";
+rename.textContent="नाम बदलें";
+
+rename.addEventListener("click",()=>{
+  const newName=prompt("नया प्रोजेक्ट नाम लिखें",project.appName||"");
+  if(!newName || !newName.trim()) return;
+
+  project.appName=newName.trim();
+  saveProjects();
+  updateInfo();
+});  
 const remove=document.createElement("button");remove.className="btn red";remove.textContent="हटाएँ";
 remove.addEventListener("click",()=>{projects.splice(index,1);if(currentApp?.id===project.id)currentApp=null;saveProjects();updateInfo()});
 actions.append(open,remove);row.append(details,actions);list.append(row);
