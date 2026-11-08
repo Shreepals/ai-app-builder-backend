@@ -595,10 +595,21 @@ let bulletLoopStarted3d = false;
 
 function createGun3d(){
 
-  if(!selectedObject3d){
-    status("status3d","पहले Player Object चुनें।");
-    return;
-  }
+// AUTO SELECT PLAYER
+selectedObject3d =
+  objects3d.find(obj => obj.userData.soldierJoints3d) ||
+  selectedObject3d ||
+  objects3d.find(obj =>
+    obj.userData.kind !== "ground" &&
+    obj.userData.kind !== "wall"
+  );
+
+if(!selectedObject3d){
+  status("status3d","पहले Scene में Soldier या Player बनाएँ।");
+  return;
+}
+
+updateObjectList3d();
 
   if(gun3d){
     gun3d.parent?.remove(gun3d);
