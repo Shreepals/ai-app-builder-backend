@@ -4495,6 +4495,11 @@ function movePlayer3d(dx,dy,dz){
   const limitZ = Math.max(0, 10 * (ground ? ground.scale.z : 1) - 0.5 * obj.scale.z);
 
   const oldPosition = obj.position.clone();
+ 
+  // SOLDIER WALK ANIMATION
+  if(obj.userData.soldierJoints3d){
+  animateSoldier3d(obj,"walk");
+  }
 
   obj.position.x = Math.max(
     -limitX,
