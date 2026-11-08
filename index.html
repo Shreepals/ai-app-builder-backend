@@ -673,6 +673,7 @@ function fireGun3d(){
     .normalize();
 
   bullet.position.copy(start);
+  
   // MUZZLE FLASH EFFECT
   const muzzleFlash3d = new THREE.PointLight(0xff6600, 3, 3);
   muzzleFlash3d.position.copy(start);
@@ -681,6 +682,7 @@ function fireGun3d(){
   setTimeout(()=>{
     scene3dWorld.remove(muzzleFlash3d);
   },80);
+  
   scene3dWorld.add(bullet);
 
   bullets3d.push({
