@@ -1113,15 +1113,30 @@ function createTerrainTextureCanvas3d(type,size=1024){
     group.add(windowMesh);
   });
 
-  // आगे का विंडशील्ड
+  // बॉडी से जुड़ा हुआ आगे का विंडशील्ड
+  const windshieldShape = new THREE.Shape();
+
+  windshieldShape.moveTo(0.72,1.96);
+  windshieldShape.lineTo(1.28,1.30);
+  windshieldShape.lineTo(1.28,1.34);
+  windshieldShape.lineTo(0.76,1.96);
+  windshieldShape.closePath();
+
+  const windshieldGeo = new THREE.ExtrudeGeometry(
+    windshieldShape,
+    {
+      depth:1.16,
+      bevelEnabled:false
+    }
+  );
+
   const windshield = new THREE.Mesh(
-    new THREE.PlaneGeometry(1.05,0.65),
+    windshieldGeo,
     glassMaterial.clone()
   );
 
-  windshield.rotation.y = Math.PI/2;
-  windshield.position.set(1.35,1.62,0);
-  group.add(windshield);  
+  windshield.position.z = -0.58;
+  group.add(windshield);
 
   // साइड मिरर
   [-0.82,0.82].forEach(z=>{
