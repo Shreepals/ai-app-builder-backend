@@ -5635,6 +5635,82 @@ document.getElementById("runEvents2d").onclick = () => {
 
   document.getElementById("eventStatus2d").textContent =
     events2d.length + " Game Rules तैयार हैं। अगला कदम इन्हें गेम में चलाना है।";
+};
+  
+// ===== 2D PLAYER COIN COLLISION =====
+
+let score2d = 0;
+let eventRunner2d = null;
+
+document.getElementById("runEvents2d").onclick = () => {
+
+  const hasCoinEvent = events2d.some(event =>
+    event.object === "Player" &&
+    event.action === "touchCoin"
+  );
+
+  if (!hasCoinEvent) {
+    document.getElementById("eventStatus2d").textContent =
+      "पहले Player → Coin को छूने वाला Event जोड़ें।";
+    return;
+  }
+
+  const player = objects2d.find(obj =>
+    obj.dataset.type === "Player"
+  );
+
+  if (!player) {
+    document.getElementById("eventStatus2d").textContent =
+      "पहले Scene में Player जोड़ें।";
+    return;
+  }
+
+  score2d = 0;
+
+  let scoreDisplay = document.getElementById("scoreDisplay2d");
+
+  if (!scoreDisplay) {
+    scoreDisplay = document.createElement("div");
+    scoreDisplay.id = "scoreDisplay2d";
+    scoreDisplay.style.cssText =
+      "position:absolute;right:12px;top:12px;color:white;font-size:18px;font-weight:bold;";
+    scene2d.appendChild(scoreDisplay);
+  }
+
+  scoreDisplay.textContent = "Score: " + score2d;
+
+  clearInterval(eventRunner2d);
+
+  eventRunner2d = setInterval(() => {
+
+    const playerRect = player.getBoundingClientRect();
+
+    objects2d.filter(obj =>
+      obj.dataset.type === "Coin"
+    ).forEach(coin => {
+
+      const coinRect = coin.getBoundingClientRect();
+
+      const touching =
+        playerRect.left < coinRect.right &&
+        playerRect.right > coinRect.left &&
+        playerRect.top < coinRect.bottom &&
+        playerRect.bottom > coinRect.top;
+
+      if (touching) {
+        coin.remove();
+
+        objects2d = objects2d.filter(obj => obj !== coin);
+
+        score2d += 10;
+        scoreDisplay.textContent = "Score: " + score2d;
+      }
+    });
+
+  }, 100);
+
+  document.getElementById("eventStatus2d").textContent =
+    "गेम Event चल रहा है! Player को Coin तक ले जाएँ।";
 };  
 
 readProjects();
