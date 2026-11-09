@@ -5588,6 +5588,42 @@ document.getElementById("addPlatform2d").onclick = () =>
 
 document.getElementById("addCoin2d").onclick = () =>
   addObject2d("Coin", "🪙", "#b18a18");  
+  
+// ===== 2D VISUAL EVENTS EDITOR =====
+
+let events2d = [];
+
+document.getElementById("addEvent2d").onclick = () => {
+
+  const object =
+    document.getElementById("eventObject2d").value;
+
+  const action =
+    document.getElementById("eventAction2d").value;
+
+  const actionNames = {
+    touchCoin: "Coin को छूने पर",
+    touchEnemy: "Enemy को छूने पर",
+    moveRight: "Right बटन दबाने पर",
+    moveLeft: "Left बटन दबाने पर"
+  };
+
+  events2d.push({
+    object: object,
+    action: action,
+    name: object + " → " + actionNames[action]
+  });
+
+  document.getElementById("eventList2d").innerHTML =
+    events2d.map((event, index) =>
+      `<div style="background:#17243b;padding:10px;margin:8px 0;border-radius:8px;">
+        ${index + 1}. ${event.name}
+      </div>`
+    ).join("");
+
+  document.getElementById("eventStatus2d").textContent =
+    "नया Game Rule जोड़ दिया गया।";
+};  
 
 readProjects();
 renderProjects();
