@@ -348,6 +348,45 @@ style="background:#10192c;padding:15px;border-radius:10px;margin-top:15px;">
 
  </section> 
   
+ <!-- ===== 2D VISUAL EVENTS EDITOR ===== -->
+
+<div id="eventsEditor2d"
+style="background:#10192c;padding:15px;border-radius:12px;margin-top:20px;">
+
+  <h2>⚡ Visual Events Editor</h2>
+  <p>बिना कोड लिखे अपने गेम के नियम बनाएँ।</p>
+
+  <label>पहला Object</label>
+  <select id="eventObject2d">
+    <option value="Player">Player</option>
+    <option value="Enemy">Enemy</option>
+    <option value="Coin">Coin</option>
+  </select>
+
+  <label>Action चुनें</label>
+  <select id="eventAction2d">
+    <option value="touchCoin">Coin को छूने पर</option>
+    <option value="touchEnemy">Enemy को छूने पर</option>
+    <option value="moveRight">Right बटन दबाने पर</option>
+    <option value="moveLeft">Left बटन दबाने पर</option>
+  </select>
+
+  <div class="actions">
+    <button class="btn" id="addEvent2d">+ Add Event</button>
+    <button class="btn secondary" id="runEvents2d">▶ Run Events</button>
+  </div>
+
+  <h3>मेरे Game Rules</h3>
+  <div id="eventList2d">
+    अभी कोई Event नहीं है।
+  </div>
+
+  <div class="status" id="eventStatus2d">
+    नया गेम नियम बनाने के लिए Add Event दबाएँ।
+  </div>
+
+</div> 
+  
 <section class="page" id="generator">
 <div class="card">
 <h2>AI App Generator</h2>
