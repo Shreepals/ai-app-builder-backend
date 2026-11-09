@@ -76,26 +76,86 @@ iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);bord
 </header>
 
 <section class="page active" id="dashboard">
-<div class="stats">
-<div class="stat"><strong id="projectCount">0</strong><span class="small">मेरे प्रोजेक्ट</span></div>
-<div class="stat"><strong>7</strong><span class="small">इंजन विकल्प</span></div>
-<div class="stat"><strong id="currentStatus">तैयार</strong><span class="small">स्थिति</span></div>
-</div>
-<div class="card">
-<h2>नया ऐप बनाएँ</h2><p>ऐप का नाम, आइडिया और इंजन चुनें।</p>
-<button class="btn" data-goto="generator">+ नया ऐप बनाएँ</button>
-</div>
-<div class="card">
-<h2>टेम्पलेट</h2>
-<div class="templates">
-<div class="template"><h3>💼 बिज़नेस ऐप</h3><p>ग्राहक, बिक्री, खर्च और रिपोर्ट।</p><button class="btn secondary" data-template="एक पूरा बिज़नेस मैनेजमेंट ऐप बनाओ जिसमें डैशबोर्ड, ग्राहक, बिक्री, खर्च, इन्वेंटरी, रिपोर्ट, सर्च और डेटा सेव करने की सुविधा हो।" data-name="Business Manager">चुनें</button></div>
-<div class="template"><h3>📚 स्टडी ऐप</h3><p>नोट्स, क्विज़ और पढ़ाई का शेड्यूल।</p><button class="btn secondary" data-template="एक पूरा स्टडी ऐप बनाओ जिसमें विषय, नोट्स, पढ़ाई का शेड्यूल, क्विज़, प्रोग्रेस ट्रैकर और डेटा सेव करने की सुविधा हो।" data-name="Study Planner">चुनें</button></div>
-<div class="template"><h3>🏎️ 3D रेसिंग गेम</h3><p>खेलने योग्य 3D गेम बनाने का आइडिया।</p><button class="btn secondary" data-template="Three.js में खेलने योग्य 3D कार रेसिंग गेम बनाओ। 3D ट्रैक, कार, कैमरा, मोबाइल कंट्रोल, बाधाएँ, स्कोर और रीस्टार्ट शामिल हों।" data-name="3D Racing Game" data-engine="threejs">चुनें</button></div>
-</div>
-</div>
-<div class="card"><h2>Backend स्थिति</h2><div id="healthStatus" class="status">अभी जाँच नहीं हुई।</div></div>
-</section>
 
+  <div class="card" style="background:linear-gradient(135deg,#182b50,#304f85);color:white;padding:28px;border-radius:16px;">
+    <h1 style="font-size:28px;margin:0 0 10px;">Game Development Studio</h1>
+    <p>अपनी कल्पना को एक शानदार 2D या 3D गेम में बदलें।</p>
+    <button class="btn" data-goto="generator">＋ नया गेम बनाएँ</button>
+    <button class="btn secondary" data-goto="projects">मेरे प्रोजेक्ट खोलें</button>
+  </div>
+
+  <h2 style="margin-top:25px;">आपका Workspace</h2>
+
+  <div class="stats">
+    <div class="stat">
+      <strong id="projectCount">0</strong>
+      <span class="small">मेरे प्रोजेक्ट</span>
+    </div>
+    <div class="stat">
+      <strong>2D + 3D</strong>
+      <span class="small">गेम डेवलपमेंट</span>
+    </div>
+    <div class="stat">
+      <strong id="currentStatus">तैयार</strong>
+      <span class="small">स्थिति</span>
+    </div>
+  </div>
+
+  <h2 style="margin-top:25px;">नया प्रोजेक्ट शुरू करें</h2>
+
+  <div class="templates">
+
+    <div class="template">
+      <h3>🎮 नया 2D गेम</h3>
+      <p>प्लेटफॉर्मर, एडवेंचर और एक्शन गेम बनाएँ।</p>
+      <button class="btn" data-goto="generator">शुरू करें</button>
+    </div>
+
+    <div class="template">
+      <h3>🌍 नया 3D गेम</h3>
+      <p>3D दुनिया, कार, खिलाड़ी और दुश्मन बनाएँ।</p>
+      <button class="btn" data-template="Three.js में एक खेलने योग्य 3D गेम बनाओ। इसमें 3D दुनिया, खिलाड़ी, कैमरा, ऑब्जेक्ट और मोबाइल कंट्रोल हों।" data-name="New 3D Game" data-engine="threejs">शुरू करें</button>
+    </div>
+
+    <div class="template">
+      <h3>🤖 AI से गेम बनाएँ</h3>
+      <p>अपना गेम आइडिया लिखें और AI से शुरुआत करें।</p>
+      <button class="btn" data-goto="generator">AI Generator खोलें</button>
+    </div>
+
+  </div>
+
+  <h2 style="margin-top:25px;">Project Workspace</h2>
+
+  <div class="templates">
+
+    <div class="template">
+      <h3>📁 My Projects</h3>
+      <p>अपने सभी सेव किए हुए प्रोजेक्ट देखें।</p>
+      <button class="btn secondary" data-goto="projects">प्रोजेक्ट देखें</button>
+    </div>
+
+    <div class="template">
+      <h3>🧰 Game Templates</h3>
+      <p>तैयार गेम आइडिया से शुरुआत करें।</p>
+      <button class="btn secondary" data-goto="generator">टेम्पलेट देखें</button>
+    </div>
+
+    <div class="template">
+      <h3>🛠️ 3D Editor</h3>
+      <p>अपनी 3D दुनिया और गेम ऑब्जेक्ट एडिट करें।</p>
+      <button class="btn secondary" data-goto="generator">गेम एडिटिंग शुरू करें</button>
+    </div>
+
+  </div>
+
+  <div class="card" style="margin-top:22px;">
+    <h2>Backend स्थिति</h2>
+    <div id="healthStatus" class="status">अभी जाँच नहीं हुई।</div>
+  </div>
+
+      </section>
+  
 <section class="page" id="generator">
 <div class="card">
 <h2>AI App Generator</h2>
