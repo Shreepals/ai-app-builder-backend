@@ -5623,6 +5623,18 @@ document.getElementById("addEvent2d").onclick = () => {
 
   document.getElementById("eventStatus2d").textContent =
     "नया Game Rule जोड़ दिया गया।";
+}; 
+  
+document.getElementById("runEvents2d").onclick = () => {
+
+  if (events2d.length === 0) {
+    document.getElementById("eventStatus2d").textContent =
+      "पहले कोई Game Rule जोड़ें।";
+    return;
+  }
+
+  document.getElementById("eventStatus2d").textContent =
+    events2d.length + " Game Rules तैयार हैं। अगला कदम इन्हें गेम में चलाना है।";
 };  
 
 readProjects();
