@@ -304,6 +304,33 @@ header{
     <h2 style="margin-top:20px">Game Scene</h2>
 
     <div id="scene2d"
+    <div id="properties2d"
+    style="background:#10192c;padding:15px;border-radius:10px;margin-top:15px;">
+
+  <h3>⚙️ Object Properties</h3>
+
+  <p id="selectedObject2d">कोई Object चुना नहीं गया।</p>
+
+  <label>Object Name</label>
+  <input id="objectName2d" placeholder="Object का नाम">
+
+  <label>X Position</label>
+  <input id="objectX2d" type="number" value="0">
+
+  <label>Y Position</label>
+  <input id="objectY2d" type="number" value="0">
+
+  <label>Width</label>
+  <input id="objectW2d" type="number" value="55">
+
+  <label>Height</label>
+  <input id="objectH2d" type="number" value="55">
+
+  <div class="actions">
+    <button class="btn" id="applyProperties2d">Apply Changes</button>
+    <button class="btn red" id="deleteObject2d">Delete Object</button>
+  </div>
+    </div>  
       style="height:420px;background:#17243b;border:2px dashed #527cff;border-radius:12px;position:relative;overflow:hidden;">
 
       <div style="position:absolute;left:10px;top:10px;color:#9eacc5;font-size:13px">
