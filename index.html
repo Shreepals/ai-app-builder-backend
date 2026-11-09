@@ -5371,6 +5371,82 @@ onresize=()=>{
   setTimeout(()=>URL.revokeObjectURL(url),3000);
   status("status3d","3D Adventure Game एक्सपोर्ट हुआ।");
 });
+  
+// ===== 2D SCENE EDITOR =====
+
+const scene2d = document.getElementById("scene2d");
+let objects2d = [];
+
+function addObject2d(type, emoji, color) {
+  const obj = document.createElement("div");
+
+  obj.textContent = emoji;
+  obj.dataset.type = type;
+
+  obj.style.cssText = `
+    position:absolute;
+    left:${40 + objects2d.length * 35}px;
+    top:100px;
+    width:55px;
+    height:55px;
+    background:${color};
+    border-radius:10px;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:30px;
+    cursor:grab;
+    user-select:none;
+    touch-action:none;
+  `;
+
+  scene2d.appendChild(obj);
+  objects2d.push(obj);
+
+  obj.addEventListener("pointerdown", event => {
+    event.preventDefault();
+    obj.setPointerCapture(event.pointerId);
+
+    const rect = scene2d.getBoundingClientRect();
+    const startX = event.clientX;
+    const startY = event.clientY;
+    const left = obj.offsetLeft;
+    const top = obj.offsetTop;
+
+    function move(e) {
+      obj.style.left = Math.max(0, Math.min(
+        rect.width - obj.offsetWidth,
+        left + e.clientX - startX
+      )) + "px";
+
+      obj.style.top = Math.max(0, Math.min(
+        rect.height - obj.offsetHeight,
+        top + e.clientY - startY
+      )) + "px";
+    }
+
+    obj.addEventListener("pointermove", move);
+
+    obj.addEventListener("pointerup", () => {
+      obj.removeEventListener("pointermove", move);
+    }, {once:true});
+  });
+
+  document.getElementById("sceneStatus2d").textContent =
+    type + " Scene में जोड़ दिया गया। अब इसे खींचकर रख सकते हैं।";
+}
+
+document.getElementById("addPlayer2d").onclick = () =>
+  addObject2d("Player", "🧍", "#2456a6");
+
+document.getElementById("addEnemy2d").onclick = () =>
+  addObject2d("Enemy", "👾", "#a52d45");
+
+document.getElementById("addPlatform2d").onclick = () =>
+  addObject2d("Platform", "🟫", "#80552e");
+
+document.getElementById("addCoin2d").onclick = () =>
+  addObject2d("Coin", "🪙", "#b18a18");  
 
 readProjects();
 renderProjects();
