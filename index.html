@@ -5411,6 +5411,7 @@ function addObject2d(type, emoji, color) {
   const obj = document.createElement("div");
 
   obj.textContent = emoji;
+  obj.dataset.emoji = emoji;
   obj.dataset.type = type;
 
   obj.style.cssText = `
