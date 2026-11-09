@@ -53,6 +53,134 @@ iframe{width:100%;height:65vh;background:white;border:1px solid var(--line);bord
 .stats{gap:7px}.stat{padding:10px}.stat strong{font-size:19px}
 .templates,.engine-grid{grid-template-columns:1fr}iframe{height:55vh}
 }
+
+/* ===== GAME STUDIO DASHBOARD DESIGN ===== */
+
+:root{
+  --bg:#090e1b;
+  --panel:#121b2d;
+  --line:#263752;
+  --text:#f4f7ff;
+  --muted:#9eacc5;
+  --blue:#527cff;
+  --green:#20c997;
+}
+
+aside{
+  background:#0b1221;
+  border-right:1px solid #263752;
+}
+
+.brand{
+  font-size:23px;
+  letter-spacing:.3px;
+}
+
+.nav{
+  gap:8px;
+}
+
+.nav button{
+  display:flex;
+  align-items:center;
+  gap:10px;
+  font-size:14px;
+  border:1px solid transparent;
+  transition:.2s;
+}
+
+.nav button.active{
+  background:linear-gradient(100deg,#234b91,#263b65);
+  border-color:#4169b5;
+  color:white;
+}
+
+.nav button:hover{
+  background:#1b2942;
+  color:white;
+}
+
+main{
+  max-width:1600px;
+  padding:26px;
+}
+
+header{
+  padding-bottom:17px;
+  border-bottom:1px solid var(--line);
+}
+
+#dashboard h2{
+  font-size:19px;
+  margin:26px 0 14px;
+}
+
+#dashboard .card{
+  background:#121c30;
+  border:1px solid #2a3b59;
+  border-radius:15px;
+  box-shadow:0 8px 25px #0002;
+}
+
+#dashboard .stat{
+  background:linear-gradient(145deg,#172744,#111b2e);
+  border:1px solid #30466b;
+  border-radius:14px;
+}
+
+#dashboard .stat strong{
+  color:#82a7ff;
+  font-size:26px;
+}
+
+#dashboard .template{
+  background:#101a2d;
+  border:1px solid #30415e;
+  border-radius:13px;
+  padding:18px;
+  transition:.2s;
+}
+
+#dashboard .template:hover{
+  border-color:#638bff;
+  transform:translateY(-2px);
+}
+
+#dashboard .template h3{
+  margin-top:0;
+  color:#eaf0ff;
+}
+
+#dashboard .btn{
+  transition:.2s;
+}
+
+#dashboard .btn:hover{
+  filter:brightness(1.15);
+}
+
+@media(max-width:760px){
+  main{
+    padding:14px;
+  }
+
+  aside{
+    position:relative;
+  }
+
+  .nav{
+    padding-bottom:5px;
+  }
+
+  #dashboard .stats{
+    grid-template-columns:repeat(3,minmax(0,1fr));
+  }
+
+  #dashboard .stat strong{
+    font-size:17px;
+  }
+}
+  
 </style>
 </head>
 <body>
