@@ -5484,6 +5484,56 @@ document.getElementById("objectH2d").value =
   document.getElementById("sceneStatus2d").textContent =
     type + " Scene में जोड़ दिया गया। अब इसे खींचकर रख सकते हैं।";
 }
+  
+// ===== 2D OBJECT PROPERTIES =====
+
+document.getElementById("applyProperties2d").onclick = () => {
+  if (!selectedObject2d) {
+    alert("पहले कोई Object चुनें।");
+    return;
+  }
+
+  const obj = selectedObject2d;
+
+  obj.dataset.name =
+    document.getElementById("objectName2d").value || obj.dataset.type;
+
+  obj.textContent =
+    obj.dataset.name;
+
+  obj.style.left =
+    Math.max(0, Number(document.getElementById("objectX2d").value)) + "px";
+
+  obj.style.top =
+    Math.max(0, Number(document.getElementById("objectY2d").value)) + "px";
+
+  obj.style.width =
+    Math.max(10, Number(document.getElementById("objectW2d").value)) + "px";
+
+  obj.style.height =
+    Math.max(10, Number(document.getElementById("objectH2d").value)) + "px";
+
+  document.getElementById("sceneStatus2d").textContent =
+    "Object Properties अपडेट हो गई हैं।";
+};
+
+document.getElementById("deleteObject2d").onclick = () => {
+  if (!selectedObject2d) {
+    alert("पहले कोई Object चुनें।");
+    return;
+  }
+
+  selectedObject2d.remove();
+
+  objects2d = objects2d.filter(obj => obj !== selectedObject2d);
+  selectedObject2d = null;
+
+  document.getElementById("selectedObject2d").textContent =
+    "कोई Object चुना नहीं गया।";
+
+  document.getElementById("sceneStatus2d").textContent =
+    "Object Delete हो गया।";
+};  
 
 document.getElementById("addPlayer2d").onclick = () =>
   addObject2d("Player", "🧍", "#2456a6");
