@@ -5433,6 +5433,27 @@ function addObject2d(type, emoji, color) {
 
   obj.addEventListener("pointerdown", event => {
     event.preventDefault();
+    selectedObject2d = obj;
+
+obj.dataset.name = obj.dataset.name || obj.dataset.type;
+
+document.getElementById("selectedObject2d").textContent =
+  "Selected: " + obj.dataset.name;
+
+document.getElementById("objectName2d").value =
+  obj.dataset.name;
+
+document.getElementById("objectX2d").value =
+  obj.offsetLeft;
+
+document.getElementById("objectY2d").value =
+  obj.offsetTop;
+
+document.getElementById("objectW2d").value =
+  obj.offsetWidth;
+
+document.getElementById("objectH2d").value =
+  obj.offsetHeight;
     obj.setPointerCapture(event.pointerId);
 
     const rect = scene2d.getBoundingClientRect();
