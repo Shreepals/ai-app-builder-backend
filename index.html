@@ -5651,11 +5651,16 @@ document.getElementById("runEvents2d").onclick = () => {
     event.action === "touchCoin"
   );
 
-  if (!hasCoinEvent) {
-    document.getElementById("eventStatus2d").textContent =
-      "पहले Player → Coin को छूने वाला Event जोड़ें।";
-    return;
-  }
+  const hasEnemyEvent = events2d.some(event =>
+  event.object === "Player" &&
+  event.action === "touchEnemy"
+);
+
+if (!hasCoinEvent && !hasEnemyEvent) {
+  document.getElementById("eventStatus2d").textContent =
+    "पहले Player → Coin या Player → Enemy Event जोड़ें।";
+  return;
+}
 
   const player = objects2d.find(obj =>
     obj.dataset.type === "Player"
