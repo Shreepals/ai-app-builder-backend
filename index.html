@@ -5726,6 +5726,49 @@ healthDisplay.textContent = "Health: " + health2d;
         scoreDisplay.textContent = "Score: " + score2d;
       }
     });
+    
+ // ===== ENEMY COLLISION + HEALTH =====
+
+const hasEnemyEvent = events2d.some(event =>
+  event.object === "Player" &&
+  event.action === "touchEnemy"
+);
+
+if (hasEnemyEvent && !enemyHitCooldown2d && health2d > 0) {
+
+  objects2d.filter(obj =>
+    obj.dataset.type === "Enemy"
+  ).forEach(enemy => {
+
+    const enemyRect = enemy.getBoundingClientRect();
+
+    const touchingEnemy =
+      playerRect.left < enemyRect.right &&
+      playerRect.right > enemyRect.left &&
+      playerRect.top < enemyRect.bottom &&
+      playerRect.bottom > enemyRect.top;
+
+    if (touchingEnemy) {
+
+      health2d = Math.max(0, health2d - 10);
+
+      healthDisplay.textContent = "Health: " + health2d;
+
+      enemyHitCooldown2d = true;
+
+      setTimeout(() => {
+        enemyHitCooldown2d = false;
+      }, 1000);
+
+      if (health2d === 0) {
+        clearInterval(eventRunner2d);
+
+        document.getElementById("eventStatus2d").textContent =
+          "Game Over! Player की Health खत्म हो गई।";
+      }
+    }
+  });
+}   
 
   }, 100);
 
