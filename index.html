@@ -5680,6 +5680,24 @@ document.getElementById("runEvents2d").onclick = () => {
   }
 
   scoreDisplay.textContent = "Score: " + score2d;
+  // ===== PLAYER HEALTH DISPLAY =====
+
+health2d = 100;
+enemyHitCooldown2d = false;
+
+let healthDisplay = document.getElementById("healthDisplay2d");
+
+if (!healthDisplay) {
+  healthDisplay = document.createElement("div");
+  healthDisplay.id = "healthDisplay2d";
+
+  healthDisplay.style.cssText =
+    "position:absolute;left:12px;top:12px;color:white;font-size:18px;font-weight:bold;";
+
+  scene2d.appendChild(healthDisplay);
+}
+
+healthDisplay.textContent = "Health: " + health2d;
 
   clearInterval(eventRunner2d);
 
