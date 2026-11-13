@@ -5543,7 +5543,19 @@ document.getElementById("resetZoom2d").onclick = () => {
 
 updateSceneZoom2d();  
 let objects2d = [];
-let selectedObject2d = null;  
+let selectedObject2d = null;
+  
+// ===== 2D LAYERS SYSTEM =====
+
+let currentLayer2d = "Gameplay";
+
+document.getElementById("layerSelect2d").onchange = function() {
+
+  currentLayer2d = this.value;
+
+  document.getElementById("layerStatus2d").textContent =
+    "Current Layer: " + currentLayer2d;
+};  
 
 function addObject2d(type, emoji, color) {
   const obj = document.createElement("div");
