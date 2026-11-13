@@ -5563,6 +5563,7 @@ function addObject2d(type, emoji, color) {
   obj.textContent = emoji;
   obj.dataset.emoji = emoji;
   obj.dataset.type = type;
+  obj.dataset.layer = currentLayer2d;
 
   obj.style.cssText = `
     position:absolute;
