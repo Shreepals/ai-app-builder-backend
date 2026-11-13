@@ -5688,7 +5688,7 @@ function movePlayer2d() {
 
   // Scene Boundary
   x = Math.max(0, Math.min(
-    scene2d.clientWidth - player.offsetWidth, x
+    world2d.clientWidth - player.offsetWidth, x
   ));
 
   player.style.left = x + "px";
