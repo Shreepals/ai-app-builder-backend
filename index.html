@@ -5551,6 +5551,36 @@ let selectedObject2d = null;
 // ===== 2D COPY PASTE SYSTEM =====
 
 let copiedObject2d = null;
+  
+// ===== MOBILE COPY PASTE BUTTONS =====
+
+document.getElementById("copyObject2d").onclick = () => {
+
+  if (!selectedObject2d) {
+    alert("पहले कोई Object चुनें।");
+    return;
+  }
+
+  copiedObject2d = selectedObject2d.cloneNode(true);
+
+  alert("Object Copy हो गया!");
+};
+
+document.getElementById("pasteObject2d").onclick = () => {
+
+  if (!copiedObject2d) {
+    alert("पहले Object Copy करें।");
+    return;
+  }
+
+  const copy = copiedObject2d;
+
+  addObject2d(
+    copy.dataset.type,
+    copy.dataset.emoji,
+    copy.style.background
+  );
+};  
 
 document.addEventListener("keydown", event => {
 
