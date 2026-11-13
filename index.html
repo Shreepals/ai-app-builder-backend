@@ -5580,7 +5580,23 @@ document.getElementById("pasteObject2d").onclick = () => {
     copy.dataset.emoji,
     copy.style.background
   );
-};  
+
+  const pasted = objects2d[objects2d.length - 1];
+
+  pasted.style.left =
+    ((parseInt(copy.style.left) || 40) + 30) + "px";
+
+  pasted.style.top =
+    ((parseInt(copy.style.top) || 100) + 30) + "px";
+
+  pasted.dataset.layer = copy.dataset.layer;
+
+  updateLayerObjects2d();
+
+  selectedObject2d = pasted;
+
+  alert("Object की Copy Paste हो गई!");
+};
 
 document.addEventListener("keydown", event => {
 
