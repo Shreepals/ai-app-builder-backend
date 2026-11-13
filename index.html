@@ -5552,6 +5552,7 @@ let currentLayer2d = "Gameplay";
 document.getElementById("layerSelect2d").onchange = function() {
 
   currentLayer2d = this.value;
+  updateLayerObjects2d();
 
   document.getElementById("layerStatus2d").textContent =
     "Current Layer: " + currentLayer2d;
