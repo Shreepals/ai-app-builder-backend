@@ -5605,7 +5605,68 @@ document.getElementById("addPlatform2d").onclick = () =>
   addObject2d("Platform", "🟫", "#80552e");
 
 document.getElementById("addCoin2d").onclick = () =>
-  addObject2d("Coin", "🪙", "#b18a18");  
+  addObject2d("Coin", "🪙", "#b18a18");
+  
+// ===== MOBILE PLAYER MOVEMENT =====
+
+let movement2d = {
+  left: false,
+  right: false,
+  up: false,
+  down: false
+};
+
+function movePlayer2d() {
+  const player = objects2d.find(obj =>
+    obj.dataset.type === "Player"
+  );
+
+  if (!player) return;
+
+  let x = player.offsetLeft;
+  let y = player.offsetTop;
+
+  if (movement2d.left) x -= 4;
+  if (movement2d.right) x += 4;
+  if (movement2d.up) y -= 4;
+  if (movement2d.down) y += 4;
+
+  player.style.left = Math.max(0, Math.min(
+    scene2d.clientWidth - player.offsetWidth, x
+  )) + "px";
+
+  player.style.top = Math.max(0, Math.min(
+    scene2d.clientHeight - player.offsetHeight, y
+  )) + "px";
+}
+
+function setupMoveButton2d(id, direction) {
+  const btn = document.getElementById(id);
+
+  btn.addEventListener("pointerdown", event => {
+    event.preventDefault();
+    movement2d[direction] = true;
+  });
+
+  btn.addEventListener("pointerup", () => {
+    movement2d[direction] = false;
+  });
+
+  btn.addEventListener("pointerleave", () => {
+    movement2d[direction] = false;
+  });
+
+  btn.addEventListener("pointercancel", () => {
+    movement2d[direction] = false;
+  });
+}
+
+setupMoveButton2d("moveLeft2d", "left");
+setupMoveButton2d("moveRight2d", "right");
+setupMoveButton2d("jump2d", "up");
+setupMoveButton2d("moveDown2d", "down");
+
+setInterval(movePlayer2d, 30);  
   
 // ===== 2D VISUAL EVENTS EDITOR =====
 
