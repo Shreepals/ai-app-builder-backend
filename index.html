@@ -5693,6 +5693,14 @@ function movePlayer2d() {
 
   player.style.left = x + "px";
   player.style.top = y + "px";
+  // ===== CAMERA FOLLOW =====
+
+const cameraX = Math.max(0, Math.min(
+  world2d.clientWidth - scene2d.clientWidth,
+  x - scene2d.clientWidth / 2
+));
+
+world2d.style.left = -cameraX + "px";
 }
 
 function setupMoveButton2d(id, direction) {
