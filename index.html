@@ -5825,8 +5825,6 @@ function movePlayer2d() {
 
   if (!player) return;
   if (!physicsEnabled2d) return;
-  // Editor में Player Select हो तो Gravity रोकें
-  if (selectedObject2d === player) return;
 
   let x = player.offsetLeft;
   let y = player.offsetTop;
