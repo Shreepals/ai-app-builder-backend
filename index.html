@@ -5481,7 +5481,47 @@ onresize=()=>{
 // ===== 2D SCENE EDITOR =====
 
 const scene2d = document.getElementById("scene2d");
-const world2d = document.getElementById("world2d");  
+const world2d = document.getElementById("world2d");
+// ===== ADVANCED GRID + ZOOM =====
+
+let gridEnabled2d = true;
+let zoom2d = 1;
+
+function updateSceneZoom2d() {
+  world2d.style.transform = `scale(${zoom2d})`;
+  world2d.style.transformOrigin = "top left";
+
+  document.getElementById("zoomLevel2d").textContent =
+    Math.round(zoom2d * 100) + "%";
+}
+
+document.getElementById("toggleGrid2d").onclick = () => {
+
+  gridEnabled2d = !gridEnabled2d;
+
+  world2d.style.backgroundImage = gridEnabled2d
+    ? "linear-gradient(#ffffff18 1px, transparent 1px), linear-gradient(90deg, #ffffff18 1px, transparent 1px)"
+    : "none";
+
+  world2d.style.backgroundSize = "25px 25px";
+};
+
+document.getElementById("zoomIn2d").onclick = () => {
+  zoom2d = Math.min(2, zoom2d + 0.1);
+  updateSceneZoom2d();
+};
+
+document.getElementById("zoomOut2d").onclick = () => {
+  zoom2d = Math.max(0.5, zoom2d - 0.1);
+  updateSceneZoom2d();
+};
+
+document.getElementById("resetZoom2d").onclick = () => {
+  zoom2d = 1;
+  updateSceneZoom2d();
+};
+
+updateSceneZoom2d();  
 let objects2d = [];
 let selectedObject2d = null;  
 
