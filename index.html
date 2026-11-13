@@ -5555,7 +5555,20 @@ document.getElementById("layerSelect2d").onchange = function() {
 
   document.getElementById("layerStatus2d").textContent =
     "Current Layer: " + currentLayer2d;
-};  
+}; 
+  
+// ===== FILTER OBJECTS BY LAYER =====
+
+function updateLayerObjects2d() {
+
+  objects2d.forEach(obj => {
+
+    obj.style.display =
+      obj.dataset.layer === currentLayer2d ? "flex" : "none";
+
+  });
+
+}  
 
 function addObject2d(type, emoji, color) {
   const obj = document.createElement("div");
