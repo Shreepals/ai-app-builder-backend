@@ -5545,6 +5545,42 @@ updateSceneZoom2d();
 let objects2d = [];
 let selectedObject2d = null;
   
+// ===== 2D COPY PASTE SYSTEM =====
+
+let copiedObject2d = null;
+
+document.addEventListener("keydown", event => {
+
+  if (event.ctrlKey && event.key.toLowerCase() === "c") {
+
+    if (!selectedObject2d) return;
+
+    copiedObject2d = selectedObject2d.cloneNode(true);
+
+  }
+
+  if (event.ctrlKey && event.key.toLowerCase() === "v") {
+
+    if (!copiedObject2d) return;
+
+    const copy = copiedObject2d.cloneNode(true);
+
+    copy.style.left =
+      (parseInt(copiedObject2d.style.left) + 30) + "px";
+
+    copy.style.top =
+      (parseInt(copiedObject2d.style.top) + 30) + "px";
+
+    addObject2d(
+      copy.dataset.type,
+      copy.dataset.emoji,
+      copy.style.background
+    );
+
+  }
+
+});  
+  
 // ===== 2D LAYERS SYSTEM =====
 
 let currentLayer2d = "Gameplay";
