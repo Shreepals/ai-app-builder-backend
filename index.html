@@ -5616,7 +5616,15 @@ let movement2d = {
   down: false
 };
 
+// ===== 2D PLATFORMER PHYSICS =====
+
+let velocityY2d = 0;
+let gravity2d = 0.5;
+let jumpPower2d = -10;
+let isGrounded2d = false;
+
 function movePlayer2d() {
+
   const player = objects2d.find(obj =>
     obj.dataset.type === "Player"
   );
@@ -5626,18 +5634,59 @@ function movePlayer2d() {
   let x = player.offsetLeft;
   let y = player.offsetTop;
 
+  // Left and Right Movement
   if (movement2d.left) x -= 4;
   if (movement2d.right) x += 4;
-  if (movement2d.up) y -= 4;
-  if (movement2d.down) y += 4;
 
-  player.style.left = Math.max(0, Math.min(
+  // Gravity
+  velocityY2d += gravity2d;
+  y += velocityY2d;
+
+  // Jump
+  if (movement2d.up && isGrounded2d) {
+    velocityY2d = jumpPower2d;
+    isGrounded2d = false;
+  }
+
+  // Ground Collision
+  const groundY =
+    scene2d.clientHeight - player.offsetHeight;
+
+  if (y >= groundY) {
+    y = groundY;
+    velocityY2d = 0;
+    isGrounded2d = true;
+  }
+
+  // Platform Collision
+  objects2d.filter(obj =>
+    obj.dataset.type === "Platform"
+  ).forEach(platform => {
+
+    const px = platform.offsetLeft;
+    const py = platform.offsetTop;
+    const pw = platform.offsetWidth;
+
+    if (
+      x + player.offsetWidth > px &&
+      x < px + pw &&
+      y + player.offsetHeight >= py &&
+      y + player.offsetHeight <= py + 12 &&
+      velocityY2d >= 0
+    ) {
+      y = py - player.offsetHeight;
+      velocityY2d = 0;
+      isGrounded2d = true;
+    }
+  });
+
+  // Scene Boundary
+  x = Math.max(0, Math.min(
     scene2d.clientWidth - player.offsetWidth, x
-  )) + "px";
+  ));
 
-  player.style.top = Math.max(0, Math.min(
-    scene2d.clientHeight - player.offsetHeight, y
-  )) + "px";
+  player.style.left = x + "px";
+  player.style.top = y + "px";
 }
 
 function setupMoveButton2d(id, direction) {
