@@ -6214,7 +6214,20 @@ let eventRunner2d = null;
 let health2d = 100;
 let enemyHitCooldown2d = false;  
 let enemyHealth2d = 100;
-let enemyDead2d = false;  
+let enemyDead2d = false;
+  
+// ===== 2D PLAYER FIRE BUTTON =====
+
+let playerBullets2d = [];
+
+let fireButton2d = document.createElement("button");
+
+fireButton2d.textContent = "🔫 FIRE";
+
+fireButton2d.style.cssText =
+  "position:absolute;right:15px;bottom:15px;padding:14px 22px;background:red;color:white;font-size:18px;font-weight:bold;border:0;border-radius:10px;z-index:1000;";
+
+scene2d.appendChild(fireButton2d);  
 
 document.getElementById("runEvents2d").onclick = () => {
 
