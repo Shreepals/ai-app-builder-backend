@@ -6094,8 +6094,9 @@ function setupMoveButton2d(id, direction) {
 
   btn.addEventListener("pointerdown", event => {
     event.preventDefault();
+    physicsEnabled2d = true;
     movement2d[direction] = true;
-  });
+});
 
   btn.addEventListener("pointerup", () => {
     movement2d[direction] = false;
