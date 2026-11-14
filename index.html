@@ -6579,7 +6579,61 @@ document.getElementById("deleteScene2d").onclick = () => {
     name + " Delete हो गया।";
 };
 
-updateSceneList2d();  
+updateSceneList2d();
+  
+// ===== AUTOMATIC SCENE TRANSITION =====
+
+let sceneTransitionCooldown2d = false;
+
+setInterval(() => {
+
+  if (!physicsEnabled2d) return;
+  if (sceneTransitionCooldown2d) return;
+
+  const player = objects2d.find(obj =>
+    obj.dataset.type === "Player"
+  );
+
+  const exit = objects2d.find(obj =>
+    obj.dataset.type === "Exit"
+  );
+
+  if (!player || !exit) return;
+
+  const touching =
+    player.offsetLeft < exit.offsetLeft + exit.offsetWidth &&
+    player.offsetLeft + player.offsetWidth > exit.offsetLeft &&
+    player.offsetTop < exit.offsetTop + exit.offsetHeight &&
+    player.offsetTop + player.offsetHeight > exit.offsetTop;
+
+  if (!touching) return;
+
+  const scenes = getAllScenes2d();
+  const sceneNames = Object.keys(scenes);
+
+  const currentIndex = sceneNames.indexOf(activeSceneName2d);
+  const nextScene = sceneNames[currentIndex + 1];
+
+  if (!nextScene) {
+    document.getElementById("eventStatus2d").textContent =
+      "🎉 आखिरी Level पूरा हो गया!";
+    return;
+  }
+
+  sceneTransitionCooldown2d = true;
+
+  saveCurrentLevel2d();
+  openLevel2d(nextScene);
+  updateSceneList2d();
+
+  document.getElementById("eventStatus2d").textContent =
+    "🎉 Level पूरा! अब " + nextScene + " शुरू हो गया।";
+
+  setTimeout(() => {
+    sceneTransitionCooldown2d = false;
+  }, 1500);
+
+}, 100);  
 
 readProjects();
 renderProjects();
