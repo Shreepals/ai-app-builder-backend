@@ -6393,7 +6393,186 @@ document.getElementById("loadScene2d").onclick = () => {
     "कोई Object चुना नहीं गया।";
 
   alert("Scene सफलतापूर्वक Load हो गया!");
-};  
+};
+  
+// ===== MULTIPLE SCENES MANAGER =====
+
+let activeSceneName2d =
+  document.getElementById("sceneName2d").value || "Main Scene";
+
+function getAllScenes2d() {
+  return JSON.parse(
+    localStorage.getItem("aiAppBuilderScenes2d") || "{}"
+  );
+}
+
+function updateSceneList2d() {
+  const scenes = getAllScenes2d();
+  const select = document.getElementById("sceneList2d");
+
+  select.innerHTML = "";
+
+  Object.keys(scenes).forEach(name => {
+    const option = document.createElement("option");
+    option.value = name;
+    option.textContent = name;
+    select.appendChild(option);
+  });
+
+  if (scenes[activeSceneName2d]) {
+    select.value = activeSceneName2d;
+  }
+}
+
+function saveCurrentLevel2d() {
+  const name = activeSceneName2d;
+
+  const scenes = getAllScenes2d();
+
+  scenes[name] = {
+    name: name,
+    objects: objects2d.map(obj => ({
+      type: obj.dataset.type,
+      emoji: obj.dataset.emoji,
+      name: obj.dataset.name || "",
+      layer: obj.dataset.layer,
+      left: obj.style.left,
+      top: obj.style.top,
+      width: obj.style.width,
+      height: obj.style.height,
+      background: obj.style.background
+    }))
+  };
+
+  localStorage.setItem(
+    "aiAppBuilderScenes2d",
+    JSON.stringify(scenes)
+  );
+}
+
+function openLevel2d(name) {
+  const scenes = getAllScenes2d();
+  const data = scenes[name];
+
+  if (!data) return;
+
+  objects2d.forEach(obj => obj.remove());
+  objects2d = [];
+  selectedObject2d = null;
+
+  document.getElementById("sceneName2d").value = name;
+
+  data.objects.forEach(item => {
+    addObject2d(item.type, item.emoji, item.background);
+
+    const obj = objects2d[objects2d.length - 1];
+
+    obj.dataset.name = item.name;
+    obj.dataset.layer = item.layer;
+    obj.style.left = item.left;
+    obj.style.top = item.top;
+    obj.style.width = item.width;
+    obj.style.height = item.height;
+  });
+
+  activeSceneName2d = name;
+  updateLayerObjects2d();
+
+  document.getElementById("selectedObject2d").textContent =
+    "कोई Object चुना नहीं गया।";
+}
+
+// नया Level बनाएँ
+document.getElementById("newScene2d").onclick = () => {
+
+  const name = prompt("नए Level का नाम लिखें:");
+
+  if (!name || !name.trim()) return;
+
+  const levelName = name.trim();
+  const scenes = getAllScenes2d();
+
+  if (scenes[levelName]) {
+    alert("इस नाम का Level पहले से मौजूद है।");
+    return;
+  }
+
+  saveCurrentLevel2d();
+
+  scenes[levelName] = {
+    name: levelName,
+    objects: []
+  };
+
+  localStorage.setItem(
+    "aiAppBuilderScenes2d",
+    JSON.stringify(scenes)
+  );
+
+  openLevel2d(levelName);
+  updateSceneList2d();
+
+  document.getElementById("sceneManagerStatus2d").textContent =
+    levelName + " बनाया गया।";
+};
+
+// Level बदलें
+document.getElementById("switchScene2d").onclick = () => {
+
+  const name = document.getElementById("sceneList2d").value;
+
+  if (!name) {
+    alert("पहले कोई Level चुनें।");
+    return;
+  }
+
+  saveCurrentLevel2d();
+  openLevel2d(name);
+
+  document.getElementById("sceneManagerStatus2d").textContent =
+    name + " खुल गया।";
+};
+
+// Level Delete करें
+document.getElementById("deleteScene2d").onclick = () => {
+
+  const name = document.getElementById("sceneList2d").value;
+
+  if (!name) {
+    alert("पहले कोई Level चुनें।");
+    return;
+  }
+
+  if (!confirm(name + " को Delete करना चाहते हैं?")) return;
+
+  const scenes = getAllScenes2d();
+  delete scenes[name];
+
+  localStorage.setItem(
+    "aiAppBuilderScenes2d",
+    JSON.stringify(scenes)
+  );
+
+  objects2d.forEach(obj => obj.remove());
+  objects2d = [];
+  selectedObject2d = null;
+
+  const remaining = Object.keys(scenes);
+
+  if (remaining.length > 0) {
+    openLevel2d(remaining[0]);
+  } else {
+    activeSceneName2d = "";
+    document.getElementById("sceneName2d").value = "";
+  }
+
+  updateSceneList2d();
+
+  document.getElementById("sceneManagerStatus2d").textContent =
+    name + " Delete हो गया।";
+};
+
+updateSceneList2d();  
 
 readProjects();
 renderProjects();
