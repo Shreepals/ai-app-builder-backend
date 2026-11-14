@@ -6116,7 +6116,48 @@ setupMoveButton2d("moveRight2d", "right");
 setupMoveButton2d("jump2d", "up");
 setupMoveButton2d("moveDown2d", "down");
 
-setInterval(movePlayer2d, 30);  
+setInterval(movePlayer2d, 30);
+  
+// ===== 2D ENEMY CHASE AI =====
+
+function moveEnemies2d() {
+
+  if (!physicsEnabled2d) return;
+
+  const player = objects2d.find(obj =>
+    obj.dataset.type === "Player"
+  );
+
+  if (!player) return;
+
+  objects2d.filter(obj =>
+    obj.dataset.type === "Enemy"
+  ).forEach(enemy => {
+
+    const playerX = player.offsetLeft + player.offsetWidth / 2;
+    const enemyX = enemy.offsetLeft + enemy.offsetWidth / 2;
+
+    const distance = Math.abs(playerX - enemyX);
+
+    // Player पास आने पर Enemy पीछा करेगा
+    if (distance > 300) return;
+
+    const speed = 1.5;
+
+    if (enemyX < playerX) {
+      enemy.style.left =
+        Math.min(
+          world2d.clientWidth - enemy.offsetWidth,
+          enemy.offsetLeft + speed
+        ) + "px";
+    } else if (enemyX > playerX) {
+      enemy.style.left =
+        Math.max(0, enemy.offsetLeft - speed) + "px";
+    }
+  });
+}
+
+setInterval(moveEnemies2d, 30);  
   
 // ===== 2D VISUAL EVENTS EDITOR =====
 
