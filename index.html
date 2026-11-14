@@ -6250,6 +6250,20 @@ fireButton2d.onclick = () => {
   scene2d.appendChild(bullet2d);
 
   playerBullets2d.push(bullet2d);
+  
+  let bulletMove2d = setInterval(() => {
+
+  let x = bullet2d.offsetLeft;
+
+  bullet2d.style.left = (x + 8) + "px";
+
+  if (x > scene2d.clientWidth) {
+    clearInterval(bulletMove2d);
+    bullet2d.remove();
+    playerBullets2d = playerBullets2d.filter(b => b !== bullet2d);
+  }
+
+}, 30);
 };  
 
 document.getElementById("runEvents2d").onclick = () => {
