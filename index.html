@@ -6308,6 +6308,20 @@ healthDisplay.textContent = "Health: " + health2d;
         scoreDisplay.textContent = "Score: " + score2d;
       }
     });
+    // ===== ENEMY HEALTH DISPLAY =====
+
+enemyHealth2d = 100;
+enemyDead2d = false;
+
+let enemyHealthDisplay2d = document.createElement("div");
+
+enemyHealthDisplay2d.id = "enemyHealthDisplay2d";
+enemyHealthDisplay2d.textContent = "Enemy Health: 100";
+
+enemyHealthDisplay2d.style.cssText =
+  "position:absolute;right:12px;top:12px;color:red;font-size:18px;font-weight:bold;";
+
+scene2d.appendChild(enemyHealthDisplay2d);
     
  // ===== ENEMY COLLISION + HEALTH =====
 
@@ -6331,6 +6345,7 @@ if (hasEnemyEvent && !enemyHitCooldown2d && health2d > 0) {
       playerRect.bottom > enemyRect.top;
 
     if (touchingEnemy) {
+      
      // ===== ENEMY ATTACK ANIMATION =====
 
 if (typeof enemy.animate === "function") {
