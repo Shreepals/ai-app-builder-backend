@@ -5555,6 +5555,34 @@ updateSceneZoom2d();
 let objects2d = [];
 let selectedObject2d = null;
   
+// ===== OBJECT LOCK / UNLOCK =====
+
+document.getElementById("lockObject2d").onclick = () => {
+
+  if (!selectedObject2d) {
+    alert("पहले कोई Object Select करें।");
+    return;
+  }
+
+  selectedObject2d.dataset.locked = "true";
+  selectedObject2d.style.cursor = "not-allowed";
+
+  alert("Object Lock हो गया!");
+};
+
+document.getElementById("unlockObject2d").onclick = () => {
+
+  if (!selectedObject2d) {
+    alert("पहले कोई Object Select करें।");
+    return;
+  }
+
+  selectedObject2d.dataset.locked = "false";
+  selectedObject2d.style.cursor = "grab";
+
+  alert("Object Unlock हो गया!");
+};  
+  
 // ===== OBJECT LAYER ORDER =====
 
 document.getElementById("bringForward2d").onclick = () => {
