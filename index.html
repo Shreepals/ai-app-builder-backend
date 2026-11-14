@@ -300,6 +300,32 @@ header{
 
     <label>Scene का नाम</label>
     <input id="sceneName2d" value="Main Scene">
+    
+    <!-- MULTIPLE SCENES MANAGER -->
+
+<div id="multipleScenes2d"
+style="background:#10192c;padding:15px;border-radius:12px;margin:12px 0;">
+
+  <h3>🎮 Multiple Scenes Manager</h3>
+
+  <label>अपने Game का Level चुनें</label>
+
+  <select id="sceneList2d"
+  style="width:100%;padding:12px;margin:8px 0;">
+    <option value="">कोई Scene नहीं चुना</option>
+  </select>
+
+  <div class="actions">
+    <button class="btn" id="newScene2d">➕ New Level</button>
+    <button class="btn secondary" id="switchScene2d">🔄 Switch Scene</button>
+    <button class="btn secondary" id="deleteScene2d">🗑️ Delete Level</button>
+  </div>
+
+  <p id="sceneManagerStatus2d" style="color:#9eacc5;">
+    अपना नया Level बनाएँ।
+  </p>
+
+</div>
 
     <h2 style="margin-top:20px">Game Scene</h2>
     
