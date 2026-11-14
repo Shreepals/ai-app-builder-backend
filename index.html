@@ -5766,6 +5766,11 @@ document.getElementById("objectW2d").value =
 
 document.getElementById("objectH2d").value =
   obj.offsetHeight;
+    
+// Locked Object को Move होने से रोकें
+if (obj.dataset.locked === "true") {
+  return;
+}    
     obj.setPointerCapture(event.pointerId);
 
     const rect = scene2d.getBoundingClientRect();
