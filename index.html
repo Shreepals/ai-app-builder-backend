@@ -5897,22 +5897,29 @@ document.getElementById("applyProperties2d").onclick = () => {
     "Object Properties अपडेट हो गई हैं।";
 };
 
+// ===== DELETE OBJECT WITH UNDO =====
+
 document.getElementById("deleteObject2d").onclick = () => {
+
   if (!selectedObject2d) {
     alert("पहले कोई Object चुनें।");
     return;
   }
 
+  // Undo के लिए Object सुरक्षित रखें
+  deletedObjects2d.push(selectedObject2d);
+
   selectedObject2d.remove();
 
   objects2d = objects2d.filter(obj => obj !== selectedObject2d);
+
   selectedObject2d = null;
 
   document.getElementById("selectedObject2d").textContent =
     "कोई Object चुना नहीं गया।";
 
   document.getElementById("sceneStatus2d").textContent =
-    "Object Delete हो गया।";
+    "Object Delete हो गया। Undo दबाकर वापस लाएँ।";
 };  
 
 document.getElementById("addPlayer2d").onclick = () =>
