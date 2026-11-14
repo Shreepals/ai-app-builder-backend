@@ -5570,6 +5570,7 @@ document.getElementById("undoObject2d").onclick = () => {
   }
 
   const obj = deletedObjects2d.pop();
+  redoObjects2d.push(obj);
 
   world2d.appendChild(obj);
 
