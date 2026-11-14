@@ -6281,6 +6281,20 @@ objects2d.filter(obj =>
     if (enemyHealth2d === 0) {
       enemyDead2d = true;
     }
+    
+    enemy.animate([
+  { opacity: 1, transform: "scale(1) rotate(0deg)" },
+  { opacity: 0.7, transform: "scale(0.8) rotate(20deg)" },
+  { opacity: 0, transform: "scale(0.2) rotate(90deg)" }
+], {
+  duration: 700,
+  easing: "ease-in"
+});
+
+setTimeout(() => {
+  enemy.remove();
+  objects2d = objects2d.filter(obj => obj !== enemy);
+}, 700);
   }
 });  
 
