@@ -6329,6 +6329,27 @@ if (hasEnemyEvent && !enemyHitCooldown2d && health2d > 0) {
       playerRect.bottom > enemyRect.top;
 
     if (touchingEnemy) {
+     // ===== ENEMY ATTACK ANIMATION =====
+
+if (typeof enemy.animate === "function") {
+  enemy.animate([
+    {
+      transform: "translateX(0) scale(1)"
+    },
+    {
+      transform: "translateX(-8px) scale(1.2)"
+    },
+    {
+      transform: "translateX(8px) scale(1.2)"
+    },
+    {
+      transform: "translateX(0) scale(1)"
+    }
+  ], {
+    duration: 350,
+    easing: "ease-out"
+  });
+} 
 
       health2d = Math.max(0, health2d - 10);
 
