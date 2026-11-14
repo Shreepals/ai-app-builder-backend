@@ -6184,9 +6184,13 @@ document.getElementById("runEvents2d").onclick = () => {
   event.action === "touchEnemy"
 );
 
-if (!hasCoinEvent && !hasEnemyEvent) {
+const hasExit2d = objects2d.some(obj =>
+  obj.dataset.type === "Exit"
+);
+
+if (!hasCoinEvent && !hasEnemyEvent && !hasExit2d) {
   document.getElementById("eventStatus2d").textContent =
-    "पहले Player → Coin या Player → Enemy Event जोड़ें।";
+    "पहले Scene में Exit / Goal जोड़ें।";
   return;
 }
 
