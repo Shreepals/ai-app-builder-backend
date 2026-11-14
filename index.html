@@ -6490,14 +6490,15 @@ document.getElementById("newScene2d").onclick = () => {
   if (!name || !name.trim()) return;
 
   const levelName = name.trim();
-  const scenes = getAllScenes2d();
 
-  if (scenes[levelName]) {
-    alert("इस नाम का Level पहले से मौजूद है।");
-    return;
-  }
+saveCurrentLevel2d();
 
-  saveCurrentLevel2d();
+const scenes = getAllScenes2d();
+
+if (scenes[levelName]) {
+  alert("इस नाम का Level पहले से मौजूद है।");
+  return;
+}
 
   scenes[levelName] = {
     name: levelName,
