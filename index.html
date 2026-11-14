@@ -5612,6 +5612,39 @@ document.getElementById("sendBackward2d").onclick = () => {
 
 let copiedObject2d = null;
   
+// ===== OBJECT DUPLICATE SYSTEM =====
+
+document.getElementById("duplicateObject2d").onclick = () => {
+
+  if (!selectedObject2d) {
+    alert("पहले कोई Object Select करें।");
+    return;
+  }
+
+  const source = selectedObject2d;
+
+  addObject2d(
+    source.dataset.type,
+    source.dataset.emoji,
+    source.style.background
+  );
+
+  const duplicate = objects2d[objects2d.length - 1];
+
+  duplicate.style.left = (source.offsetLeft + 30) + "px";
+  duplicate.style.top = (source.offsetTop + 30) + "px";
+  duplicate.dataset.layer = source.dataset.layer;
+
+  updateLayerObjects2d();
+
+  selectedObject2d = duplicate;
+
+  document.getElementById("selectedObject2d").textContent =
+    "Selected: " + duplicate.dataset.type;
+
+  alert("Object Duplicate हो गया!");
+};  
+  
 // ===== MOBILE COPY PASTE BUTTONS =====
 
 document.getElementById("copyObject2d").onclick = () => {
