@@ -5557,6 +5557,34 @@ updateSceneZoom2d();
 let objects2d = [];
 let selectedObject2d = null;
   
+// ===== OBJECT UNDO SYSTEM =====
+
+let deletedObjects2d = [];
+
+document.getElementById("undoObject2d").onclick = () => {
+
+  if (deletedObjects2d.length === 0) {
+    alert("वापस लाने के लिए कोई Deleted Object नहीं है।");
+    return;
+  }
+
+  const obj = deletedObjects2d.pop();
+
+  world2d.appendChild(obj);
+
+  objects2d.push(obj);
+
+  obj.style.display =
+    obj.dataset.layer === currentLayer2d ? "flex" : "none";
+
+  selectedObject2d = obj;
+
+  document.getElementById("selectedObject2d").textContent =
+    "Selected: " + (obj.dataset.name || obj.dataset.type);
+
+  alert("Object वापस आ गया!");
+};  
+  
 // ===== OBJECT LOCK / UNLOCK =====
 
 document.getElementById("lockObject2d").onclick = () => {
