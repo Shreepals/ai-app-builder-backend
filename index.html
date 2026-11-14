@@ -5584,6 +5584,33 @@ document.getElementById("undoObject2d").onclick = () => {
     "Selected: " + (obj.dataset.name || obj.dataset.type);
 
   alert("Object वापस आ गया!");
+}; 
+  
+// ===== OBJECT REDO SYSTEM =====
+
+let redoObjects2d = [];
+
+document.getElementById("redoObject2d").onclick = () => {
+
+  if (redoObjects2d.length === 0) {
+    alert("पहले Undo करें।");
+    return;
+  }
+
+  const obj = redoObjects2d.pop();
+
+  deletedObjects2d.push(obj);
+
+  obj.remove();
+
+  objects2d = objects2d.filter(item => item !== obj);
+
+  selectedObject2d = null;
+
+  document.getElementById("selectedObject2d").textContent =
+    "कोई Object चुना नहीं गया।";
+
+  alert("Redo सफल! Object फिर से Delete हो गया।");
 };  
   
 // ===== OBJECT LOCK / UNLOCK =====
