@@ -6252,6 +6252,37 @@ fireButton2d.onclick = () => {
   playerBullets2d.push(bullet2d);
   
   let bulletMove2d = setInterval(() => {
+    
+  const bulletRect = bullet2d.getBoundingClientRect();
+
+objects2d.filter(obj =>
+  obj.dataset.type === "Enemy"
+).forEach(enemy => {
+
+  if (enemyDead2d) return;
+
+  const enemyRect = enemy.getBoundingClientRect();
+
+  const hit =
+    bulletRect.left < enemyRect.right &&
+    bulletRect.right > enemyRect.left &&
+    bulletRect.top < enemyRect.bottom &&
+    bulletRect.bottom > enemyRect.top;
+
+  if (hit) {
+    enemyHealth2d = Math.max(0, enemyHealth2d - 20);
+
+    enemyHealthDisplay2d.textContent =
+      "Enemy Health: " + enemyHealth2d;
+
+    bullet2d.remove();
+    clearInterval(bulletMove2d);
+
+    if (enemyHealth2d === 0) {
+      enemyDead2d = true;
+    }
+  }
+});  
 
   let x = bullet2d.offsetLeft;
 
