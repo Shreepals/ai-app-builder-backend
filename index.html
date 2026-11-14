@@ -6227,7 +6227,30 @@ fireButton2d.textContent = "🔫 FIRE";
 fireButton2d.style.cssText =
   "position:absolute;right:15px;bottom:15px;padding:14px 22px;background:red;color:white;font-size:18px;font-weight:bold;border:0;border-radius:10px;z-index:1000;";
 
-scene2d.appendChild(fireButton2d);  
+scene2d.appendChild(fireButton2d); 
+  
+fireButton2d.onclick = () => {
+
+  const player = objects2d.find(obj =>
+    obj.dataset.type === "Player"
+  );
+
+  if (!player) return;
+
+  const bullet2d = document.createElement("div");
+
+  bullet2d.textContent = "🔴";
+
+  bullet2d.style.cssText =
+    "position:absolute;width:16px;height:16px;font-size:16px;z-index:1001;";
+
+  bullet2d.style.left = (player.offsetLeft + player.offsetWidth) + "px";
+  bullet2d.style.top = (player.offsetTop + player.offsetHeight / 2) + "px";
+
+  scene2d.appendChild(bullet2d);
+
+  playerBullets2d.push(bullet2d);
+};  
 
 document.getElementById("runEvents2d").onclick = () => {
 
