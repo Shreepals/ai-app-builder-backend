@@ -5962,6 +5962,11 @@ resizeHandle.addEventListener("pointerdown", event => {
       Math.min(scene2d.clientHeight - obj.offsetTop,
         startH + e.clientY - startY)
     ) + "px";
+document.getElementById("objectW2d").value =
+  obj.offsetWidth;
+
+document.getElementById("objectH2d").value =
+  obj.offsetHeight; 
   }
 
   function stopResize() {
