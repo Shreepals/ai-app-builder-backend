@@ -6279,7 +6279,7 @@ objects2d.filter(obj =>
     bullet2d.remove();
     clearInterval(bulletMove2d);
 
-    if (enemyHealth2d === 0) {
+  if (enemyHealth2d === 0) {
   enemyDead2d = true;
 
   enemy.animate([
@@ -6294,22 +6294,22 @@ objects2d.filter(obj =>
   setTimeout(() => {
     enemy.remove();
     objects2d = objects2d.filter(obj => obj !== enemy);
-    }, 700);
+  }, 700);
+
+  setTimeout(() => {
+    addObject2d("Enemy", "👾", "#a52d45");
+
+    enemyHealth2d = 100;
+    enemyDead2d = false;
+
+    if (enemyHealthDisplay2d) {
+      enemyHealthDisplay2d.textContent =
+        "Enemy Health: " + enemyHealth2d;
     }
-  }
-}); 
-    
-setTimeout(() => {
-  addObject2d("Enemy", "👾", "#a52d45");
-
-  enemyHealth2d = 100;
-  enemyDead2d = false;
-
-  if (enemyHealthDisplay2d) {
-    enemyHealthDisplay2d.textContent =
-      "Enemy Health: " + enemyHealth2d;
-  }
-}, 2000);    
+  }, 2000);
+}
+}
+});
 
   let x = bullet2d.offsetLeft;
 
