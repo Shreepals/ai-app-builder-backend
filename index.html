@@ -6260,7 +6260,7 @@ objects2d.filter(obj =>
   obj.dataset.type === "Enemy"
 ).forEach(enemy => {
 
-  if (enemyDead2d) return;
+  if (enemyDead2d || enemyHealth2d <= 0) return;
 
   const enemyRect = enemy.getBoundingClientRect();
 
