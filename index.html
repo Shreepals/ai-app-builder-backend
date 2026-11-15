@@ -5896,8 +5896,51 @@ document.getElementById("addLayer2d").onclick = function() {
 
   input.value = "";
 };
-  
 
+document.getElementById("renameLayer2d").onclick = function() {
+  const select = document.getElementById("layerSelect2d");
+  const oldName = select.value;
+
+  if (!oldName) return;
+
+  const newName = prompt("नई Layer का नाम लिखें:", oldName);
+
+  if (!newName || !newName.trim()) return;
+
+  const cleanName = newName.trim();
+
+  const exists = Array.from(select.options).some(
+    option =>
+      option.value.toLowerCase() === cleanName.toLowerCase() &&
+      option.value !== oldName
+  );
+
+  if (exists) {
+    alert("इस नाम की Layer पहले से मौजूद है।");
+    return;
+  }
+
+  const option = Array.from(select.options).find(
+    item => item.value === oldName
+  );
+
+  option.value = cleanName;
+  option.textContent = cleanName;
+
+  objects2d.forEach(obj => {
+    if (obj.dataset.layer === oldName) {
+      obj.dataset.layer = cleanName;
+    }
+  });
+
+  currentLayer2d = cleanName;
+  select.value = cleanName;
+  updateLayerObjects2d();
+
+  document.getElementById("layerStatus2d").textContent =
+    "Current Layer: " + cleanName;
+};
+          
 function addObject2d(type, emoji, color) {
   const obj = document.createElement("div");
 
