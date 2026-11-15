@@ -5938,6 +5938,60 @@ resizeHandle.style.cssText = `
 `;
 
 obj.appendChild(resizeHandle);
+  
+// ===== 2D OBJECT ROTATE HANDLE =====
+
+const rotateHandle = document.createElement("div");
+
+rotateHandle.textContent = "↻";
+
+rotateHandle.style.cssText = `
+  position:absolute;
+  width:22px;
+  height:22px;
+  top:-28px;
+  left:50%;
+  transform:translateX(-50%);
+  background:#2563eb;
+  color:white;
+  border-radius:50%;
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  font-size:18px;
+  cursor:grab;
+  touch-action:none;
+  z-index:1003;
+`;
+
+obj.appendChild(rotateHandle);
+
+rotateHandle.addEventListener("pointerdown", event => {
+  event.preventDefault();
+  event.stopPropagation();
+
+  rotateHandle.setPointerCapture(event.pointerId);
+
+  const startX = event.clientX;
+  const startRotation = Number(obj.dataset.rotation || 0);
+
+  function rotate(e) {
+    const angle = startRotation + (e.clientX - startX);
+    obj.dataset.rotation = angle;
+
+    obj.style.transform = `rotate(${angle}deg)`;
+  }
+
+  function stopRotate() {
+    rotateHandle.removeEventListener("pointermove", rotate);
+    rotateHandle.removeEventListener("pointerup", stopRotate);
+    rotateHandle.removeEventListener("pointercancel", stopRotate);
+  }
+
+  rotateHandle.addEventListener("pointermove", rotate);
+  rotateHandle.addEventListener("pointerup", stopRotate);
+  rotateHandle.addEventListener("pointercancel", stopRotate);
+});  
 
 resizeHandle.addEventListener("pointerdown", event => {
   event.preventDefault();
