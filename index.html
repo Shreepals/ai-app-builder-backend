@@ -5948,7 +5948,51 @@ document.getElementById("renameLayer2d").onclick = function() {
   document.getElementById("layerStatus2d").textContent =
     "Current Layer: " + cleanName;
 };
-          
+
+document.getElementById("deleteLayer2d").onclick = function() {
+  const select = document.getElementById("layerSelect2d");
+  const layerName = select.value;
+
+  if (!layerName) return;
+
+  if (select.options.length <= 1) {
+    alert("कम से कम एक Layer रखना जरूरी है।");
+    return;
+  }
+
+  if (!confirm(
+    layerName + " Layer हटाएँ? इसमें मौजूद Objects Gameplay Layer में भेजे जाएँगे।"
+  )) return;
+
+  objects2d.forEach(obj => {
+    if (obj.dataset.layer === layerName) {
+      obj.dataset.layer = "Gameplay";
+    }
+  });
+
+  const option = Array.from(select.options).find(
+    item => item.value === layerName
+  );
+
+  if (option) option.remove();
+
+  if (!Array.from(select.options).some(
+    item => item.value === "Gameplay"
+  )) {
+    const gameplay = document.createElement("option");
+    gameplay.value = "Gameplay";
+    gameplay.textContent = "Gameplay";
+    select.appendChild(gameplay);
+  }
+
+  select.value = "Gameplay";
+  currentLayer2d = "Gameplay";
+  updateLayerObjects2d();
+
+  document.getElementById("layerStatus2d").textContent =
+    "Current Layer: Gameplay";
+};
+            
 function addObject2d(type, emoji, color) {
   const obj = document.createElement("div");
 
