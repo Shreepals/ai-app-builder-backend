@@ -6380,8 +6380,10 @@ healthDisplay.textContent = "Health: " + health2d;
   
 // ===== ENEMY HEALTH DISPLAY =====
 
-enemyHealth2d = 100;
-enemyDead2d = false;
+if (enemyHealth2d <= 0) {
+  enemyHealth2d = 100;
+  enemyDead2d = false;
+}
 
 let enemyHealthDisplay2d =
   document.getElementById("enemyHealthDisplay2d");
