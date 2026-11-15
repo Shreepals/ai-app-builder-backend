@@ -6378,6 +6378,20 @@ if (!healthDisplay) {
 healthDisplay.textContent = "Health: " + health2d;
 
   clearInterval(eventRunner2d);
+  
+// ===== ENEMY HEALTH DISPLAY =====
+enemyHealth2d = 100;
+enemyDead2d = false;
+
+if (!enemyHealthDisplay2d) {
+  enemyHealthDisplay2d = document.createElement("div");
+  enemyHealthDisplay2d.id = "enemyHealthDisplay2d";
+  enemyHealthDisplay2d.style.cssText =
+    "position:absolute;right:12px;top:42px;color:red;font-size:18px;font-weight:bold;";
+  scene2d.appendChild(enemyHealthDisplay2d);
+}
+
+enemyHealthDisplay2d.textContent = "Enemy Health: " + enemyHealth2d;
 
   eventRunner2d = setInterval(() => {
 
