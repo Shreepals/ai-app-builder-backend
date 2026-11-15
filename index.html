@@ -6396,13 +6396,8 @@ if (!enemyHealthDisplay2d) {
   scene2d.appendChild(enemyHealthDisplay2d);
 }
 
-let enemyHealthDisplay2d =
-  document.getElementById("enemyHealthDisplay2d");
-
-if (enemyHealthDisplay2d) {
-  enemyHealthDisplay2d.textContent =
-    "Enemy Health: " + enemyHealth2d;
-  }
+enemyHealthDisplay2d.textContent =
+  "Enemy Health: " + enemyHealth2d;
 
   clearInterval(eventRunner2d);
      
