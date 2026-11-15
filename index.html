@@ -6000,7 +6000,35 @@ document.getElementById("deleteLayer2d").onclick = function() {
   document.getElementById("layerStatus2d").textContent =
     "Current Layer: Gameplay";
 };
-            
+
+let hiddenLayers2d = [];
+
+document.getElementById("toggleLayerVisibility2d").onclick = function() {
+  const select = document.getElementById("layerSelect2d");
+  const layerName = select.value;
+
+  if (!layerName) return;
+
+  if (hiddenLayers2d.includes(layerName)) {
+    hiddenLayers2d = hiddenLayers2d.filter(
+      name => name !== layerName
+    );
+  } else {
+    hiddenLayers2d.push(layerName);
+  }
+
+  updateLayerObjects2d();
+
+  this.textContent = hiddenLayers2d.includes(layerName)
+    ? "👁️ Show Layer"
+    : "🙈 Hide Layer";
+
+  document.getElementById("layerStatus2d").textContent =
+    hiddenLayers2d.includes(layerName)
+      ? layerName + " Layer छिपी हुई है।"
+      : layerName + " Layer दिखाई दे रही है।";
+};
+              
 function addObject2d(type, emoji, color) {
   const obj = document.createElement("div");
 
