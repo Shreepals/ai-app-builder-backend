@@ -6297,7 +6297,19 @@ objects2d.filter(obj =>
     }, 700);
     }
   }
-});  
+}); 
+    
+setTimeout(() => {
+  addObject2d("Enemy", "👾", "#a52d45");
+
+  enemyHealth2d = 100;
+  enemyDead2d = false;
+
+  if (enemyHealthDisplay2d) {
+    enemyHealthDisplay2d.textContent =
+      "Enemy Health: " + enemyHealth2d;
+  }
+}, 2000);    
 
   let x = bullet2d.offsetLeft;
 
