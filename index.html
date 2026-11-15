@@ -6409,20 +6409,27 @@ if (enemyHealthDisplay2d) {
         scoreDisplay.textContent = "Score: " + score2d;
       }
     });
-    // ===== ENEMY HEALTH DISPLAY =====
+
+ // ===== ENEMY HEALTH DISPLAY =====
 
 enemyHealth2d = 100;
 enemyDead2d = false;
 
-let enemyHealthDisplay2d = document.createElement("div");
+let enemyHealthDisplay2d =
+  document.getElementById("enemyHealthDisplay2d");
 
-enemyHealthDisplay2d.id = "enemyHealthDisplay2d";
-enemyHealthDisplay2d.textContent = "Enemy Health: 100";
+if (!enemyHealthDisplay2d) {
+  enemyHealthDisplay2d = document.createElement("div");
+  enemyHealthDisplay2d.id = "enemyHealthDisplay2d";
 
-enemyHealthDisplay2d.style.cssText =
-  "position:absolute;right:12px;top:12px;color:red;font-size:18px;font-weight:bold;";
+  enemyHealthDisplay2d.style.cssText =
+    "position:absolute;left:12px;top:40px;color:red;font-size:18px;font-weight:bold;";
 
-scene2d.appendChild(enemyHealthDisplay2d);
+  scene2d.appendChild(enemyHealthDisplay2d);
+}
+
+enemyHealthDisplay2d.textContent =
+  "Enemy Health: " + enemyHealth2d;   
     
  // ===== ENEMY COLLISION + HEALTH =====
 
