@@ -6071,6 +6071,12 @@ document.getElementById("applyProperties2d").onclick = () => {
 
   obj.style.height =
     Math.max(10, Number(document.getElementById("objectH2d").value)) + "px";
+  
+  const rotation =
+  Number(document.getElementById("objectRotation2d").value) || 0;
+
+obj.dataset.rotation = rotation;
+obj.style.transform = `rotate(${rotation}deg)`;
 
   document.getElementById("sceneStatus2d").textContent =
     "Object Properties अपडेट हो गई हैं।";
