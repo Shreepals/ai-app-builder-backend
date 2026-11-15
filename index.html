@@ -6381,10 +6381,11 @@ healthDisplay.textContent = "Health: " + health2d;
   
 }
   
-if (enemyHealthDisplay2d) {  
-
-enemyHealthDisplay2d.textContent = "Enemy Health: " + enemyHealth2d;
-
+if (enemyHealthDisplay2d) {
+  enemyHealthDisplay2d.textContent =
+    "Enemy Health: " + enemyHealth2d;
+}
+  
   eventRunner2d = setInterval(() => {
 
     const playerRect = player.getBoundingClientRect();
