@@ -5918,6 +5918,62 @@ if (obj.dataset.locked === "true") {
       obj.removeEventListener("pointermove", move);
     }, {once:true});
   });
+  
+  // ===== 2D OBJECT RESIZE HANDLE =====
+
+const resizeHandle = document.createElement("div");
+
+resizeHandle.style.cssText = `
+  position:absolute;
+  width:16px;
+  height:16px;
+  right:-5px;
+  bottom:-5px;
+  background:#ffffff;
+  border:2px solid #2563eb;
+  border-radius:4px;
+  cursor:nwse-resize;
+  touch-action:none;
+  z-index:1002;
+`;
+
+obj.appendChild(resizeHandle);
+
+resizeHandle.addEventListener("pointerdown", event => {
+  event.preventDefault();
+  event.stopPropagation();
+
+  resizeHandle.setPointerCapture(event.pointerId);
+
+  const startX = event.clientX;
+  const startY = event.clientY;
+  const startW = obj.offsetWidth;
+  const startH = obj.offsetHeight;
+
+  function resize(e) {
+    obj.style.width = Math.max(
+      30,
+      Math.min(scene2d.clientWidth - obj.offsetLeft,
+        startW + e.clientX - startX)
+    ) + "px";
+
+    obj.style.height = Math.max(
+      30,
+      Math.min(scene2d.clientHeight - obj.offsetTop,
+        startH + e.clientY - startY)
+    ) + "px";
+  }
+
+  function stopResize() {
+    resizeHandle.removeEventListener("pointermove", resize);
+    resizeHandle.removeEventListener("pointerup", stopResize);
+    resizeHandle.removeEventListener("pointercancel", stopResize);
+  }
+
+  resizeHandle.addEventListener("pointermove", resize);
+  resizeHandle.addEventListener("pointerup", stopResize);
+  resizeHandle.addEventListener("pointercancel", stopResize);
+});
 
   document.getElementById("sceneStatus2d").textContent =
     type + " Scene में जोड़ दिया गया। अब इसे खींचकर रख सकते हैं।";
