@@ -5854,6 +5854,42 @@ function updateLayerObjects2d() {
 
 }  
 
+document.getElementById("addLayer2d").onclick = function() {
+  const input = document.getElementById("newLayerName2d");
+  const name = input.value.trim();
+
+  if (!name) {
+    alert("पहले Layer का नाम लिखें।");
+    return;
+  }
+
+  const select = document.getElementById("layerSelect2d");
+
+  const exists = Array.from(select.options).some(
+    option => option.value.toLowerCase() === name.toLowerCase()
+  );
+
+  if (exists) {
+    alert("यह Layer पहले से मौजूद है।");
+    return;
+  }
+
+  const option = document.createElement("option");
+  option.value = name;
+  option.textContent = name;
+  select.appendChild(option);
+
+  select.value = name;
+  currentLayer2d = name;
+  updateLayerObjects2d();
+
+  document.getElementById("layerStatus2d").textContent =
+    "Current Layer: " + name;
+
+  input.value = "";
+};
+  
+
 function addObject2d(type, emoji, color) {
   const obj = document.createElement("div");
 
