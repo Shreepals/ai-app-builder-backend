@@ -5900,7 +5900,23 @@ function updateLayerObjects2d() {
         : "none";
   });
 }
-                                                
+
+function updateLayerZOrder2d() {
+  const select = document.getElementById("layerSelect2d");
+
+  const layerOrder = Array.from(select.options).map(
+    option => option.value
+  );
+
+  objects2d.forEach(obj => {
+    const layerIndex = layerOrder.indexOf(obj.dataset.layer);
+
+    obj.style.zIndex = String(
+      (layerIndex + 1) * 100
+    );
+  });
+  }
+                                                  
 document.getElementById("addLayer2d").onclick = function() {
   const input = document.getElementById("newLayerName2d");
   const name = input.value.trim();
