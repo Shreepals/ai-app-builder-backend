@@ -5703,6 +5703,7 @@ document.getElementById("undoObject2d").onclick = () => {
 
   objects2d.push(obj);
   updateLayerZOrder2d();
+  updateLayerObjectList2d();
 
   obj.style.display =
     obj.dataset.layer === currentLayer2d ? "flex" : "none";
