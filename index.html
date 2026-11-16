@@ -5670,6 +5670,7 @@ document.getElementById("undoObject2d").onclick = () => {
   world2d.appendChild(obj);
 
   objects2d.push(obj);
+  updateLayerZOrder2d();
 
   obj.style.display =
     obj.dataset.layer === currentLayer2d ? "flex" : "none";
