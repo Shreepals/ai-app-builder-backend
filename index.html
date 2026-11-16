@@ -6100,7 +6100,30 @@ document.getElementById("moveLayerUp2d").onclick = function() {
   document.getElementById("layerStatus2d").textContent =
     option.value + " Layer ऊपर आ गई है।";
 };
-                  
+
+document.getElementById("moveLayerDown2d").onclick = function() {
+  const select = document.getElementById("layerSelect2d");
+  const index = select.selectedIndex;
+
+  if (index < 0 || index >= select.options.length - 1) {
+    alert("यह Layer पहले से सबसे नीचे है।");
+    return;
+  }
+
+  const option = select.options[index];
+  const next = select.options[index + 1];
+
+  select.insertBefore(next, option);
+
+  select.value = option.value;
+  currentLayer2d = option.value;
+
+  updateLayerObjects2d();
+
+  document.getElementById("layerStatus2d").textContent =
+    option.value + " Layer नीचे आ गई है।";
+};
+                    
 function addObject2d(type, emoji, color) {
   const obj = document.createElement("div");
 
