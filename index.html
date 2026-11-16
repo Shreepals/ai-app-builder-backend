@@ -5895,13 +5895,12 @@ document.getElementById("layerSelect2d").onchange = function() {
 function updateLayerObjects2d() {
   objects2d.forEach(obj => {
     obj.style.display =
-      obj.dataset.layer === currentLayer2d &&
       !hiddenLayers2d.includes(obj.dataset.layer)
         ? "flex"
         : "none";
   });
 }
-
+  
 function updateLayerZOrder2d() {
   const select = document.getElementById("layerSelect2d");
 
