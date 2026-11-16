@@ -5984,6 +5984,8 @@ function updateLayerObjectList2d() {
 
     item.onclick = () => {
       selectedObject2d = obj;
+      
+    updateLayerObjectList2d();  
 
       document.getElementById("selectedObject2d").textContent =
         "Selected: " + (obj.dataset.name || obj.dataset.type);
