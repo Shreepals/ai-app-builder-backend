@@ -6201,6 +6201,13 @@ obj.appendChild(rotateHandle);
 rotateHandle.addEventListener("pointerdown", event => {
   event.preventDefault();
   event.stopPropagation();
+  
+if (
+  obj.dataset.locked === "true" ||
+  lockedLayers2d.includes(obj.dataset.layer)
+) {
+  return;
+  }  
 
   rotateHandle.setPointerCapture(event.pointerId);
 
