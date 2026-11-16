@@ -6069,7 +6069,30 @@ document.getElementById("toggleLayerLock2d").onclick = function() {
       ? layerName + " Layer Lock हो गई है।"
       : layerName + " Layer Unlock हो गई है।";
 };
-                
+
+document.getElementById("moveLayerUp2d").onclick = function() {
+  const select = document.getElementById("layerSelect2d");
+  const index = select.selectedIndex;
+
+  if (index <= 0) {
+    alert("यह Layer पहले से सबसे ऊपर है।");
+    return;
+  }
+
+  const option = select.options[index];
+  const previous = select.options[index - 1];
+
+  select.insertBefore(option, previous);
+
+  select.value = option.value;
+  currentLayer2d = option.value;
+
+  updateLayerObjects2d();
+
+  document.getElementById("layerStatus2d").textContent =
+    option.value + " Layer ऊपर आ गई है।";
+};
+                  
 function addObject2d(type, emoji, color) {
   const obj = document.createElement("div");
 
