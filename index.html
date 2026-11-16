@@ -5945,6 +5945,53 @@ function updateLayerObjects2d() {
   });
 }
   
+function updateLayerObjectList2d() {
+  const list = document.getElementById("layerObjectList2d");
+  const layerName = document.getElementById("layerSelect2d").value;
+
+  const layerObjects = objects2d.filter(obj =>
+    obj.dataset.layer === layerName
+  );
+
+  list.innerHTML = "";
+
+  if (layerObjects.length === 0) {
+    list.innerHTML =
+      '<p style="color:#9eacc5;">इस Layer में कोई Object नहीं है।</p>';
+    return;
+  }
+
+  layerObjects.forEach(obj => {
+    const item = document.createElement("div");
+
+    item.textContent =
+      (obj.dataset.emoji || obj.textContent) + " " +
+      (obj.dataset.name || obj.dataset.type);
+
+    item.style.cssText =
+      "padding:9px;margin:5px 0;background:#24344d;border-radius:6px;cursor:pointer;color:white;";
+
+    item.onclick = () => {
+      selectedObject2d = obj;
+
+      document.getElementById("selectedObject2d").textContent =
+        "Selected: " + (obj.dataset.name || obj.dataset.type);
+
+      document.getElementById("objectName2d").value =
+        obj.dataset.name || obj.dataset.type;
+
+      document.getElementById("objectX2d").value = obj.offsetLeft;
+      document.getElementById("objectY2d").value = obj.offsetTop;
+      document.getElementById("objectW2d").value = obj.offsetWidth;
+      document.getElementById("objectH2d").value = obj.offsetHeight;
+      document.getElementById("objectRotation2d").value =
+        Number(obj.dataset.rotation || 0);
+    };
+
+    list.appendChild(item);
+  });
+  }  
+
 function updateLayerZOrder2d() {
   const select = document.getElementById("layerSelect2d");
 
