@@ -6118,7 +6118,10 @@ document.getElementById("objectRotation2d").value =
   Number(obj.dataset.rotation || 0);    
     
 // Locked Object को Move होने से रोकें
-if (obj.dataset.locked === "true") {
+if (
+  obj.dataset.locked === "true" ||
+  lockedLayers2d.includes(obj.dataset.layer)
+) {
   return;
 }    
     obj.setPointerCapture(event.pointerId);
