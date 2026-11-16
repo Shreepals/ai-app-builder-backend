@@ -5990,7 +5990,9 @@ document.getElementById("renameLayer2d").onclick = function() {
 
   currentLayer2d = cleanName;
   select.value = cleanName;
+  
   updateLayerObjects2d();
+  updateLayerZOrder2d();
 
   document.getElementById("layerStatus2d").textContent =
     "Current Layer: " + cleanName;
