@@ -5974,6 +5974,13 @@ function updateLayerObjectList2d() {
 
     item.style.cssText =
       "padding:9px;margin:5px 0;background:#24344d;border-radius:6px;cursor:pointer;color:white;";
+    
+    if (obj === selectedObject2d) {
+  item.style.border = "2px solid #3b82f6";
+  item.style.background = "#1e3a5f";
+} else {
+  item.style.border = "2px solid transparent";
+    }
 
     item.onclick = () => {
       selectedObject2d = obj;
