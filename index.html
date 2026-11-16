@@ -5901,6 +5901,12 @@ document.getElementById("layerSelect2d").onchange = function() {
 
   currentLayer2d = this.value;
   updateLayerObjects2d();
+  
+ const savedOpacity = layerOpacities2d[currentLayer2d] ?? 1;
+
+layerOpacity2d.value = savedOpacity * 100;
+layerOpacityValue2d.textContent =
+  Math.round(savedOpacity * 100) + "%"; 
 
   document.getElementById("layerStatus2d").textContent =
     "Current Layer: " + currentLayer2d;
