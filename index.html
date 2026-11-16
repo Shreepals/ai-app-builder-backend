@@ -6061,6 +6061,7 @@ document.getElementById("toggleLayerVisibility2d").onclick = function() {
   }
 
   updateLayerObjects2d();
+  updateLayerZOrder2d();
 
   this.textContent = hiddenLayers2d.includes(layerName)
     ? "👁️ Show Layer"
