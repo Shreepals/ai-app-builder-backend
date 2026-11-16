@@ -6035,7 +6035,33 @@ document.getElementById("toggleLayerVisibility2d").onclick = function() {
       ? layerName + " Layer छिपी हुई है।"
       : layerName + " Layer दिखाई दे रही है।";
 };
-              
+  
+let lockedLayers2d = [];
+
+document.getElementById("toggleLayerLock2d").onclick = function() {
+  const select = document.getElementById("layerSelect2d");
+  const layerName = select.value;
+
+  if (!layerName) return;
+
+  if (lockedLayers2d.includes(layerName)) {
+    lockedLayers2d = lockedLayers2d.filter(
+      name => name !== layerName
+    );
+  } else {
+    lockedLayers2d.push(layerName);
+  }
+
+  this.textContent = lockedLayers2d.includes(layerName)
+    ? "🔓 Unlock Layer"
+    : "🔒 Lock Layer";
+
+  document.getElementById("layerStatus2d").textContent =
+    lockedLayers2d.includes(layerName)
+      ? layerName + " Layer Lock हो गई है।"
+      : layerName + " Layer Unlock हो गई है।";
+};
+                
 function addObject2d(type, emoji, color) {
   const obj = document.createElement("div");
 
