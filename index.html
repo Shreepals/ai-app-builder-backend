@@ -6286,6 +6286,9 @@ function addObject2d(type, emoji, color) {
 
   world2d.appendChild(obj);
   objects2d.push(obj);
+  
+  updateLayerZOrder2d();
+  updateLayerObjectList2d();
 
   obj.addEventListener("pointerdown", event => {
     event.preventDefault();
