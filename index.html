@@ -5733,6 +5733,8 @@ document.getElementById("redoObject2d").onclick = () => {
   obj.remove();
 
   objects2d = objects2d.filter(item => item !== obj);
+  
+  updateLayerObjectList2d();
 
   selectedObject2d = null;
 
