@@ -6098,6 +6098,7 @@ layerOpacity2d.oninput = function() {
   const select = document.getElementById("layerSelect2d");
   const layerName = select.value;
   const opacity = Number(this.value) / 100;
+  layerOpacities2d[layerName] = opacity;
 
   layerOpacityValue2d.textContent = this.value + "%";
 
