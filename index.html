@@ -6112,6 +6112,7 @@ document.getElementById("moveLayerUp2d").onclick = function() {
   currentLayer2d = option.value;
 
   updateLayerObjects2d();
+  updateLayerZOrder2d();
 
   document.getElementById("layerStatus2d").textContent =
     option.value + " Layer ऊपर आ गई है।";
