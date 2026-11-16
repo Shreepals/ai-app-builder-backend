@@ -6539,6 +6539,8 @@ document.getElementById("deleteObject2d").onclick = () => {
   selectedObject2d.remove();
 
   objects2d = objects2d.filter(obj => obj !== selectedObject2d);
+  
+  updateLayerObjectList2d();
 
   selectedObject2d = null;
 
