@@ -6088,7 +6088,24 @@ document.getElementById("toggleLayerVisibility2d").onclick = function() {
       ? layerName + " Layer छिपी हुई है।"
       : layerName + " Layer दिखाई दे रही है।";
 };
-  
+
+const layerOpacity2d = document.getElementById("layerOpacity2d");
+const layerOpacityValue2d = document.getElementById("layerOpacityValue2d");
+
+layerOpacity2d.oninput = function() {
+  const select = document.getElementById("layerSelect2d");
+  const layerName = select.value;
+  const opacity = Number(this.value) / 100;
+
+  layerOpacityValue2d.textContent = this.value + "%";
+
+  objects2d.forEach(obj => {
+    if (obj.dataset.layer === layerName) {
+      obj.style.opacity = opacity;
+    }
+  });
+};
+    
 let lockedLayers2d = [];
 
 document.getElementById("toggleLayerLock2d").onclick = function() {
