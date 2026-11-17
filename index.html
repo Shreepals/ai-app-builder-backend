@@ -6904,6 +6904,38 @@ document.getElementById("resetSpriteCrop2d").onclick = function() {
 
   document.getElementById("spriteStatus2d").textContent =
     "Sprite Crop Reset हो गया!";
+}; 
+  
+// ===== SAVE SPRITE TO LIBRARY =====
+
+document.getElementById("saveSpriteLibrary2d").onclick = function() {
+
+  if (!spriteImageData2d) {
+    alert("पहले कोई Image Import करें।");
+    return;
+  }
+
+  try {
+    let library = JSON.parse(
+      localStorage.getItem("spriteLibrary2d") || "[]"
+    );
+
+    library.push({
+      name: "Sprite " + (library.length + 1),
+      image: spriteImageData2d
+    });
+
+    localStorage.setItem(
+      "spriteLibrary2d",
+      JSON.stringify(library)
+    );
+
+    document.getElementById("spriteStatus2d").textContent =
+      "Sprite Library में सफलतापूर्वक Save हो गई!";
+
+  } catch (error) {
+    alert("Storage भर गया है। कुछ पुरानी Images हटाएँ।");
+  }
 };  
   
 // ===== 2D OBJECT PROPERTIES =====
