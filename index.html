@@ -6938,6 +6938,85 @@ document.getElementById("saveSpriteLibrary2d").onclick = function() {
   }
 };  
   
+// ===== LOAD SPRITE LIBRARY =====
+
+function renderSpriteLibrary2d() {
+
+  const list = document.getElementById("spriteLibraryList2d");
+
+  const library = JSON.parse(
+    localStorage.getItem("spriteLibrary2d") || "[]"
+  );
+
+  list.innerHTML = "";
+
+  if (library.length === 0) {
+    list.textContent = "अभी Library खाली है।";
+    return;
+  }
+
+  library.forEach((sprite, index) => {
+
+    const item = document.createElement("div");
+
+    item.style.cssText =
+      "padding:10px;margin:8px 0;background:#24344d;border-radius:8px;";
+
+    const img = document.createElement("img");
+    img.src = sprite.image;
+    img.style.cssText =
+      "width:65px;height:65px;object-fit:contain;display:block;margin-bottom:8px;";
+
+    const name = document.createElement("p");
+    name.textContent = sprite.name;
+
+    const addBtn = document.createElement("button");
+    addBtn.className = "btn";
+    addBtn.textContent = "➕ Add to Scene";
+
+    addBtn.onclick = function() {
+
+      const obj = document.createElement("div");
+
+      obj.dataset.type = "Sprite";
+      obj.dataset.name = sprite.name;
+      obj.dataset.layer = currentLayer2d;
+      obj.dataset.emoji = "";
+
+      obj.style.cssText = `
+        position:absolute;
+        left:100px;
+        top:100px;
+        width:80px;
+        height:80px;
+        background-image:url("${sprite.image}");
+        background-size:contain;
+        background-position:center;
+        background-repeat:no-repeat;
+        cursor:grab;
+        touch-action:none;
+      `;
+
+      world2d.appendChild(obj);
+      objects2d.push(obj);
+
+      updateLayerZOrder2d();
+      updateLayerObjectList2d();
+
+      document.getElementById("spriteStatus2d").textContent =
+        "Library से Sprite Scene में जोड़ दी गई!";
+    };
+
+    item.appendChild(img);
+    item.appendChild(name);
+    item.appendChild(addBtn);
+
+    list.appendChild(item);
+  });
+}
+
+renderSpriteLibrary2d();  
+  
 // ===== 2D OBJECT PROPERTIES =====
 
 document.getElementById("applyProperties2d").onclick = () => {
