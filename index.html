@@ -7232,7 +7232,81 @@ document.getElementById("tileZoomReset2d").onclick = function() {
 };
 
 updateTileZoom2d();
-    
+
+// ===== TILEMAP UNDO / REDO HISTORY =====
+
+let tileHistory2d = [
+  JSON.stringify([])
+];
+
+let tileHistoryIndex2d = 0;
+
+function getTilemapData2d() {
+  return Array.from(
+    world2d.querySelectorAll("[data-tile-cell2d]")
+  ).map(tile => ({
+    x: Number(tile.dataset.x),
+    y: Number(tile.dataset.y),
+    type: tile.dataset.tileKind2d
+  }));
+}
+
+function saveTileHistory2d() {
+  const current = JSON.stringify(getTilemapData2d());
+
+  if (current === tileHistory2d[tileHistoryIndex2d]) {
+    return;
+  }
+
+  tileHistory2d =
+    tileHistory2d.slice(0, tileHistoryIndex2d + 1);
+
+  tileHistory2d.push(current);
+
+  if (tileHistory2d.length > 50) {
+    tileHistory2d.shift();
+  }
+
+  tileHistoryIndex2d = tileHistory2d.length - 1;
+}
+
+function restoreTileHistory2d() {
+  const tiles = JSON.parse(
+    tileHistory2d[tileHistoryIndex2d]
+  );
+
+  world2d.querySelectorAll("[data-tile-cell2d]").forEach(tile => {
+    tile.remove();
+  });
+
+  tiles.forEach(data => {
+    if (!tileColors2d[data.type]) return;
+
+    const tile = document.createElement("div");
+
+    tile.dataset.tileCell2d = "true";
+    tile.dataset.x = data.x;
+    tile.dataset.y = data.y;
+    tile.dataset.type = "Tile";
+    tile.dataset.tileKind2d = data.type;
+
+    tile.style.cssText = `
+      position:absolute;
+      left:${data.x}px;
+      top:${data.y}px;
+      width:40px;
+      height:40px;
+      background:${tileColors2d[data.type]};
+      border:1px solid rgba(255,255,255,0.25);
+      box-sizing:border-box;
+      pointer-events:none;
+      z-index:1;
+    `;
+
+    world2d.appendChild(tile);
+  });
+  }
+      
 // Tile Selection
 document.querySelectorAll("[data-tile2d]").forEach(button => {
   button.onclick = function() {
