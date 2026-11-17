@@ -596,8 +596,36 @@ style="background:#10192c;padding:12px;border-radius:10px;margin:10px 0;">
     Sprite Import करने के लिए Image चुनें।
   </p>
 
-</div>   
-    
+</div> 
+
+<!-- TILEMAP EDITOR -->
+<div id="tilemapEditor2d"
+style="background:#10192c;padding:12px;border-radius:10px;margin:12px 0;">
+
+  <h3>🧱 Tilemap Editor</h3>
+
+  <p style="color:#9eacc5;">अपना Tile चुनें:</p>
+
+  <div style="display:flex;gap:8px;flex-wrap:wrap;">
+
+    <button class="btn" data-tile2d="grass">🟩 Grass</button>
+
+    <button class="btn" data-tile2d="sand">🟨 Sand</button>
+
+    <button class="btn" data-tile2d="water">🟦 Water</button>
+
+    <button class="btn" data-tile2d="stone">⬜ Stone</button>
+
+    <button class="btn" data-tile2d="erase">🧹 Eraser</button>
+
+  </div>
+
+  <p id="tilemapStatus2d" style="color:#9eacc5;margin-top:10px;">
+    Tile चुनकर Scene में लगाएँ।
+  </p>
+
+</div>
+        
 <div id="scene2d"
 style="height:420px;background:#17243b;border:2px dashed #527cff;border-radius:12px;position:relative;overflow:hidden;">
 
