@@ -6973,6 +6973,33 @@ function renderSpriteLibrary2d() {
     const addBtn = document.createElement("button");
     addBtn.className = "btn";
     addBtn.textContent = "➕ Add to Scene";
+  
+    const deleteBtn = document.createElement("button");
+
+deleteBtn.className = "btn";
+deleteBtn.textContent = "🗑️ Delete";
+
+deleteBtn.style.marginLeft = "8px";
+
+deleteBtn.onclick = function() {
+
+  if (!confirm("क्या आप यह Sprite Delete करना चाहते हैं?")) {
+    return;
+  }
+
+  let savedLibrary = JSON.parse(
+    localStorage.getItem("spriteLibrary2d") || "[]"
+  );
+
+  savedLibrary.splice(index, 1);
+
+  localStorage.setItem(
+    "spriteLibrary2d",
+    JSON.stringify(savedLibrary)
+  );
+
+  renderSpriteLibrary2d();
+};
 
     addBtn.onclick = function() {
 
