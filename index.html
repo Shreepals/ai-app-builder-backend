@@ -6814,6 +6814,59 @@ document.getElementById("rotateSpriteRight2d").onclick = function() {
 
   document.getElementById("spriteStatus2d").textContent =
     "Sprite Right Rotate हो गई!";
+};
+  
+// ===== SPRITE CROP SYSTEM =====
+
+document.getElementById("applySpriteCrop2d").onclick = function() {
+
+  if (!selectedSprite2d) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  const left = Math.min(45, Math.max(0,
+    Number(document.getElementById("cropLeft2d").value) || 0
+  ));
+
+  const right = Math.min(45, Math.max(0,
+    Number(document.getElementById("cropRight2d").value) || 0
+  ));
+
+  const top = Math.min(45, Math.max(0,
+    Number(document.getElementById("cropTop2d").value) || 0
+  ));
+
+  const bottom = Math.min(45, Math.max(0,
+    Number(document.getElementById("cropBottom2d").value) || 0
+  ));
+
+  selectedSprite2d.style.clipPath =
+    `inset(${top}% ${right}% ${bottom}% ${left}%)`;
+
+  document.getElementById("spriteStatus2d").textContent =
+    "Sprite Crop सफलतापूर्वक लागू हो गया!";
+};
+
+
+// ===== RESET SPRITE CROP =====
+
+document.getElementById("resetSpriteCrop2d").onclick = function() {
+
+  if (!selectedSprite2d) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  selectedSprite2d.style.clipPath = "none";
+
+  document.getElementById("cropLeft2d").value = 0;
+  document.getElementById("cropRight2d").value = 0;
+  document.getElementById("cropTop2d").value = 0;
+  document.getElementById("cropBottom2d").value = 0;
+
+  document.getElementById("spriteStatus2d").textContent =
+    "Sprite Crop Reset हो गया!";
 };  
   
 // ===== 2D OBJECT PROPERTIES =====
