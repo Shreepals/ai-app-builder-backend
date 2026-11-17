@@ -6753,7 +6753,6 @@ document.getElementById("applySpriteSize2d").onclick = function() {
     "Sprite का Size बदल दिया गया!";
 };
 
-
 // ===== LEFT / RIGHT FLIP =====
 
 document.getElementById("flipSprite2d").onclick = function() {
@@ -6774,6 +6773,47 @@ document.getElementById("flipSprite2d").onclick = function() {
 
   document.getElementById("spriteStatus2d").textContent =
     flipped ? "Sprite वापस सीधी हो गई!" : "Sprite Left / Right Flip हो गई!";
+}; 
+  
+// ===== SPRITE ROTATE SYSTEM =====
+
+document.getElementById("rotateSpriteLeft2d").onclick = function() {
+
+  if (!selectedSprite2d) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  let angle = Number(selectedSprite2d.dataset.rotate || 0);
+
+  angle -= 90;
+
+  selectedSprite2d.dataset.rotate = angle;
+
+  selectedSprite2d.style.rotate = angle + "deg";
+
+  document.getElementById("spriteStatus2d").textContent =
+    "Sprite Left Rotate हो गई!";
+};
+
+
+document.getElementById("rotateSpriteRight2d").onclick = function() {
+
+  if (!selectedSprite2d) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  let angle = Number(selectedSprite2d.dataset.rotate || 0);
+
+  angle += 90;
+
+  selectedSprite2d.dataset.rotate = angle;
+
+  selectedSprite2d.style.rotate = angle + "deg";
+
+  document.getElementById("spriteStatus2d").textContent =
+    "Sprite Right Rotate हो गई!";
 };  
   
 // ===== 2D OBJECT PROPERTIES =====
