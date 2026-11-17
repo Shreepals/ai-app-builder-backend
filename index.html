@@ -6691,6 +6691,53 @@ scene2d.addEventListener("pointerdown", function(event) {
   }
 });  
   
+// ===== APPLY SPRITE SIZE =====
+
+document.getElementById("applySpriteSize2d").onclick = function() {
+
+  if (!selectedSprite2d) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  const width = Math.max(10,
+    Number(document.getElementById("spriteWidth2d").value) || 80
+  );
+
+  const height = Math.max(10,
+    Number(document.getElementById("spriteHeight2d").value) || 80
+  );
+
+  selectedSprite2d.style.width = width + "px";
+  selectedSprite2d.style.height = height + "px";
+
+  document.getElementById("spriteStatus2d").textContent =
+    "Sprite का Size बदल दिया गया!";
+};
+
+
+// ===== LEFT / RIGHT FLIP =====
+
+document.getElementById("flipSprite2d").onclick = function() {
+
+  if (!selectedSprite2d) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  const flipped =
+    selectedSprite2d.dataset.flipped === "true";
+
+  selectedSprite2d.dataset.flipped =
+    flipped ? "false" : "true";
+
+  selectedSprite2d.style.scale =
+    flipped ? "1 1" : "-1 1";
+
+  document.getElementById("spriteStatus2d").textContent =
+    flipped ? "Sprite वापस सीधी हो गई!" : "Sprite Left / Right Flip हो गई!";
+};  
+  
 // ===== 2D OBJECT PROPERTIES =====
 
 document.getElementById("applyProperties2d").onclick = () => {
