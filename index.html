@@ -6671,7 +6671,25 @@ document.getElementById("addSpriteToScene2d").onclick = function() {
 
   document.getElementById("spriteStatus2d").textContent =
     "Sprite सफलतापूर्वक Scene में जुड़ गई!";
-};  
+}; 
+  
+// ===== SPRITE SIZE AND FLIP SYSTEM =====
+
+let selectedSprite2d = null;
+
+scene2d.addEventListener("pointerdown", function(event) {
+  const obj = event.target.closest('[data-type="Sprite"]');
+
+  if (obj && scene2d.contains(obj)) {
+    selectedSprite2d = obj;
+
+    document.getElementById("spriteWidth2d").value =
+      obj.offsetWidth;
+
+    document.getElementById("spriteHeight2d").value =
+      obj.offsetHeight;
+  }
+});  
   
 // ===== 2D OBJECT PROPERTIES =====
 
