@@ -5943,9 +5943,10 @@ objects2d.forEach(obj => {
 function updateLayerObjects2d() {
   objects2d.forEach(obj => {
     obj.style.display =
-      !hiddenLayers2d.includes(obj.dataset.layer)
-        ? "flex"
-        : "none";
+  !hiddenLayers2d.includes(obj.dataset.layer) &&
+  obj.dataset.hidden !== "true"
+    ? "flex"
+    : "none";
   });
 }
   
