@@ -6576,6 +6576,42 @@ document.getElementById("objectH2d").value =
     type + " Scene में जोड़ दिया गया। अब इसे खींचकर रख सकते हैं।";
 }
   
+// ===== SPRITE IMPORT SYSTEM =====
+
+let spriteImageUrl2d = "";
+
+document.getElementById("spriteFileInput2d").onchange = function() {
+  const file = this.files[0];
+
+  if (!file) return;
+
+  if (!file.type.startsWith("image/")) {
+    alert("कृपया PNG, JPG या WEBP Image चुनें।");
+    return;
+  }
+
+  if (spriteImageUrl2d) {
+    URL.revokeObjectURL(spriteImageUrl2d);
+  }
+
+  spriteImageUrl2d = URL.createObjectURL(file);
+
+  const preview = document.getElementById("spritePreview2d");
+  preview.innerHTML = "";
+
+  const img = document.createElement("img");
+  img.src = spriteImageUrl2d;
+  img.style.cssText =
+    "max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;";
+
+  preview.appendChild(img);
+
+  document.getElementById("addSpriteToScene2d").disabled = false;
+
+  document.getElementById("spriteStatus2d").textContent =
+    "Image Import सफल! अब Preview देख सकते हैं।";
+};  
+  
 // ===== 2D OBJECT PROPERTIES =====
 
 document.getElementById("applyProperties2d").onclick = () => {
