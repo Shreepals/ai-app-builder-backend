@@ -6610,6 +6610,41 @@ document.getElementById("spriteFileInput2d").onchange = function() {
 
   document.getElementById("spriteStatus2d").textContent =
     "Image Import सफल! अब Preview देख सकते हैं।";
+}; 
+  
+document.getElementById("addSpriteToScene2d").onclick = function() {
+
+  if (!spriteImageUrl2d) return;
+
+  const obj = document.createElement("div");
+
+  obj.dataset.type = "Sprite";
+  obj.dataset.name = "Imported Sprite";
+  obj.dataset.layer = currentLayer2d;
+  obj.dataset.emoji = "";
+
+  obj.style.cssText = `
+    position:absolute;
+    left:100px;
+    top:100px;
+    width:80px;
+    height:80px;
+    background-image:url("${spriteImageUrl2d}");
+    background-size:contain;
+    background-position:center;
+    background-repeat:no-repeat;
+    cursor:grab;
+    touch-action:none;
+  `;
+
+  world2d.appendChild(obj);
+  objects2d.push(obj);
+
+  updateLayerZOrder2d();
+  updateLayerObjectList2d();
+
+  document.getElementById("spriteStatus2d").textContent =
+    "Sprite सफलतापूर्वक Scene में जुड़ गई!";
 };  
   
 // ===== 2D OBJECT PROPERTIES =====
