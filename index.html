@@ -7161,6 +7161,7 @@ scene2d.addEventListener("click", function(event) {
   tile.dataset.x = x;
   tile.dataset.y = y;
   tile.dataset.type = "Tile";
+  tile.dataset.tileKind2d = selectedTile2d;
 
   tile.style.cssText = `
     position:absolute;
