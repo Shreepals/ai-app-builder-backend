@@ -474,7 +474,46 @@ style="background:#10192c;padding:12px;border-radius:10px;margin:10px 0;">
 
   </div>
 
-</div>    
+</div> 
+    
+ <!-- SPRITE IMPORT PANEL -->
+
+<div id="spriteImportPanel2d"
+style="background:#10192c;padding:12px;border-radius:10px;margin:10px 0;">
+
+  <h3>🖼️ Sprite Import & Image Editor</h3>
+
+  <label style="display:block;margin:10px 0;">
+    अपनी Sprite Image चुनें:
+  </label>
+
+  <input
+    type="file"
+    id="spriteFileInput2d"
+    accept="image/png,image/jpeg,image/webp"
+    style="width:100%;padding:10px;background:#24344d;color:white;border-radius:8px;"
+  >
+
+  <div id="spritePreview2d"
+  style="margin-top:12px;text-align:center;color:#9eacc5;">
+    अभी कोई Image Import नहीं हुई है।
+  </div>
+
+  <button
+    class="btn"
+    id="addSpriteToScene2d"
+    style="width:100%;margin-top:10px;"
+    disabled
+  >
+    ➕ Add Sprite to Scene
+  </button>
+
+  <p id="spriteStatus2d"
+  style="color:#9eacc5;">
+    Sprite Import करने के लिए Image चुनें।
+  </p>
+
+</div>   
     
 <div id="scene2d"
 style="height:420px;background:#17243b;border:2px dashed #527cff;border-radius:12px;position:relative;overflow:hidden;">
