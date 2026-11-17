@@ -7093,7 +7093,86 @@ deleteBtn.onclick = function() {
   });
 }
 
-renderSpriteLibrary2d();  
+renderSpriteLibrary2d();
+
+// ===== TILEMAP EDITOR SYSTEM =====
+
+let selectedTile2d = "grass";
+
+const tileColors2d = {
+  grass: "#39864b",
+  sand: "#c9a34d",
+  water: "#287fc4",
+  stone: "#858b96"
+};
+
+// Tile Selection
+document.querySelectorAll("[data-tile2d]").forEach(button => {
+  button.onclick = function() {
+    selectedTile2d = this.dataset.tile2d;
+
+    document.getElementById("tilemapStatus2d").textContent =
+      selectedTile2d === "erase"
+        ? "Eraser चुना गया है। Tile हटाने के लिए Scene पर क्लिक करें।"
+        : selectedTile2d + " Tile चुना गया है। अब Scene पर क्लिक करें।";
+  };
+});
+
+// Place or Erase Tiles
+scene2d.addEventListener("click", function(event) {
+
+  if (event.target.closest("#mobileControls2d")) return;
+
+  const rect = scene2d.getBoundingClientRect();
+
+  const x = Math.floor((event.clientX - rect.left) / 40) * 40;
+  const y = Math.floor((event.clientY - rect.top) / 40) * 40;
+
+  if (x < 0 || y < 0) return;
+
+  const oldTile = Array.from(
+    world2d.querySelectorAll("[data-tile-cell2d]")
+  ).find(tile =>
+    Number(tile.dataset.x) === x &&
+    Number(tile.dataset.y) === y
+  );
+
+  if (selectedTile2d === "erase") {
+    if (oldTile) oldTile.remove();
+
+    document.getElementById("tilemapStatus2d").textContent =
+      "Tile हटा दिया गया!";
+    return;
+  }
+
+  if (oldTile) oldTile.remove();
+
+  const tile = document.createElement("div");
+
+  tile.dataset.tileCell2d = "true";
+  tile.dataset.x = x;
+  tile.dataset.y = y;
+  tile.dataset.type = "Tile";
+
+  tile.style.cssText = `
+    position:absolute;
+    left:${x}px;
+    top:${y}px;
+    width:40px;
+    height:40px;
+    background:${tileColors2d[selectedTile2d]};
+    border:1px solid rgba(255,255,255,0.25);
+    box-sizing:border-box;
+    pointer-events:none;
+    z-index:1;
+  `;
+
+  world2d.appendChild(tile);
+
+  document.getElementById("tilemapStatus2d").textContent =
+    "Tile Scene में लगा दिया गया!";
+});
+  
   
 // ===== 2D OBJECT PROPERTIES =====
 
