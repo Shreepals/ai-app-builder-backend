@@ -6679,6 +6679,23 @@ document.getElementById("spriteFileInput2d").onchange = function() {
   }
 
   spriteImageUrl2d = URL.createObjectURL(file);
+  
+  // Image को Save करने योग्य Data में बदलें
+
+const reader = new FileReader();
+
+reader.onload = function(e) {
+  spriteImageData2d = e.target.result;
+
+  document.getElementById("spriteStatus2d").textContent =
+    "Image Library में Save करने के लिए तैयार है!";
+};
+
+reader.onerror = function() {
+  alert("Image पढ़ने में समस्या हुई।");
+};
+
+reader.readAsDataURL(file);
 
   const preview = document.getElementById("spritePreview2d");
   preview.innerHTML = "";
