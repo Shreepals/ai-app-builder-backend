@@ -7433,6 +7433,36 @@ for (let row = 0; row < brushSize; row++) {
   document.getElementById("tilemapStatus2d").textContent =
     "Tile Scene में लगा दिया गया!";
 });
+  
+// ===== TILE DRAG PAINTING =====
+
+let isPaintingTiles2d = false;
+
+scene2d.addEventListener("pointerdown", function(event) {
+  if (event.target.closest("#tilemapEditor2d")) return;
+  isPaintingTiles2d = true;
+});
+
+scene2d.addEventListener("pointermove", function(event) {
+  if (!isPaintingTiles2d) return;
+
+  scene2d.dispatchEvent(
+    new PointerEvent("pointerdown", {
+      bubbles: true,
+      button: 0,
+      clientX: event.clientX,
+      clientY: event.clientY
+    })
+  );
+});
+
+window.addEventListener("pointerup", function() {
+  isPaintingTiles2d = false;
+});
+
+scene2d.addEventListener("pointerleave", function() {
+  isPaintingTiles2d = false;
+});  
 
 // ===== TILEMAP SAVE SYSTEM =====
 
