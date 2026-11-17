@@ -7178,7 +7178,45 @@ document.getElementById("toggleTileGrid2d").onclick = function() {
 };
 
 updateTileGrid2d();
-  
+
+// ===== TILEMAP ZOOM SYSTEM =====
+
+let tileZoom2d = 1;
+
+function updateTileZoom2d() {
+
+  world2d.style.zoom = tileZoom2d;
+
+  document.getElementById("tileZoomStatus2d").textContent =
+    "Zoom: " + Math.round(tileZoom2d * 100) + "%";
+}
+
+// Zoom In
+document.getElementById("tileZoomIn2d").onclick = function() {
+
+  tileZoom2d = Math.min(2, tileZoom2d + 0.1);
+
+  updateTileZoom2d();
+};
+
+// Zoom Out
+document.getElementById("tileZoomOut2d").onclick = function() {
+
+  tileZoom2d = Math.max(0.5, tileZoom2d - 0.1);
+
+  updateTileZoom2d();
+};
+
+// Reset Zoom
+document.getElementById("tileZoomReset2d").onclick = function() {
+
+  tileZoom2d = 1;
+
+  updateTileZoom2d();
+};
+
+updateTileZoom2d();
+    
 // Tile Selection
 document.querySelectorAll("[data-tile2d]").forEach(button => {
   button.onclick = function() {
