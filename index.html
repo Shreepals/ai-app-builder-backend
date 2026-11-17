@@ -531,6 +531,44 @@ style="background:#10192c;padding:12px;border-radius:10px;margin:10px 0;">
   <button class="btn" id="flipSprite2d">
     ↔️ Left / Right Flip
   </button>
+  
+  <!-- SPRITE ROTATE AND CROP EDITOR -->
+
+<div style="margin-top:12px;padding:10px;background:#17243a;border-radius:8px;">
+
+  <h4>🔄 Sprite Rotate</h4>
+
+  <button class="btn" id="rotateSpriteLeft2d">
+    ↶ Rotate Left 90°
+  </button>
+
+  <button class="btn" id="rotateSpriteRight2d">
+    ↷ Rotate Right 90°
+  </button>
+
+  <h4 style="margin-top:15px;">✂️ Sprite Crop</h4>
+
+  <label>Crop Left (%)</label>
+  <input type="number" id="cropLeft2d" value="0" min="0" max="45">
+
+  <label>Crop Right (%)</label>
+  <input type="number" id="cropRight2d" value="0" min="0" max="45">
+
+  <label>Crop Top (%)</label>
+  <input type="number" id="cropTop2d" value="0" min="0" max="45">
+
+  <label>Crop Bottom (%)</label>
+  <input type="number" id="cropBottom2d" value="0" min="0" max="45">
+
+  <button class="btn" id="applySpriteCrop2d">
+    ✂️ Apply Crop
+  </button>
+
+  <button class="btn secondary" id="resetSpriteCrop2d">
+    Reset Crop
+  </button>
+
+    </div>
 
 </div>
 
