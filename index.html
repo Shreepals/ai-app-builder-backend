@@ -7134,6 +7134,31 @@ const tileColors2d = {
   stone: "#858b96"
 };
 
+// ===== TILEMAP GRID ON / OFF =====
+
+let tileGridVisible2d = true;
+
+function updateTileGrid2d() {
+  world2d.style.backgroundImage = tileGridVisible2d
+    ? `
+      linear-gradient(to right, rgba(255,255,255,0.20) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(255,255,255,0.20) 1px, transparent 1px)
+    `
+    : "none";
+
+  world2d.style.backgroundSize = "40px 40px";
+
+  document.getElementById("toggleTileGrid2d").textContent =
+    tileGridVisible2d ? "🔲 Grid: ON" : "⬜ Grid: OFF";
+}
+
+document.getElementById("toggleTileGrid2d").onclick = function() {
+  tileGridVisible2d = !tileGridVisible2d;
+  updateTileGrid2d();
+};
+
+updateTileGrid2d();
+  
 // Tile Selection
 document.querySelectorAll("[data-tile2d]").forEach(button => {
   button.onclick = function() {
