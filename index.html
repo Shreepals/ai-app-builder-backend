@@ -7326,7 +7326,25 @@ document.getElementById("tileUndo2d").onclick = function() {
   document.getElementById("tileUndoStatus2d").textContent =
     "↩️ पिछली Tile कार्रवाई वापस हो गई!";
 };
-        
+
+// ===== TILEMAP REDO BUTTON =====
+
+document.getElementById("tileRedo2d").onclick = function() {
+
+  if (tileHistoryIndex2d >= tileHistory2d.length - 1) {
+    document.getElementById("tileUndoStatus2d").textContent =
+      "Redo करने के लिए कोई कार्रवाई नहीं है।";
+    return;
+  }
+
+  tileHistoryIndex2d++;
+
+  restoreTileHistory2d();
+
+  document.getElementById("tileUndoStatus2d").textContent =
+    "↪️ Tile कार्रवाई फिर से लागू हो गई!";
+};
+          
 // Tile Selection
 document.querySelectorAll("[data-tile2d]").forEach(button => {
   button.onclick = function() {
