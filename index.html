@@ -6001,6 +6001,26 @@ function updateLayerObjectList2d() {
       document.getElementById("objectRotation2d").value =
         Number(obj.dataset.rotation || 0);
     };
+    
+    const visibilityBtn = document.createElement("button");
+
+visibilityBtn.textContent =
+  obj.dataset.hidden === "true" ? "👁️ Show" : "🙈 Hide";
+
+visibilityBtn.style.cssText =
+  "margin:4px;padding:5px 8px;border:0;border-radius:5px;cursor:pointer;";
+
+visibilityBtn.onclick = event => {
+  event.stopPropagation();
+
+  obj.dataset.hidden =
+    obj.dataset.hidden === "true" ? "false" : "true";
+
+  updateLayerObjects2d();
+  updateLayerObjectList2d();
+};
+
+item.appendChild(visibilityBtn);
 
     list.appendChild(item);
   });
