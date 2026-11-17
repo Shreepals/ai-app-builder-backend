@@ -7181,6 +7181,72 @@ scene2d.addEventListener("click", function(event) {
   document.getElementById("tilemapStatus2d").textContent =
     "Tile Scene में लगा दिया गया!";
 });
+
+// ===== TILEMAP SAVE SYSTEM =====
+
+document.getElementById("saveTilemap2d").onclick = function() {
+
+  const tiles = Array.from(
+    world2d.querySelectorAll("[data-tile-cell2d]")
+  ).map(tile => ({
+    x: Number(tile.dataset.x),
+    y: Number(tile.dataset.y),
+    type: tile.dataset.tileKind2d
+  }));
+
+  localStorage.setItem(
+    "savedTilemap2d",
+    JSON.stringify(tiles)
+  );
+
+  document.getElementById("tilemapStatus2d").textContent =
+    "💾 Tilemap सफलतापूर्वक Save हो गया!";
+};
+
+
+// ===== TILEMAP LOAD SYSTEM =====
+
+document.getElementById("loadTilemap2d").onclick = function() {
+
+  const tiles = JSON.parse(
+    localStorage.getItem("savedTilemap2d") || "[]"
+  );
+
+  world2d.querySelectorAll("[data-tile-cell2d]").forEach(tile => {
+    tile.remove();
+  });
+
+  tiles.forEach(data => {
+
+    if (!tileColors2d[data.type]) return;
+
+    const tile = document.createElement("div");
+
+    tile.dataset.tileCell2d = "true";
+    tile.dataset.x = data.x;
+    tile.dataset.y = data.y;
+    tile.dataset.type = "Tile";
+    tile.dataset.tileKind2d = data.type;
+
+    tile.style.cssText = `
+      position:absolute;
+      left:${data.x}px;
+      top:${data.y}px;
+      width:40px;
+      height:40px;
+      background:${tileColors2d[data.type]};
+      border:1px solid rgba(255,255,255,0.25);
+      box-sizing:border-box;
+      pointer-events:none;
+      z-index:1;
+    `;
+
+    world2d.appendChild(tile);
+  });
+
+  document.getElementById("tilemapStatus2d").textContent =
+    "📂 Tilemap Load हो गया!";
+};
   
   
 // ===== 2D OBJECT PROPERTIES =====
