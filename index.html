@@ -7236,8 +7236,13 @@ scene2d.addEventListener("click", function(event) {
 
   const rect = scene2d.getBoundingClientRect();
 
-  const x = Math.floor((event.clientX - rect.left) / 40) * 40;
-  const y = Math.floor((event.clientY - rect.top) / 40) * 40;
+  const x = Math.floor(
+  (event.clientX - rect.left) / (40 * tileZoom2d)
+) * 40;
+
+const y = Math.floor(
+  (event.clientY - rect.top) / (40 * tileZoom2d)
+) * 40;
 
   if (x < 0 || y < 0) return;
   
