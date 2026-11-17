@@ -7308,7 +7308,25 @@ function restoreTileHistory2d() {
   }
   
   saveTileHistory2d();
-      
+ 
+// ===== TILEMAP UNDO BUTTON =====
+
+document.getElementById("tileUndo2d").onclick = function() {
+
+  if (tileHistoryIndex2d <= 0) {
+    document.getElementById("tileUndoStatus2d").textContent =
+      "Undo करने के लिए कोई पुरानी कार्रवाई नहीं है।";
+    return;
+  }
+
+  tileHistoryIndex2d--;
+
+  restoreTileHistory2d();
+
+  document.getElementById("tileUndoStatus2d").textContent =
+    "↩️ पिछली Tile कार्रवाई वापस हो गई!";
+};
+        
 // Tile Selection
 document.querySelectorAll("[data-tile2d]").forEach(button => {
   button.onclick = function() {
