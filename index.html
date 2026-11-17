@@ -6021,6 +6021,25 @@ visibilityBtn.onclick = event => {
 };
 
 item.appendChild(visibilityBtn);
+    
+const lockBtn = document.createElement("button");
+
+lockBtn.textContent =
+  obj.dataset.locked === "true" ? "🔓 Unlock" : "🔒 Lock";
+
+lockBtn.style.cssText =
+  "margin:4px;padding:5px 8px;border:0;border-radius:5px;cursor:pointer;";
+
+lockBtn.onclick = event => {
+  event.stopPropagation();
+
+  obj.dataset.locked =
+    obj.dataset.locked === "true" ? "false" : "true";
+
+  updateLayerObjectList2d();
+};
+
+item.appendChild(lockBtn);    
 
     list.appendChild(item);
   });
