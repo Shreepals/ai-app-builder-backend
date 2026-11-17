@@ -7359,6 +7359,10 @@ document.querySelectorAll("[data-tile2d]").forEach(button => {
 
 // Place or Erase Tiles
 scene2d.addEventListener("pointerdown", function(event) {
+  
+if (event.button !== 0) return;
+
+if (event.target.closest("#tilemapEditor2d")) return;  
 
   if (event.target.closest("#mobileControls2d")) return;
 
