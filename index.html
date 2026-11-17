@@ -7152,47 +7152,57 @@ scene2d.addEventListener("click", function(event) {
   const y = Math.floor((event.clientY - rect.top) / 40) * 40;
 
   if (x < 0 || y < 0) return;
+  
+// ===== TILE BRUSH SIZE SYSTEM =====
 
-  const oldTile = Array.from(
-    world2d.querySelectorAll("[data-tile-cell2d]")
-  ).find(tile =>
-    Number(tile.dataset.x) === x &&
-    Number(tile.dataset.y) === y
-  );
+const brushSize = Number(
+  document.getElementById("tileBrushSize2d").value
+) || 1;
 
-  if (selectedTile2d === "erase") {
+const existingTiles = Array.from(
+  world2d.querySelectorAll("[data-tile-cell2d]")
+);
+
+for (let row = 0; row < brushSize; row++) {
+  for (let col = 0; col < brushSize; col++) {
+
+    const tileX = x + col * 40;
+    const tileY = y + row * 40;
+
+    const oldTile = existingTiles.find(tile =>
+      Number(tile.dataset.x) === tileX &&
+      Number(tile.dataset.y) === tileY
+    );
+
     if (oldTile) oldTile.remove();
 
-    document.getElementById("tilemapStatus2d").textContent =
-      "Tile हटा दिया गया!";
-    return;
+    if (selectedTile2d === "erase") continue;
+
+    const tile = document.createElement("div");
+
+    tile.dataset.tileCell2d = "true";
+    tile.dataset.x = tileX;
+    tile.dataset.y = tileY;
+    tile.dataset.type = "Tile";
+    tile.dataset.tileKind2d = selectedTile2d;
+
+    tile.style.cssText = `
+      position:absolute;
+      left:${tileX}px;
+      top:${tileY}px;
+      width:40px;
+      height:40px;
+      background:${tileColors2d[selectedTile2d]};
+      border:1px solid rgba(255,255,255,0.25);
+      box-sizing:border-box;
+      pointer-events:none;
+      z-index:1;
+    `;
+
+    world2d.appendChild(tile);
   }
-
-  if (oldTile) oldTile.remove();
-
-  const tile = document.createElement("div");
-
-  tile.dataset.tileCell2d = "true";
-  tile.dataset.x = x;
-  tile.dataset.y = y;
-  tile.dataset.type = "Tile";
-  tile.dataset.tileKind2d = selectedTile2d;
-
-  tile.style.cssText = `
-    position:absolute;
-    left:${x}px;
-    top:${y}px;
-    width:40px;
-    height:40px;
-    background:${tileColors2d[selectedTile2d]};
-    border:1px solid rgba(255,255,255,0.25);
-    box-sizing:border-box;
-    pointer-events:none;
-    z-index:1;
-  `;
-
-  world2d.appendChild(tile);
-
+  }
+                         
   document.getElementById("tilemapStatus2d").textContent =
     "Tile Scene में लगा दिया गया!";
 });
