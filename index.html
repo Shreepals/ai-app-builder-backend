@@ -7419,15 +7419,31 @@ document.getElementById("tileRedo2d").onclick = function() {
     "↪️ Tile कार्रवाई फिर से लागू हो गई!";
 };
           
-// Tile Selection
+// ===== TILE SELECTION =====
+
+let floodFillMode2d = false;
+
 document.querySelectorAll("[data-tile2d]").forEach(button => {
   button.onclick = function() {
-    selectedTile2d = this.dataset.tile2d;
+
+    const tool = this.dataset.tile2d;
+
+    if (tool === "fill") {
+      floodFillMode2d = true;
+
+      document.getElementById("tilemapStatus2d").textContent =
+        "🪣 Flood Fill चुना गया। अब खाली क्षेत्र पर क्लिक करें।";
+
+      return;
+    }
+
+    floodFillMode2d = false;
+    selectedTile2d = tool;
 
     document.getElementById("tilemapStatus2d").textContent =
       selectedTile2d === "erase"
-        ? "Eraser चुना गया है। Tile हटाने के लिए Scene पर क्लिक करें।"
-        : selectedTile2d + " Tile चुना गया है। अब Scene पर क्लिक करें।";
+        ? "Eraser चुना गया है।"
+        : selectedTile2d + " Tile चुना गया है।";
   };
 });
 
