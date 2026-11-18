@@ -7171,6 +7171,79 @@ const tileColors2d = {
   water: "#287fc4",
   stone: "#858b96"
 };
+  
+// ===== FLOOD FILL TOOL =====
+
+function floodFillTiles2d(startX, startY) {
+  if (selectedTile2d === "erase" ||
+      selectedTile2d === "fill") return;
+
+  const tileSize = 40;
+
+  const tiles = new Map();
+
+  world2d.querySelectorAll("[data-tile-cell2d]").forEach(tile => {
+    const key =
+      tile.dataset.x + "," + tile.dataset.y;
+
+    tiles.set(key, tile);
+  });
+
+  const startKey = startX + "," + startY;
+
+  if (tiles.has(startKey)) return;
+
+  const queue = [[startX, startY]];
+  const visited = new Set();
+
+  while (queue.length > 0) {
+    const [x, y] = queue.shift();
+    const key = x + "," + y;
+
+    if (visited.has(key)) continue;
+    visited.add(key);
+
+    if (tiles.has(key)) continue;
+
+    const tile = document.createElement("div");
+
+    tile.dataset.tileCell2d = "true";
+    tile.dataset.x = x;
+    tile.dataset.y = y;
+    tile.dataset.type = "Tile";
+    tile.dataset.tileKind2d = selectedTile2d;
+
+    tile.style.cssText = `
+      position:absolute;
+      left:${x}px;
+      top:${y}px;
+      width:40px;
+      height:40px;
+      background:${tileColors2d[selectedTile2d]};
+      border:1px solid rgba(255,255,255,0.25);
+      box-sizing:border-box;
+      pointer-events:none;
+      z-index:1;
+    `;
+
+    world2d.appendChild(tile);
+
+    queue.push(
+      [x + tileSize, y],
+      [x - tileSize, y],
+      [x, y + tileSize],
+      [x, y - tileSize]
+    );
+
+    // सुरक्षा: बहुत बड़े क्षेत्र को भरने से रोकें
+    if (visited.size >= 2000) break;
+  }
+
+  saveTileHistory2d();
+
+  document.getElementById("tilemapStatus2d").textContent =
+    "🪣 Flood Fill पूरा हो गया!";
+                                        }  
 
 // ===== TILEMAP GRID ON / OFF =====
 
