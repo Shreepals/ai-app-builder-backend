@@ -7900,6 +7900,33 @@ y = nextY;
     velocityY2d = jumpPower2d;
     isGrounded2d = false;
   }
+  
+  // ===== WALL VERTICAL COLLISION =====
+
+objects2d.filter(obj =>
+  obj.dataset.type === "Wall"
+).forEach(wall => {
+
+  const overlapX =
+    x + player.offsetWidth > wall.offsetLeft &&
+    x < wall.offsetLeft + wall.offsetWidth;
+
+  const overlapY =
+    y + player.offsetHeight > wall.offsetTop &&
+    y < wall.offsetTop + wall.offsetHeight;
+
+  if (overlapX && overlapY) {
+
+    if (velocityY2d > 0) {
+      y = wall.offsetTop - player.offsetHeight;
+      isGrounded2d = true;
+    } else if (velocityY2d < 0) {
+      y = wall.offsetTop + wall.offsetHeight;
+    }
+
+    velocityY2d = 0;
+  }
+});
 
   // Ground Collision
   const groundY =
