@@ -7857,9 +7857,43 @@ if (!blockedX) {
   x += inWater ? moveX * 0.5 : moveX;
 }
 
-  // Gravity
-  velocityY2d += gravity2d;
-  y += velocityY2d;
+  // ===== VERTICAL TILE COLLISION =====
+
+velocityY2d += gravity2d;
+
+let nextY = y + velocityY2d;
+
+const verticalPoints = [
+  [x, nextY],
+  [x + player.offsetWidth - 1, nextY],
+  [x, nextY + player.offsetHeight - 1],
+  [x + player.offsetWidth - 1, nextY + player.offsetHeight - 1]
+];
+
+let blockedY = false;
+
+verticalPoints.forEach(point => {
+  if (
+    getTileCollisionMode2d(point[0], point[1]) === "solid"
+  ) {
+    blockedY = true;
+  }
+});
+
+if (blockedY) {
+  if (velocityY2d > 0) {
+    nextY = Math.floor(
+      (nextY + player.offsetHeight - 1) / 40
+    ) * 40 - player.offsetHeight;
+    isGrounded2d = true;
+  } else {
+    nextY = Math.ceil(nextY / 40) * 40;
+  }
+
+  velocityY2d = 0;
+}
+
+y = nextY;
 
   // Jump
   if (movement2d.up && isGrounded2d) {
