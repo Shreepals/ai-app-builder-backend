@@ -7534,6 +7534,13 @@ if (event.button !== 0) return;
 if (event.target.closest("#tilemapEditor2d")) return;  
 
   if (event.target.closest("#mobileControls2d")) return;
+  
+  // Locked Layer में Tile Editing बंद
+if (lockedLayers2d.includes(currentLayer2d)) {
+  document.getElementById("tilemapStatus2d").textContent =
+    currentLayer2d + " Layer Lock है। पहले Unlock करें।";
+  return;
+}
 
   const rect = scene2d.getBoundingClientRect();
 
