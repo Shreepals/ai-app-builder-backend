@@ -7857,6 +7857,20 @@ if (!blockedX) {
   x += inWater ? moveX * 0.5 : moveX;
 }
 
+// ===== WATER VERTICAL SLOWDOWN =====
+
+const playerCenterX = x + player.offsetWidth / 2;
+const playerCenterY = y + player.offsetHeight / 2;
+
+const waterMode = getTileCollisionMode2d(
+  playerCenterX,
+  playerCenterY
+);
+
+if (waterMode === "slow") {
+  velocityY2d *= 0.5;
+}
+
   // ===== VERTICAL TILE COLLISION =====
 
 velocityY2d += gravity2d;
