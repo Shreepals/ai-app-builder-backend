@@ -7282,6 +7282,7 @@ function floodFillTiles2d(startX, startY) {
     tile.dataset.y = y;
     tile.dataset.type = "Tile";
     tile.dataset.tileKind2d = selectedTile2d;
+    tile.dataset.layer = currentLayer2d;
 
     tile.style.cssText = `
       position:absolute;
