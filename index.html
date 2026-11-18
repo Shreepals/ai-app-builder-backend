@@ -675,7 +675,33 @@ style="background:#10192c;padding:12px;border-radius:10px;margin:12px 0;">
 
 </div>
     
-    
+<!-- TILE COLLISION SETTINGS -->
+
+<div style="margin-top:12px;padding:10px;background:#17243a;border-radius:8px;">
+
+  <h4>🧱 Tile Collision Settings</h4>
+
+  <label>Stone Collision</label>
+  <select id="stoneCollision2d"
+    style="width:100%;padding:10px;margin:6px 0;">
+    <option value="solid">Solid - रास्ता रोके</option>
+    <option value="none">No Collision - रास्ता खुला</option>
+  </select>
+
+  <label>Water Collision</label>
+  <select id="waterCollision2d"
+    style="width:100%;padding:10px;margin:6px 0;">
+    <option value="slow">Slow - Player धीमा चले</option>
+    <option value="solid">Solid - रास्ता रोके</option>
+    <option value="none">Normal - सामान्य चले</option>
+  </select>
+
+  <p id="tileCollisionStatus2d" style="color:#9eacc5;">
+    Collision Settings तैयार हैं।
+  </p>
+
+    </div>    
+        
     <button class="btn" id="saveTilemap2d">
   💾 Save Map
 </button>
