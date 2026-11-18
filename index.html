@@ -7401,6 +7401,7 @@ function getTilemapData2d() {
     x: Number(tile.dataset.x),
     y: Number(tile.dataset.y),
     type: tile.dataset.tileKind2d
+    layer: tile.dataset.layer || "Gameplay"
   }));
 }
 
