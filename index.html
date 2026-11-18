@@ -7452,6 +7452,13 @@ const y = Math.floor(
 
   if (x < 0 || y < 0) return;
   
+// ===== FLOOD FILL ACTION =====
+
+if (selectedTile2d === "fill") {
+  floodFillTiles2d(x, y);
+  return;
+}  
+  
 // ===== TILE BRUSH SIZE SYSTEM =====
 
 const brushSize = Number(
