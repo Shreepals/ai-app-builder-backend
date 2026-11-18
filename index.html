@@ -7470,7 +7470,8 @@ const y = Math.floor(
   
 // ===== FLOOD FILL ACTION =====
 
-if (selectedTile2d === "fill") {
+if (floodFillMode2d) {
+  floodFillMode2d = false;
   floodFillTiles2d(x, y);
   return;
 }  
