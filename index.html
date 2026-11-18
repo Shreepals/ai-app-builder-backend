@@ -7198,6 +7198,50 @@ const tileColors2d = {
   stone: "#858b96"
 };
   
+// ===== TILE COLLISION SETTINGS =====
+
+let stoneCollisionMode2d = "solid";
+let waterCollisionMode2d = "slow";
+
+document.getElementById("stoneCollision2d").onchange = function() {
+  stoneCollisionMode2d = this.value;
+
+  document.getElementById("tileCollisionStatus2d").textContent =
+    "Stone Collision: " + this.value;
+};
+
+document.getElementById("waterCollision2d").onchange = function() {
+  waterCollisionMode2d = this.value;
+
+  document.getElementById("tileCollisionStatus2d").textContent =
+    "Water Collision: " + this.value;
+};
+
+// Tile के Collision नियम की जाँच
+function getTileCollisionMode2d(x, y) {
+  const tileX = Math.floor(x / 40) * 40;
+  const tileY = Math.floor(y / 40) * 40;
+
+  const tile = Array.from(
+    world2d.querySelectorAll("[data-tile-cell2d]")
+  ).find(t =>
+    Number(t.dataset.x) === tileX &&
+    Number(t.dataset.y) === tileY
+  );
+
+  if (!tile) return "none";
+
+  if (tile.dataset.tileKind2d === "stone") {
+    return stoneCollisionMode2d;
+  }
+
+  if (tile.dataset.tileKind2d === "water") {
+    return waterCollisionMode2d;
+  }
+
+  return "none";
+  }  
+  
 // ===== FLOOD FILL TOOL =====
 
 function floodFillTiles2d(startX, startY) {
