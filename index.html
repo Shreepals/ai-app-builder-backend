@@ -6186,13 +6186,20 @@ objects2d.forEach(obj => {
 function updateLayerObjects2d() {
   objects2d.forEach(obj => {
     obj.style.display =
-  !hiddenLayers2d.includes(obj.dataset.layer) &&
-  obj.dataset.hidden !== "true"
-    ? "flex"
-    : "none";
+      !hiddenLayers2d.includes(obj.dataset.layer) &&
+      obj.dataset.hidden !== "true"
+        ? "flex"
+        : "none";
+  });
+
+  world2d.querySelectorAll("[data-tile-cell2d]").forEach(tile => {
+    tile.style.display =
+      !hiddenLayers2d.includes(tile.dataset.layer)
+        ? "block"
+        : "none";
   });
 }
-  
+    
 function updateLayerObjectList2d() {
   const list = document.getElementById("layerObjectList2d");
   const layerName = document.getElementById("layerSelect2d").value;
