@@ -7810,9 +7810,52 @@ function movePlayer2d() {
   let x = player.offsetLeft;
   let y = player.offsetTop;
 
-  // Left and Right Movement
-  if (movement2d.left) x -= 4;
-  if (movement2d.right) x += 4;
+  // ===== TILE AND WALL COLLISION =====
+
+let moveX = 0;
+
+if (movement2d.left) moveX = -4;
+if (movement2d.right) moveX = 4;
+
+const testX = x + moveX;
+
+const tilePoints = [
+  [testX, y],
+  [testX + player.offsetWidth - 1, y],
+  [testX, y + player.offsetHeight - 1],
+  [testX + player.offsetWidth - 1, y + player.offsetHeight - 1]
+];
+
+let blockedX = false;
+let inWater = false;
+
+tilePoints.forEach(point => {
+  const mode = getTileCollisionMode2d(
+    point[0], point[1]
+  );
+
+  if (mode === "solid") blockedX = true;
+  if (mode === "slow") inWater = true;
+});
+
+// Wall Object Collision
+objects2d.filter(obj =>
+  obj.dataset.type === "Wall"
+).forEach(wall => {
+
+  if (
+    testX + player.offsetWidth > wall.offsetLeft &&
+    testX < wall.offsetLeft + wall.offsetWidth &&
+    y + player.offsetHeight > wall.offsetTop &&
+    y < wall.offsetTop + wall.offsetHeight
+  ) {
+    blockedX = true;
+  }
+});
+
+if (!blockedX) {
+  x += inWater ? moveX * 0.5 : moveX;
+}
 
   // Gravity
   velocityY2d += gravity2d;
