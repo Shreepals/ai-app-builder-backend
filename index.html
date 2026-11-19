@@ -8564,10 +8564,22 @@ function updateSceneList2d() {
 function saveCurrentLevel2d() {
   const name = activeSceneName2d;
 
+  if (!name) return;
+
   const scenes = getAllScenes2d();
+
+  const tiles = Array.from(
+    world2d.querySelectorAll("[data-tile-cell2d]")
+  ).map(tile => ({
+    x: Number(tile.dataset.x),
+    y: Number(tile.dataset.y),
+    type: tile.dataset.tileKind2d,
+    layer: tile.dataset.layer || "Gameplay"
+  }));
 
   scenes[name] = {
     name: name,
+
     objects: objects2d.map(obj => ({
       type: obj.dataset.type,
       emoji: obj.dataset.emoji,
@@ -8578,15 +8590,17 @@ function saveCurrentLevel2d() {
       width: obj.style.width,
       height: obj.style.height,
       background: obj.style.background
-    }))
+    })),
+
+    tiles: tiles
   };
 
   localStorage.setItem(
     "aiAppBuilderScenes2d",
     JSON.stringify(scenes)
   );
-}
-
+    }
+    
 function openLevel2d(name) {
   const scenes = getAllScenes2d();
   const data = scenes[name];
