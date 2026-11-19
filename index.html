@@ -8444,92 +8444,31 @@ if (typeof enemy.animate === "function") {
 // ===== 2D SCENE SAVE / LOAD SYSTEM =====
 
 document.getElementById("saveScene2d").onclick = () => {
-
   const sceneName =
     document.getElementById("sceneName2d").value.trim() || "Main Scene";
 
-  const sceneData = {
-    name: sceneName,
-    objects: objects2d.map(obj => ({
-      type: obj.dataset.type,
-      emoji: obj.dataset.emoji,
-      name: obj.dataset.name || "",
-      layer: obj.dataset.layer,
-      left: obj.style.left,
-      top: obj.style.top,
-      width: obj.style.width,
-      height: obj.style.height,
-      background: obj.style.background
-    }))
-  };
+  activeSceneName2d = sceneName;
+  saveCurrentLevel2d();
+  updateSceneList2d();
 
-  let savedScenes = JSON.parse(
-    localStorage.getItem("aiAppBuilderScenes2d") || "{}"
-  );
-
-  savedScenes[sceneName] = sceneData;
-
-  localStorage.setItem(
-    "aiAppBuilderScenes2d",
-    JSON.stringify(savedScenes)
-  );
-
-  alert("Scene सफलतापूर्वक Save हो गया!");
+  alert("Scene और Tilemap सफलतापूर्वक Save हो गए!");
 };
 
-
-// ===== LOAD 2D SCENE =====
-
 document.getElementById("loadScene2d").onclick = () => {
-
   const sceneName =
     document.getElementById("sceneName2d").value.trim() || "Main Scene";
 
-  const savedScenes = JSON.parse(
-    localStorage.getItem("aiAppBuilderScenes2d") || "{}"
-  );
+  const savedScenes = getAllScenes2d();
 
-  const sceneData = savedScenes[sceneName];
-
-  if (!sceneData) {
+  if (!savedScenes[sceneName]) {
     alert("इस नाम का कोई Saved Scene नहीं मिला।");
     return;
   }
 
-  // पुराने Objects हटाएँ
-  objects2d.forEach(obj => obj.remove());
+  openLevel2d(sceneName);
+  updateSceneList2d();
 
-  objects2d = [];
-  selectedObject2d = null;
-
-  // Saved Objects वापस बनाएँ
-  sceneData.objects.forEach(item => {
-
-    addObject2d(
-      item.type,
-      item.emoji,
-      item.background
-    );
-
-    const obj = objects2d[objects2d.length - 1];
-
-    obj.dataset.name = item.name;
-    obj.dataset.layer = item.layer;
-
-    obj.style.left = item.left;
-    obj.style.top = item.top;
-    obj.style.width = item.width;
-    obj.style.height = item.height;
-    obj.style.background = item.background;
-
-  });
-
-  updateLayerObjects2d();
-
-  document.getElementById("selectedObject2d").textContent =
-    "कोई Object चुना नहीं गया।";
-
-  alert("Scene सफलतापूर्वक Load हो गया!");
+  alert("Scene और Tilemap सफलतापूर्वक Load हो गए!");
 };
   
 // ===== MULTIPLE SCENES MANAGER =====
