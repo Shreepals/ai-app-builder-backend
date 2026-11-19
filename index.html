@@ -8474,7 +8474,9 @@ document.getElementById("loadScene2d").onclick = () => {
 // ===== MULTIPLE SCENES MANAGER =====
 
 let activeSceneName2d =
-  document.getElementById("sceneName2d").value || "Main Scene";
+  localStorage.getItem("activeSceneName2d") ||
+  document.getElementById("sceneName2d").value ||
+  "Main Scene";
 
 function getAllScenes2d() {
   return JSON.parse(
