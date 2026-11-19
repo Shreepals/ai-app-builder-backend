@@ -7696,6 +7696,7 @@ document.getElementById("loadTilemap2d").onclick = function() {
     tile.dataset.y = data.y;
     tile.dataset.type = "Tile";
     tile.dataset.tileKind2d = data.type;
+    tile.dataset.layer = data.layer || "Gameplay";
 
     tile.style.cssText = `
       position:absolute;
