@@ -7594,6 +7594,7 @@ for (let row = 0; row < brushSize; row++) {
     tile.dataset.y = tileY;
     tile.dataset.type = "Tile";
     tile.dataset.tileKind2d = selectedTile2d;
+    tile.dataset.layer = currentLayer2d;
 
     tile.style.cssText = `
       position:absolute;
