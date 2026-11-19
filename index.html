@@ -7662,18 +7662,26 @@ scene2d.addEventListener("pointerleave", function() {
   isPaintingTiles2d = false;
 });  
 
-// ===== TILEMAP SAVE SYSTEM =====
+// ===== TILEMAP SAVE / LOAD (SCENE BASED) =====
 
 document.getElementById("saveTilemap2d").onclick = function() {
+  saveCurrentLevel2d();
 
-  const tiles = Array.from(
-    world2d.querySelectorAll("[data-tile-cell2d]")
-  ).map(tile => ({
-    x: Number(tile.dataset.x),
-    y: Number(tile.dataset.y),
-    type: tile.dataset.tileKind2d,
-    layer: tile.dataset.layer || "Gameplay"
-  }));
+  document.getElementById("tilemapStatus2d").textContent =
+    "💾 इस Scene का Tilemap अपने आप Save हो गया!";
+};
+
+document.getElementById("loadTilemap2d").onclick = function() {
+  if (!activeSceneName2d) {
+    alert("पहले कोई Scene चुनें।");
+    return;
+  }
+
+  openLevel2d(activeSceneName2d);
+
+  document.getElementById("tilemapStatus2d").textContent =
+    "📂 वर्तमान Scene का Tilemap Load हो गया!";
+};
   
 // ===== 2D OBJECT PROPERTIES =====
 
