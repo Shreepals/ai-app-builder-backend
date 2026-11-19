@@ -8540,7 +8540,12 @@ function saveCurrentLevel2d() {
     "aiAppBuilderScenes2d",
     JSON.stringify(scenes)
   );
-    }
+  
+  localStorage.setItem(
+  "activeSceneName2d",
+  activeSceneName2d
+);
+}
     
 function openLevel2d(name) {
   const scenes = getAllScenes2d();
