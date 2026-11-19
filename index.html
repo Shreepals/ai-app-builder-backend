@@ -8581,6 +8581,10 @@ function openLevel2d(name) {
 
   // वर्तमान Scene का नाम सेट करें
   activeSceneName2d = name;
+  localStorage.setItem(
+  "activeSceneName2d",
+  name
+);
 
   // इसी Scene के Tiles Load करें
   (data.tiles || []).forEach(item => {
