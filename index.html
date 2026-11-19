@@ -7717,6 +7717,14 @@ document.getElementById("loadTilemap2d").onclick = function() {
     "📂 Tilemap Load हो गया!";
 };
   
+// ===== AUTO LOAD TILEMAP ON RELOAD =====
+window.addEventListener("load", function() {
+  const savedTiles = localStorage.getItem("savedTilemap2d");
+
+  if (savedTiles) {
+    document.getElementById("loadTilemap2d").click();
+  }
+});  
   
 // ===== 2D OBJECT PROPERTIES =====
 
