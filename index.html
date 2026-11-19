@@ -7660,6 +7660,7 @@ document.getElementById("saveTilemap2d").onclick = function() {
     x: Number(tile.dataset.x),
     y: Number(tile.dataset.y),
     type: tile.dataset.tileKind2d
+    layer: tile.dataset.layer || "Gameplay"
   }));
 
   localStorage.setItem(
