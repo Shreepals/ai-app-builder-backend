@@ -5885,6 +5885,19 @@ onresize=()=>{
 
 const scene2d = document.getElementById("scene2d");
 const world2d = document.getElementById("world2d");
+  
+// ===== CENTRAL TILEMAP AUTO SAVE =====
+
+const tilemapAutoSaveObserver2d = new MutationObserver(() => {
+  if (activeSceneName2d) {
+    saveCurrentLevel2d();
+  }
+});
+
+tilemapAutoSaveObserver2d.observe(world2d, {
+  childList: true
+});
+  
 // ===== ADVANCED GRID + ZOOM =====
 
 let gridEnabled2d = true;
