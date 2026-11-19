@@ -8607,13 +8607,20 @@ function openLevel2d(name) {
 
   if (!data) return;
 
+  // पुराने Objects हटाएँ
   objects2d.forEach(obj => obj.remove());
   objects2d = [];
   selectedObject2d = null;
 
+  // पुराने Tiles हटाएँ
+  world2d.querySelectorAll(
+    "[data-tile-cell2d]"
+  ).forEach(tile => tile.remove());
+
   document.getElementById("sceneName2d").value = name;
 
-  data.objects.forEach(item => {
+  // Objects Load करें
+  (data.objects || []).forEach(item => {
     addObject2d(item.type, item.emoji, item.background);
 
     const obj = objects2d[objects2d.length - 1];
@@ -8626,13 +8633,44 @@ function openLevel2d(name) {
     obj.style.height = item.height;
   });
 
+  // वर्तमान Scene का नाम सेट करें
   activeSceneName2d = name;
+
+  // इसी Scene के Tiles Load करें
+  (data.tiles || []).forEach(item => {
+    if (!tileColors2d[item.type]) return;
+
+    const tile = document.createElement("div");
+
+    tile.dataset.tileCell2d = "true";
+    tile.dataset.x = item.x;
+    tile.dataset.y = item.y;
+    tile.dataset.type = "Tile";
+    tile.dataset.tileKind2d = item.type;
+    tile.dataset.layer = item.layer || "Gameplay";
+
+    tile.style.cssText = `
+      position:absolute;
+      left:${item.x}px;
+      top:${item.y}px;
+      width:40px;
+      height:40px;
+      background:${tileColors2d[item.type]};
+      border:1px solid rgba(255,255,255,0.25);
+      box-sizing:border-box;
+      pointer-events:none;
+      z-index:1;
+    `;
+
+    world2d.appendChild(tile);
+  });
+
   updateLayerObjects2d();
 
   document.getElementById("selectedObject2d").textContent =
     "कोई Object चुना नहीं गया।";
-}
-
+  }
+                    
 // नया Level बनाएँ
 document.getElementById("newScene2d").onclick = () => {
 
