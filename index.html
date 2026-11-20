@@ -8548,6 +8548,27 @@ function openLevel2d(name) {
     obj.style.top = item.top;
     obj.style.width = item.width;
     obj.style.height = item.height;
+  
+// Sprite Image और Editing Settings Restore करें
+obj.dataset.spriteData = item.spriteData || "";
+
+obj.style.backgroundImage =
+  item.backgroundImage || "";
+
+obj.style.backgroundSize =
+  item.backgroundSize || "";
+
+obj.style.backgroundPosition =
+  item.backgroundPosition || "";
+
+obj.style.transform =
+  item.transform || "";
+
+obj.style.clipPath =
+  item.clipPath || "";
+
+obj.dataset.locked =
+  item.locked || "false";
   });
 
   // वर्तमान Scene का नाम सेट करें
