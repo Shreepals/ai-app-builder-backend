@@ -6827,6 +6827,8 @@ const reader = new FileReader();
 
 reader.onload = function(e) {
   spriteImageData2d = e.target.result;
+  
+  spriteImageUrl2d = spriteImageData2d;
 
   document.getElementById("spriteStatus2d").textContent =
     "Image Library में Save करने के लिए तैयार है!";
