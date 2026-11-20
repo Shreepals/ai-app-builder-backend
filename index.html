@@ -8671,6 +8671,22 @@ document.getElementById("deleteScene2d").onclick = () => {
 
 updateSceneList2d();
   
+// ===== RESTORE SAVED SCENE AFTER PAGE RELOAD =====
+
+const savedScenesOnStart2d = getAllScenes2d();
+
+if (savedScenesOnStart2d[activeSceneName2d]) {
+  openLevel2d(activeSceneName2d);
+} else {
+  const availableScenes2d = Object.keys(savedScenesOnStart2d);
+
+  if (availableScenes2d.length > 0) {
+    openLevel2d(availableScenes2d[0]);
+  }
+}
+
+updateSceneList2d();  
+  
 // ===== AUTOMATIC SCENE TRANSITION =====
 
 let sceneTransitionCooldown2d = false;
