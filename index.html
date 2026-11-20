@@ -8486,11 +8486,22 @@ function saveCurrentLevel2d() {
       emoji: obj.dataset.emoji,
       name: obj.dataset.name || "",
       layer: obj.dataset.layer,
+      
       left: obj.style.left,
       top: obj.style.top,
       width: obj.style.width,
       height: obj.style.height,
+      
       background: obj.style.background
+      backgroundImage: obj.style.backgroundImage,
+      backgroundSize: obj.style.backgroundSize,
+      backgroundPosition: obj.style.backgroundPosition,
+
+      spriteData: obj.dataset.spriteData || "",
+      transform: obj.style.transform,
+      clipPath: obj.style.clipPath,
+
+      locked: obj.dataset.locked || "false"
     })),
 
     tiles: tiles
