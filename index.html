@@ -6637,7 +6637,13 @@ document.getElementById("objectH2d").value =
   obj.offsetHeight;
     
 document.getElementById("objectRotation2d").value =
-  Number(obj.dataset.rotation || 0);    
+  Number(obj.dataset.rotation || 0); 
+    
+document.getElementById("objectScaleX2d").value =
+  Number(obj.dataset.scaleX || 1);
+
+document.getElementById("objectScaleY2d").value =
+  Number(obj.dataset.scaleY || 1);    
     
 // Locked Object को Move होने से रोकें
 if (
