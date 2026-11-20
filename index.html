@@ -7725,6 +7725,22 @@ document.getElementById("applyProperties2d").onclick = () => {
 
 obj.dataset.rotation = rotation;
 obj.style.transform = `rotate(${rotation}deg)`;
+  
+const scaleX = Math.max(
+  0.1,
+  Number(document.getElementById("objectScaleX2d").value) || 1
+);
+
+const scaleY = Math.max(
+  0.1,
+  Number(document.getElementById("objectScaleY2d").value) || 1
+);
+
+obj.dataset.scaleX = scaleX;
+obj.dataset.scaleY = scaleY;
+
+obj.style.transform =
+  `rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`;  
 
   document.getElementById("sceneStatus2d").textContent =
     "Object Properties अपडेट हो गई हैं।";
