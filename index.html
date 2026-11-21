@@ -7919,6 +7919,8 @@ document.getElementById("applyProperties2d").onclick = () => {
     alert("पहले कोई Object चुनें।");
     return;
   }
+  
+  const beforeProperties = captureObjectState2d(selectedObject2d);
 
   const obj = selectedObject2d;
 
