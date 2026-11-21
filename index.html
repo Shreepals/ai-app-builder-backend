@@ -7004,7 +7004,18 @@ document.getElementById("objectH2d").value =
     resizeHandle.removeEventListener("pointermove", resize);
     resizeHandle.removeEventListener("pointerup", stopResize);
     resizeHandle.removeEventListener("pointercancel", stopResize);
+
+    const afterResize = captureObjectState2d(obj);
+
+   if (beforeResize.cssText !== afterResize.cssText) {
+     recordObjectHistory2d(
+       "resize",
+       obj,
+       beforeResize,
+       afterResize
+    );
   }
+}
 
   resizeHandle.addEventListener("pointermove", resize);
   resizeHandle.addEventListener("pointerup", stopResize);
