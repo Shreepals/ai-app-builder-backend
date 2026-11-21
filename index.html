@@ -8691,6 +8691,9 @@ obj.dataset.flipVertical =
   item.flipVertical ?? "false";    
     
 obj.dataset.opacity = item.opacity ?? "100";
+obj.dataset.zIndex = item.zIndex ?? "1";
+obj.style.zIndex = obj.dataset.zIndex;
+    
 obj.style.opacity = Number(obj.dataset.opacity) / 100;    
 
 obj.style.clipPath =
