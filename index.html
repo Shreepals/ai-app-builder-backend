@@ -6662,7 +6662,13 @@ document.getElementById("objectScaleX2d").value =
   Number(obj.dataset.scaleX || 1);
 
 document.getElementById("objectScaleY2d").value =
-  Number(obj.dataset.scaleY || 1);  
+  Number(obj.dataset.scaleY || 1); 
+  
+document.getElementById("objectFlipHorizontal2d").checked =
+  obj.dataset.flipHorizontal === "true";
+
+document.getElementById("objectFlipVertical2d").checked =
+  obj.dataset.flipVertical === "true";    
     
 document.getElementById("objectOpacity2d").value =
   Number(obj.dataset.opacity ?? 100);    
