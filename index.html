@@ -6659,7 +6659,10 @@ document.getElementById("objectScaleX2d").value =
   Number(obj.dataset.scaleX || 1);
 
 document.getElementById("objectScaleY2d").value =
-  Number(obj.dataset.scaleY || 1);    
+  Number(obj.dataset.scaleY || 1);  
+    
+document.getElementById("objectOpacity2d").value =
+  Number(obj.dataset.opacity ?? 100);    
     
 // Locked Object को Move होने से रोकें
 if (
