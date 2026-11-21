@@ -7927,8 +7927,18 @@ document.getElementById("applyProperties2d").onclick = () => {
   obj.dataset.name =
     document.getElementById("objectName2d").value || obj.dataset.type;
 
-  obj.textContent =
-    obj.dataset.emoji;
+  const emojiTextNode = Array.from(obj.childNodes).find(
+  node => node.nodeType === Node.TEXT_NODE
+);
+
+if (emojiTextNode) {
+  emojiTextNode.textContent = obj.dataset.emoji;
+} else {
+  obj.insertBefore(
+    document.createTextNode(obj.dataset.emoji),
+    obj.firstChild
+  );
+}
 
   obj.style.left =
     Math.max(0, Number(document.getElementById("objectX2d").value)) + "px";
