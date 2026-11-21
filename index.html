@@ -7763,6 +7763,17 @@ obj.dataset.scaleY = scaleY;
 
 obj.style.transform =
   `rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`;  
+  
+  const opacityValue = Number(
+  document.getElementById("objectOpacity2d").value
+);
+
+const opacity = Number.isFinite(opacityValue)
+  ? Math.min(100, Math.max(0, opacityValue))
+  : 100;
+
+obj.dataset.opacity = opacity;
+obj.style.opacity = opacity / 100;
 
   document.getElementById("sceneStatus2d").textContent =
     "Object Properties अपडेट हो गई हैं।";
