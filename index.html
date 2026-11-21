@@ -7818,6 +7818,13 @@ const opacity = Number.isFinite(opacityValue)
 
 obj.dataset.opacity = opacity;
 obj.style.opacity = opacity / 100;
+  
+const zIndex = Number(
+  document.getElementById("objectZIndex2d").value
+);
+
+obj.dataset.zIndex = zIndex;
+obj.style.zIndex = zIndex;  
 
   document.getElementById("sceneStatus2d").textContent =
     "Object Properties अपडेट हो गई हैं।";
