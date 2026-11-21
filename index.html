@@ -7767,8 +7767,20 @@ const scaleY = Math.max(
 obj.dataset.scaleX = scaleX;
 obj.dataset.scaleY = scaleY;
 
+const flipHorizontal =
+  document.getElementById("objectFlipHorizontal2d").checked;
+
+const flipVertical =
+  document.getElementById("objectFlipVertical2d").checked;
+
+obj.dataset.flipHorizontal = flipHorizontal;
+obj.dataset.flipVertical = flipVertical;
+
+const finalScaleX = flipHorizontal ? -scaleX : scaleX;
+const finalScaleY = flipVertical ? -scaleY : scaleY;
+
 obj.style.transform =
-  `rotate(${rotation}deg) scale(${scaleX}, ${scaleY})`;  
+  `rotate(${rotation}deg) scale(${finalScaleX}, ${finalScaleY})`;
   
   const opacityValue = Number(
   document.getElementById("objectOpacity2d").value
