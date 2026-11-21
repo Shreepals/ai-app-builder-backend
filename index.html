@@ -6308,6 +6308,9 @@ function updateLayerObjectList2d() {
       
      document.getElementById("objectOpacity2d").value =
        Number(obj.dataset.opacity ?? 100); 
+      
+    document.getElementById("objectZIndex2d").value =
+       Number(obj.dataset.zIndex || 1);  
     };
     
     const visibilityBtn = document.createElement("button");
