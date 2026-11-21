@@ -6023,45 +6023,137 @@ function recordObjectHistory2d(type, obj, before, after) {
   objectHistoryIndex2d = objectHistory2d.length - 1;
 }
     
-// ===== OBJECT UNDO SYSTEM =====
+/* ===== OBJECT UNDO / REDO SYSTEM ===== */
 
+// Delete Undo के लिए पुरानी सूची फिलहाल सुरक्षित रखें
 let deletedObjects2d = [];
+let redoObjects2d = [];
 
+// ===== UNDO =====
 document.getElementById("undoObject2d").onclick = () => {
 
+  // पहले नई History को Undo करें
+  if (objectHistoryIndex2d >= 0) {
+
+    const action =
+      objectHistory2d[objectHistoryIndex2d];
+
+    if (action.type === "delete") {
+
+      const obj = action.obj;
+
+      if (!world2d.contains(obj)) {
+        world2d.appendChild(obj);
+      }
+
+      if (!objects2d.includes(obj)) {
+        objects2d.push(obj);
+      }
+
+      restoreObjectState2d(obj, action.before);
+
+      selectedObject2d = obj;
+
+    } else {
+
+      restoreObjectState2d(
+        action.obj,
+        action.before
+      );
+
+      selectedObject2d = action.obj;
+    }
+
+    objectHistoryIndex2d--;
+
+    document.getElementById("selectedObject2d").textContent =
+      selectedObject2d
+        ? "Selected: " +
+          (selectedObject2d.dataset.name ||
+           selectedObject2d.dataset.type)
+        : "कोई Object चुना नहीं गया।";
+
+    return;
+  }
+
+  // फिलहाल पुराने Delete Undo को भी चलने दें
   if (deletedObjects2d.length === 0) {
-    alert("वापस लाने के लिए कोई Deleted Object नहीं है।");
+    alert("Undo करने के लिए कोई बदलाव नहीं है।");
     return;
   }
 
   const obj = deletedObjects2d.pop();
+
   redoObjects2d.push(obj);
 
   world2d.appendChild(obj);
-
   objects2d.push(obj);
+
   updateLayerZOrder2d();
   updateLayerObjectList2d();
 
   obj.style.display =
-    obj.dataset.layer === currentLayer2d ? "flex" : "none";
+    obj.dataset.layer === currentLayer2d
+      ? "flex"
+      : "none";
 
   selectedObject2d = obj;
 
   document.getElementById("selectedObject2d").textContent =
-    "Selected: " + (obj.dataset.name || obj.dataset.type);
+    "Selected: " +
+    (obj.dataset.name || obj.dataset.type);
+};
 
-  alert("Object वापस आ गया!");
-}; 
-  
-// ===== OBJECT REDO SYSTEM =====
 
-let redoObjects2d = [];
-
+// ===== REDO =====
 document.getElementById("redoObject2d").onclick = () => {
 
+  // नई History को Redo करें
+  if (
+    objectHistoryIndex2d <
+    objectHistory2d.length - 1
+  ) {
+
+    objectHistoryIndex2d++;
+
+    const action =
+      objectHistory2d[objectHistoryIndex2d];
+
+    if (action.type === "delete") {
+
+      action.obj.remove();
+
+      objects2d = objects2d.filter(
+        item => item !== action.obj
+      );
+
+      selectedObject2d = null;
+
+    } else {
+
+      restoreObjectState2d(
+        action.obj,
+        action.after
+      );
+
+      selectedObject2d = action.obj;
+    }
+
+    updateLayerObjectList2d();
+
+    document.getElementById("selectedObject2d").textContent =
+      selectedObject2d
+        ? "Selected: " +
+          (selectedObject2d.dataset.name ||
+           selectedObject2d.dataset.type)
+        : "कोई Object चुना नहीं गया।";
+
+    return;
+  }
+
+  // फिलहाल पुराने Delete Redo को भी चलने दें
   if (redoObjects2d.length === 0) {
-    alert("पहले Undo करें।");
+    alert("Redo करने के लिए कोई बदलाव नहीं है।");
     return;
   }
 
@@ -6071,18 +6163,18 @@ document.getElementById("redoObject2d").onclick = () => {
 
   obj.remove();
 
-  objects2d = objects2d.filter(item => item !== obj);
-  
+  objects2d = objects2d.filter(
+    item => item !== obj
+  );
+
   updateLayerObjectList2d();
 
   selectedObject2d = null;
 
   document.getElementById("selectedObject2d").textContent =
     "कोई Object चुना नहीं गया।";
-
-  alert("Redo सफल! Object फिर से Delete हो गया।");
-};  
-  
+};
+      
 // ===== OBJECT LOCK / UNLOCK =====
 
 document.getElementById("lockObject2d").onclick = () => {
