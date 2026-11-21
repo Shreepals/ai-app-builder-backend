@@ -8653,6 +8653,12 @@ obj.style.transform =
 obj.dataset.scaleX = item.scaleX || "1";
 obj.dataset.scaleY = item.scaleY || "1";  
     
+obj.dataset.flipHorizontal =
+  item.flipHorizontal ?? "false";
+
+obj.dataset.flipVertical =
+  item.flipVertical ?? "false";    
+    
 obj.dataset.opacity = item.opacity ?? "100";
 obj.style.opacity = Number(obj.dataset.opacity) / 100;    
 
