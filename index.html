@@ -6846,6 +6846,7 @@ if (
     const rect = scene2d.getBoundingClientRect();
     const startX = event.clientX;
     const startY = event.clientY;
+    const beforeMove = captureObjectState2d(obj);
     const left = obj.offsetLeft;
     const top = obj.offsetTop;
 
