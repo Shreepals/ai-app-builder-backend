@@ -5976,7 +5976,53 @@ document.getElementById("resetZoom2d").onclick = () => {
 updateSceneZoom2d();  
 let objects2d = [];
 let selectedObject2d = null;
-  
+
+/* ===== UNIFIED OBJECT HISTORY ===== */
+
+let objectHistory2d = [];
+let objectHistoryIndex2d = -1;
+
+function captureObjectState2d(obj) {
+  return {
+    cssText: obj.style.cssText,
+    dataset: { ...obj.dataset }
+  };
+}
+
+function restoreObjectState2d(obj, state) {
+  if (!obj || !state) return;
+
+  obj.style.cssText = state.cssText;
+
+  Object.keys(obj.dataset).forEach(key => {
+    delete obj.dataset[key];
+  });
+
+  Object.keys(state.dataset).forEach(key => {
+    obj.dataset[key] = state.dataset[key];
+  });
+
+  updateLayerZOrder2d();
+  updateLayerObjectList2d();
+}
+
+function recordObjectHistory2d(type, obj, before, after) {
+  if (!obj || !before || !after) return;
+
+  // नया बदलाव होने पर आगे की Redo History हटाएँ
+  objectHistory2d =
+    objectHistory2d.slice(0, objectHistoryIndex2d + 1);
+
+  objectHistory2d.push({
+    type,
+    obj,
+    before,
+    after
+  });
+
+  objectHistoryIndex2d = objectHistory2d.length - 1;
+}
+    
 // ===== OBJECT UNDO SYSTEM =====
 
 let deletedObjects2d = [];
