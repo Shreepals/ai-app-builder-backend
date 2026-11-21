@@ -6863,11 +6863,23 @@ if (
     }
 
     obj.addEventListener("pointermove", move);
+   
+obj.addEventListener("pointerup", () => {
+  obj.removeEventListener("pointermove", move);
 
-    obj.addEventListener("pointerup", () => {
-      obj.removeEventListener("pointermove", move);
-    }, {once:true});
-  });
+  const afterMove = captureObjectState2d(obj);
+
+  if (beforeMove.cssText !== afterMove.cssText) {
+    recordObjectHistory2d(
+      "move",
+      obj,
+      beforeMove,
+      afterMove
+    );
+  }
+}, {once:true}); 
+  
+});
   
   // ===== 2D OBJECT RESIZE HANDLE =====
 
