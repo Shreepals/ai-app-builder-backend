@@ -8032,11 +8032,24 @@ document.getElementById("deleteObject2d").onclick = () => {
   }
 
   // Undo के लिए Object सुरक्षित रखें
-  deletedObjects2d.push(selectedObject2d);
+  const beforeDelete = captureObjectState2d(selectedObject2d);
 
-  selectedObject2d.remove();
+  const deletedObject = selectedObject2d;
 
-  objects2d = objects2d.filter(obj => obj !== selectedObject2d);
+deletedObject.remove();
+
+objects2d = objects2d.filter(
+  obj => obj !== deletedObject
+);
+
+const afterDelete = captureObjectState2d(deletedObject);
+
+recordObjectHistory2d(
+  "delete",
+  deletedObject,
+  beforeDelete,
+  afterDelete
+);
   
   updateLayerObjectList2d();
 
