@@ -8002,7 +8002,21 @@ const zIndex = Number(
 );
 
 obj.dataset.zIndex = zIndex;
-obj.style.zIndex = zIndex;  
+obj.style.zIndex = zIndex;
+  
+const afterProperties = captureObjectState2d(obj);
+
+if (beforeProperties.cssText !== afterProperties.cssText ||
+    JSON.stringify(beforeProperties.dataset) !==
+    JSON.stringify(afterProperties.dataset)) {
+
+  recordObjectHistory2d(
+    "properties",
+    obj,
+    beforeProperties,
+    afterProperties
+  );
+  }  
 
   document.getElementById("sceneStatus2d").textContent =
     "Object Properties अपडेट हो गई हैं।";
