@@ -6816,10 +6816,14 @@ if (
       )) + "px";
     }
 
-    obj.addEventListener("pointermove", move);
-   
-obj.addEventListener("pointerup", () => {
-  obj.removeEventListener("pointermove", move);
+    window.addEventListener("pointermove", move);
+
+function finishMove(e) {
+  if (e.pointerId !== event.pointerId) return;
+
+  window.removeEventListener("pointermove", move);
+  window.removeEventListener("pointerup", finishMove);
+  window.removeEventListener("pointercancel", finishMove);
 
   const afterMove = captureObjectState2d(obj);
 
@@ -6831,7 +6835,10 @@ obj.addEventListener("pointerup", () => {
       afterMove
     );
   }
-}, {once:true}); 
+}
+
+window.addEventListener("pointerup", finishMove);
+window.addEventListener("pointercancel", finishMove);
   
 });
   
