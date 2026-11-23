@@ -7823,6 +7823,7 @@ let isPaintingTiles2d = false;
 
 scene2d.addEventListener("pointerdown", function(event) {
   if (event.target.closest("#tilemapEditor2d")) return;
+  if (event.target.closest("#world2d [data-type]:not([data-tile-cell2d])")) return;
   isPaintingTiles2d = true;
 });
 
