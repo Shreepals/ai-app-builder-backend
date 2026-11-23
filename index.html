@@ -7829,6 +7829,8 @@ scene2d.addEventListener("pointerdown", function(event) {
 
 scene2d.addEventListener("pointermove", function(event) {
   if (!isPaintingTiles2d) return;
+  
+  if (event.target.closest("#world2d [data-type]:not([data-tile-cell2d])")) return;
 
   scene2d.dispatchEvent(
     new PointerEvent("pointerdown", {
