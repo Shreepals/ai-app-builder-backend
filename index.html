@@ -6076,34 +6076,8 @@ document.getElementById("undoObject2d").onclick = () => {
     return;
   }
 
-  // फिलहाल पुराने Delete Undo को भी चलने दें
-  if (deletedObjects2d.length === 0) {
-    alert("Undo करने के लिए कोई बदलाव नहीं है।");
-    return;
-  }
-
-  const obj = deletedObjects2d.pop();
-
-  redoObjects2d.push(obj);
-
-  world2d.appendChild(obj);
-  objects2d.push(obj);
-
-  updateLayerZOrder2d();
-  updateLayerObjectList2d();
-
-  obj.style.display =
-    obj.dataset.layer === currentLayer2d
-      ? "flex"
-      : "none";
-
-  selectedObject2d = obj;
-
-  document.getElementById("selectedObject2d").textContent =
-    "Selected: " +
-    (obj.dataset.name || obj.dataset.type);
-};
-
+ alert("Undo करने के लिए कोई बदलाव नहीं है।");
+return; };
 
 // ===== REDO =====
 document.getElementById("redoObject2d").onclick = () => {
