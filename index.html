@@ -6804,43 +6804,32 @@ if (
     const left = obj.offsetLeft;
     const top = obj.offsetTop;
 
-    let moveHistoryAction = null;
+    let movedObject2d = false;
 
 function move(e) {
   if (e.pointerId !== event.pointerId) return;
 
-  obj.style.left = Math.max(0, Math.min(
-    rect.width - obj.offsetWidth,
-    left + e.clientX - startX
-  )) + "px";
+  const newLeft = Math.max(
+    0,
+    Math.min(
+      rect.width - obj.offsetWidth,
+      left + e.clientX - startX
+    )
+  );
 
-  obj.style.top = Math.max(0, Math.min(
-    rect.height - obj.offsetHeight,
-    top + e.clientY - startY
-  )) + "px";
+  const newTop = Math.max(
+    0,
+    Math.min(
+      rect.height - obj.offsetHeight,
+      top + e.clientY - startY
+    )
+  );
 
-  const afterMove = captureObjectState2d(obj);
+  obj.style.left = newLeft + "px";
+  obj.style.top = newTop + "px";
 
-  if (
-    !moveHistoryAction &&
-    beforeMove.cssText !== afterMove.cssText
-  ) {
-    recordObjectHistory2d(
-      "move",
-      obj,
-      beforeMove,
-      afterMove
-    );
-
-    moveHistoryAction =
-      objectHistory2d[objectHistoryIndex2d];
-
-  } else if (moveHistoryAction) {
-    moveHistoryAction.after = afterMove;
-  }
+  movedObject2d = true;
 }
-
-obj.addEventListener("pointermove", move);
 
 function finishMove(e) {
   if (e.pointerId !== event.pointerId) return;
@@ -6849,12 +6838,24 @@ function finishMove(e) {
   obj.removeEventListener("pointerup", finishMove);
   obj.removeEventListener("pointercancel", finishMove);
 
-  if (moveHistoryAction) {
-    moveHistoryAction.after =
-      captureObjectState2d(obj);
+  if (movedObject2d) {
+    const afterMove = captureObjectState2d(obj);
+
+    if (beforeMove.cssText !== afterMove.cssText) {
+      recordObjectHistory2d(
+        "move",
+        obj,
+        beforeMove,
+        afterMove
+      );
+
+      document.getElementById("sceneStatus2d").textContent =
+        "Object Move Undo History में Save हो गया।";
+    }
   }
 }
 
+obj.addEventListener("pointermove", move);
 obj.addEventListener("pointerup", finishMove);
 obj.addEventListener("pointercancel", finishMove);
   
