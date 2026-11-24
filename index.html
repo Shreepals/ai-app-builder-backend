@@ -6819,19 +6819,24 @@ function move(e) {
     top + e.clientY - startY
   )) + "px";
 
-  if (!moveHistoryAction) {
+  const afterMove = captureObjectState2d(obj);
+
+  if (
+    !moveHistoryAction &&
+    beforeMove.cssText !== afterMove.cssText
+  ) {
     recordObjectHistory2d(
       "move",
       obj,
       beforeMove,
-      captureObjectState2d(obj)
+      afterMove
     );
 
     moveHistoryAction =
       objectHistory2d[objectHistoryIndex2d];
-  } else {
-    moveHistoryAction.after =
-      captureObjectState2d(obj);
+
+  } else if (moveHistoryAction) {
+    moveHistoryAction.after = afterMove;
   }
 }
 
