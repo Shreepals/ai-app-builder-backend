@@ -6840,14 +6840,14 @@ function move(e) {
   }
 }
 
-window.addEventListener("pointermove", move);
+obj.addEventListener("pointermove", move);
 
 function finishMove(e) {
   if (e.pointerId !== event.pointerId) return;
 
-  window.removeEventListener("pointermove", move);
-  window.removeEventListener("pointerup", finishMove);
-  window.removeEventListener("pointercancel", finishMove);
+  obj.removeEventListener("pointermove", move);
+  obj.removeEventListener("pointerup", finishMove);
+  obj.removeEventListener("pointercancel", finishMove);
 
   if (moveHistoryAction) {
     moveHistoryAction.after =
@@ -6855,8 +6855,8 @@ function finishMove(e) {
   }
 }
 
-window.addEventListener("pointerup", finishMove);
-window.addEventListener("pointercancel", finishMove);
+obj.addEventListener("pointerup", finishMove);
+obj.addEventListener("pointercancel", finishMove);
   
 });
   
