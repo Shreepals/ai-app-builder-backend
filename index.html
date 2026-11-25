@@ -7170,6 +7170,38 @@ scene2d.addEventListener("pointerdown", function(event) {
   }
 }); 
   
+function renderAnimationFramesList2d() {
+  const list = document.getElementById("animationFramesList2d");
+
+  if (!list) return;
+
+  list.innerHTML = "";
+
+  spriteAnimationFrames2d.forEach((frame, index) => {
+    const item = document.createElement("div");
+
+    item.style.display = "inline-block";
+    item.style.margin = "5px";
+    item.style.textAlign = "center";
+
+    const img = document.createElement("img");
+
+    img.src = frame;
+    img.style.width = "50px";
+    img.style.height = "50px";
+    img.style.objectFit = "contain";
+    img.style.border = "1px solid #999";
+
+    const label = document.createElement("div");
+    label.textContent = "Frame " + (index + 1);
+
+    item.appendChild(img);
+    item.appendChild(label);
+
+    list.appendChild(item);
+  });
+  }  
+  
 // ===== SPRITE ANIMATION FRAMES =====
 
 let spriteAnimationFrames2d = [];
