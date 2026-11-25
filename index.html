@@ -7230,6 +7230,12 @@ function renderAnimationFramesList2d() {
 let spriteAnimationFrames2d = [];
 
 document.getElementById("addAnimationFrames2d").onclick = async function() {
+  
+    if (!selectedSprite2d || !scene2d.contains(selectedSprite2d)) {
+    document.getElementById("spriteAnimationStatus2d").textContent =
+      "पहले Scene में कोई Sprite चुनें।";
+    return;
+    }
   const input = document.getElementById("animationFramesInput2d");
   const files = Array.from(input.files || []);
 
