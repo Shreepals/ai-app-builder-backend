@@ -9049,7 +9049,9 @@ function saveCurrentLevel2d() {
       height: obj.style.height,
       
       background: obj.style.background,
-      backgroundImage: obj.style.backgroundImage,
+      backgroundImage: obj.dataset.spriteData
+        ? ""
+        : obj.style.backgroundImage,
       backgroundSize: obj.style.backgroundSize,
       backgroundPosition: obj.style.backgroundPosition,
 
