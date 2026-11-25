@@ -7154,7 +7154,7 @@ document.getElementById("addSpriteToScene2d").onclick = function() {
   
 // ===== SPRITE SIZE AND FLIP SYSTEM =====
 
-let selectedSprite2d = null;
+let selectedSprite2d = null; 
 
 scene2d.addEventListener("pointerdown", function(event) {
   const obj = event.target.closest('[data-type="Sprite"]');
@@ -7168,7 +7168,65 @@ scene2d.addEventListener("pointerdown", function(event) {
     document.getElementById("spriteHeight2d").value =
       obj.offsetHeight;
   }
-});  
+}); 
+  
+// ===== SPRITE ANIMATION FRAMES =====
+
+let spriteAnimationFrames2d = [];
+
+document.getElementById("addAnimationFrames2d").onclick = async function() {
+  const input = document.getElementById("animationFramesInput2d");
+  const files = Array.from(input.files || []);
+
+  if (files.length === 0) {
+    document.getElementById("spriteAnimationStatus2d").textContent =
+      "पहले Animation की Images चुनें।";
+    return;
+  }
+
+  const loadedFrames = await Promise.all(
+    files.map(file => {
+      return new Promise(resolve => {
+        const reader = new FileReader();
+
+        reader.onload = function() {
+          resolve(reader.result);
+        };
+
+        reader.onerror = function() {
+          resolve(null);
+        };
+
+        reader.readAsDataURL(file);
+      });
+    })
+  );
+
+  loadedFrames.forEach(frame => {
+    if (frame) spriteAnimationFrames2d.push(frame);
+  });
+
+  const list = document.getElementById("animationFramesList2d");
+  list.innerHTML = "";
+
+  spriteAnimationFrames2d.forEach((frame, index) => {
+    const item = document.createElement("div");
+
+    item.style.cssText =
+      "display:flex;align-items:center;gap:8px;margin:6px 0;";
+
+    item.innerHTML =
+      `<img src="${frame}" style="width:40px;height:40px;object-fit:contain;background:#24344d;border-radius:5px;">
+       <span>Frame ${index + 1}</span>`;
+
+    list.appendChild(item);
+  });
+
+  document.getElementById("spriteAnimationStatus2d").textContent =
+    spriteAnimationFrames2d.length + " Animation Frames तैयार हैं।";
+
+  input.value = "";
+};  
   
 // ===== APPLY SPRITE SIZE =====
 
