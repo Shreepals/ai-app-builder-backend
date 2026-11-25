@@ -7159,8 +7159,15 @@ document.getElementById("flipSprite2d").onclick = function() {
   selectedSprite2d.dataset.flipped =
     flipped ? "false" : "true";
 
+    const horizontal =
+    selectedSprite2d.dataset.flipped === "true";
+
+  const vertical =
+    selectedSprite2d.dataset.verticalFlipped === "true";
+
   selectedSprite2d.style.scale =
-    flipped ? "1 1" : "-1 1";
+    (horizontal ? "-1" : "1") + " " +
+    (vertical ? "-1" : "1");
 
   document.getElementById("spriteStatus2d").textContent =
     flipped ? "Sprite वापस सीधी हो गई!" : "Sprite Left / Right Flip हो गई!";
