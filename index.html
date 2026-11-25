@@ -509,6 +509,56 @@ style="background:#10192c;padding:12px;border-radius:10px;margin:10px 0;">
     ➕ Add Sprite to Scene
   </button>
   
+<!-- ===== SPRITE ANIMATION FRAMES ===== -->
+
+<div style="margin-top:12px;padding:12px;background:#17243a;border-radius:8px;">
+
+  <h4>🎞️ Sprite Animation</h4>
+
+  <label>Animation Frames की Images चुनें:</label>
+
+  <input
+    type="file"
+    id="animationFramesInput2d"
+    accept="image/png,image/jpeg,image/webp"
+    multiple
+    style="width:100%;padding:10px;background:#24344d;color:white;border-radius:8px;"
+  >
+
+  <button class="btn" id="addAnimationFrames2d" style="margin-top:10px;">
+    ➕ Add Animation Frames
+  </button>
+
+  <div id="animationFramesList2d"
+    style="margin-top:10px;color:#9eacc5;">
+    अभी कोई Animation Frame नहीं है।
+  </div>
+
+  <div class="actions">
+    <button class="btn green" id="playSpriteAnimation2d">
+      ▶ Play Animation
+    </button>
+
+    <button class="btn secondary" id="stopSpriteAnimation2d">
+      ⏹ Stop Animation
+    </button>
+  </div>
+
+  <label>Animation Speed (FPS)</label>
+  <input
+    type="number"
+    id="spriteAnimationSpeed2d"
+    value="8"
+    min="1"
+    max="30"
+  >
+
+  <p id="spriteAnimationStatus2d" style="color:#9eacc5;">
+    Animation Frames जोड़ें।
+  </p>
+
+</div>
+    
   <!-- SPRITE SIZE AND FLIP CONTROLS -->
 
 <div style="margin-top:12px;padding:10px;background:#17243a;border-radius:8px;">
