@@ -7197,6 +7197,20 @@ function renderAnimationFramesList2d() {
 
     item.appendChild(img);
     item.appendChild(label);
+  
+    const deleteBtn = document.createElement("button");
+
+    deleteBtn.textContent = "Delete";
+    deleteBtn.style.display = "block";
+    deleteBtn.style.margin = "4px auto";
+
+    deleteBtn.onclick = function() {
+      spriteAnimationFrames2d.splice(index, 1);
+
+      renderAnimationFramesList2d();
+    };
+
+    item.appendChild(deleteBtn);
 
     list.appendChild(item);
   });
