@@ -7163,9 +7163,11 @@ scene2d.addEventListener("pointerdown", function(event) {
     selectedSprite2d = obj;
   
  // चुने गए Sprite की अपनी Animation लाएँ
-spriteAnimationFrames2d = Array.isArray(obj._animationFrames2d)
-  ? obj._animationFrames2d
-  : [];
+if (!Array.isArray(obj._animationFrames2d)) {
+  obj._animationFrames2d = [];
+}
+
+spriteAnimationFrames2d = obj._animationFrames2d;
 
 renderAnimationFramesList2d();   
 
