@@ -9044,6 +9044,8 @@ function openLevel2d(name) {
   spriteAnimationFrames2d = Array.isArray(data.animationFrames2d)
     ? data.animationFrames2d
     : [];
+  
+    renderAnimationFramesList2d();
 
   // पुराने Objects हटाएँ
   objects2d.forEach(obj => obj.remove());
