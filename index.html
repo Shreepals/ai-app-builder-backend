@@ -9066,6 +9066,14 @@ function saveCurrentLevel2d() {
   
       clipPath: obj.style.clipPath,
 
+// Sprite Editor की Settings Save करें
+spriteScale: obj.style.scale || "",
+spriteRotate: obj.style.rotate || "",
+
+flipped: obj.dataset.flipped || "false",
+verticalFlipped: obj.dataset.verticalFlipped || "false",
+spriteRotateAngle: obj.dataset.rotate || "0",
+
       locked: obj.dataset.locked || "false"
     })),
 
