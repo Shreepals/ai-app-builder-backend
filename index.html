@@ -9136,7 +9136,10 @@ function openLevel2d(name) {
 obj.dataset.spriteData = item.spriteData || "";
 
 obj.style.backgroundImage =
-  item.backgroundImage || "";
+  item.backgroundImage ||
+  (item.spriteData
+    ? `url("${item.spriteData}")`
+    : "");
 
 obj.style.backgroundSize =
   item.backgroundSize || "";
