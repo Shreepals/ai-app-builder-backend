@@ -9143,6 +9143,17 @@ obj.style.backgroundSize =
 
 obj.style.backgroundPosition =
   item.backgroundPosition || "";
+    
+// Sprite Editor Settings Restore करें
+obj.style.scale = item.spriteScale || "";
+obj.style.rotate = item.spriteRotate || "";
+
+obj.dataset.flipped = item.flipped || "false";
+obj.dataset.verticalFlipped =
+  item.verticalFlipped || "false";
+
+obj.dataset.rotate =
+  item.spriteRotateAngle || "0";    
 
 obj.style.transform =
   item.transform || "";
