@@ -9082,18 +9082,16 @@ function openLevel2d(name) {
 
   if (!data) return;
   
-    // Saved Animation Frames वापस लाएँ
-  spriteAnimationFrames2d = Array.isArray(data.animationFrames2d)
-    ? data.animationFrames2d
-    : [];
-  
-    renderAnimationFramesList2d();
+  // पुराने Sprite का Selection और Animation साफ़ करें
+  selectedSprite2d = null;
+  spriteAnimationFrames2d = [];
+  renderAnimationFramesList2d();
 
   // पुराने Objects हटाएँ
   objects2d.forEach(obj => obj.remove());
   objects2d = [];
   selectedObject2d = null;
-
+  
   // पुराने Tiles हटाएँ
   world2d.querySelectorAll(
     "[data-tile-cell2d]"
