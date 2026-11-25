@@ -7304,16 +7304,16 @@ document.getElementById("playSpriteAnimation2d").onclick = function() {
   spriteAnimationIndex2d = 0;
 
   spriteAnimationTimer2d = setInterval(function() {
-    const frame = spriteAnimationFrames2d[
+    const frame = animatingFrames2d[
       spriteAnimationIndex2d
     ];
 
-    selectedSprite2d.style.backgroundImage =
+    animatingSprite2d.style.backgroundImage =
       `url("${frame}")`;
 
     spriteAnimationIndex2d++;
 
-    if (spriteAnimationIndex2d >= spriteAnimationFrames2d.length) {
+    if (spriteAnimationIndex2d >= animatingFrames2d.length) {
       spriteAnimationIndex2d = 0;
     }
   }, 1000 / fps);
