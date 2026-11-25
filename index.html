@@ -9122,6 +9122,11 @@ function openLevel2d(name) {
     addObject2d(item.type, item.emoji, item.background);
 
     const obj = objects2d[objects2d.length - 1];
+    
+  // इस Sprite की अपनी Animation वापस लाएँ
+  obj._animationFrames2d = Array.isArray(item.animationFrames2d)
+    ? item.animationFrames2d
+    : []; 
 
     obj.dataset.name = item.name;
     obj.dataset.layer = item.layer;
