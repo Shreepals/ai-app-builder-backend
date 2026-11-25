@@ -7294,6 +7294,9 @@ document.getElementById("playSpriteAnimation2d").onclick = function() {
   }
 
   clearInterval(spriteAnimationTimer2d);
+  
+    const animatingSprite2d = selectedSprite2d;
+  const animatingFrames2d = [...spriteAnimationFrames2d];
 
   let fps = Number(
     document.getElementById("spriteAnimationSpeed2d").value
