@@ -7263,22 +7263,6 @@ document.getElementById("addAnimationFrames2d").onclick = async function() {
   
   renderAnimationFramesList2d();
 
-  const list = document.getElementById("animationFramesList2d");
-  list.innerHTML = "";
-
-  spriteAnimationFrames2d.forEach((frame, index) => {
-    const item = document.createElement("div");
-
-    item.style.cssText =
-      "display:flex;align-items:center;gap:8px;margin:6px 0;";
-
-    item.innerHTML =
-      `<img src="${frame}" style="width:40px;height:40px;object-fit:contain;background:#24344d;border-radius:5px;">
-       <span>Frame ${index + 1}</span>`;
-
-    list.appendChild(item);
-  });
-
   document.getElementById("spriteAnimationStatus2d").textContent =
     spriteAnimationFrames2d.length + " Animation Frames तैयार हैं।";
 
