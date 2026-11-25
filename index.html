@@ -7161,6 +7161,13 @@ scene2d.addEventListener("pointerdown", function(event) {
 
   if (obj && scene2d.contains(obj)) {
     selectedSprite2d = obj;
+  
+ // चुने गए Sprite की अपनी Animation लाएँ
+spriteAnimationFrames2d = Array.isArray(obj._animationFrames2d)
+  ? obj._animationFrames2d
+  : [];
+
+renderAnimationFramesList2d();   
 
     document.getElementById("spriteWidth2d").value =
       obj.offsetWidth;
