@@ -7188,8 +7188,15 @@ document.getElementById("flipSpriteVertical2d").onclick = function() {
   selectedSprite2d.dataset.verticalFlipped =
     flipped ? "false" : "true";
 
-  selectedSprite2d.style.scale =
-    flipped ? "1 1" : "1 -1";
+  const horizontal =
+  selectedSprite2d.dataset.flipped === "true";
+
+const vertical =
+  selectedSprite2d.dataset.verticalFlipped === "true";
+
+selectedSprite2d.style.scale =
+  (horizontal ? "-1" : "1") + " " +
+  (vertical ? "-1" : "1");
 
   document.getElementById("spriteStatus2d").textContent =
     flipped
