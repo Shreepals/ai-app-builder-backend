@@ -7164,7 +7164,31 @@ document.getElementById("flipSprite2d").onclick = function() {
 
   document.getElementById("spriteStatus2d").textContent =
     flipped ? "Sprite वापस सीधी हो गई!" : "Sprite Left / Right Flip हो गई!";
-}; 
+};
+  
+// ===== SPRITE VERTICAL FLIP =====
+
+document.getElementById("flipSpriteVertical2d").onclick = function() {
+
+  if (!selectedSprite2d) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  const flipped =
+    selectedSprite2d.dataset.verticalFlipped === "true";
+
+  selectedSprite2d.dataset.verticalFlipped =
+    flipped ? "false" : "true";
+
+  selectedSprite2d.style.scale =
+    flipped ? "1 1" : "1 -1";
+
+  document.getElementById("spriteStatus2d").textContent =
+    flipped
+      ? "Sprite वापस सीधी हो गई!"
+      : "Sprite ऊपर-नीचे Flip हो गई!";
+};  
   
 // ===== SPRITE ROTATE SYSTEM =====
 
