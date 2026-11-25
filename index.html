@@ -7228,6 +7228,66 @@ document.getElementById("addAnimationFrames2d").onclick = async function() {
   input.value = "";
 };  
   
+// ===== SPRITE ANIMATION PLAY / STOP =====
+
+let spriteAnimationTimer2d = null;
+let spriteAnimationIndex2d = 0;
+
+document.getElementById("playSpriteAnimation2d").onclick = function() {
+  if (!selectedSprite2d) {
+    document.getElementById("spriteAnimationStatus2d").textContent =
+      "पहले Scene में Sprite चुनें।";
+    return;
+  }
+
+  if (spriteAnimationFrames2d.length === 0) {
+    document.getElementById("spriteAnimationStatus2d").textContent =
+      "पहले Animation Frames जोड़ें।";
+    return;
+  }
+
+  clearInterval(spriteAnimationTimer2d);
+
+  let fps = Number(
+    document.getElementById("spriteAnimationSpeed2d").value
+  );
+
+  fps = Math.max(1, Math.min(30, fps || 8));
+
+  spriteAnimationIndex2d = 0;
+
+  spriteAnimationTimer2d = setInterval(function() {
+    const frame = spriteAnimationFrames2d[
+      spriteAnimationIndex2d
+    ];
+
+    selectedSprite2d.style.backgroundImage =
+      `url("${frame}")`;
+
+    spriteAnimationIndex2d++;
+
+    if (spriteAnimationIndex2d >= spriteAnimationFrames2d.length) {
+      spriteAnimationIndex2d = 0;
+    }
+  }, 1000 / fps);
+
+  document.getElementById("spriteAnimationStatus2d").textContent =
+    "▶ Sprite Animation चल रही है।";
+};
+
+document.getElementById("stopSpriteAnimation2d").onclick = function() {
+  clearInterval(spriteAnimationTimer2d);
+  spriteAnimationTimer2d = null;
+
+  if (selectedSprite2d && selectedSprite2d.dataset.spriteData) {
+    selectedSprite2d.style.backgroundImage =
+      `url("${selectedSprite2d.dataset.spriteData}")`;
+  }
+
+  document.getElementById("spriteAnimationStatus2d").textContent =
+    "Animation रोक दी गई।";
+};  
+  
 // ===== APPLY SPRITE SIZE =====
 
 document.getElementById("applySpriteSize2d").onclick = function() {
