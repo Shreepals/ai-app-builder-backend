@@ -7237,6 +7237,8 @@ document.getElementById("addAnimationFrames2d").onclick = async function() {
   loadedFrames.forEach(frame => {
     if (frame) spriteAnimationFrames2d.push(frame);
   });
+  
+  renderAnimationFramesList2d();
 
   const list = document.getElementById("animationFramesList2d");
   list.innerHTML = "";
