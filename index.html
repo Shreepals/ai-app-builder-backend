@@ -9536,9 +9536,9 @@ requestAnimationFrame(() => {
   renderSpriteHitbox2d(obj);
 });
   
- // Reload के बाद पहली Sprite की Animation List वापस दिखाएँ
- const firstSprite2d = objects2d.find(
-  obj => obj.dataset.type === "Sprite"
+ // Reload के बाद Hitbox दिखाएँ
+ renderSpriteHitbox2d(obj);
+    
 );
 
 if (firstSprite2d) {
