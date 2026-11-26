@@ -9240,7 +9240,7 @@ enemyHealthDisplay2d.textContent =
       obj.dataset.type === "Coin"
     ).forEach(coin => {
 
-      const coinRect = coin.getBoundingClientRect();
+      const coinRect = getSpriteHitboxRect2d(coin);
 
       const touching =
         playerRect.left < coinRect.right &&
