@@ -7319,10 +7319,12 @@ function renderAnimationFramesList2d() {
     deleteBtn.style.margin = "4px auto";
 
     deleteBtn.onclick = function() {
-      spriteAnimationFrames2d.splice(index, 1);
+  spriteAnimationFrames2d.splice(index, 1);
 
-      renderAnimationFramesList2d();
-    };
+  renderAnimationFramesList2d();
+
+  saveCurrentLevel2d();
+};
 
     item.appendChild(deleteBtn);
 
