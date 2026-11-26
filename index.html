@@ -9271,7 +9271,7 @@ if (hasEnemyEvent && !enemyHitCooldown2d && health2d > 0) {
     obj.dataset.type === "Enemy"
   ).forEach(enemy => {
 
-    const enemyRect = enemy.getBoundingClientRect();
+    const enemyRect = getSpriteHitboxRect2d(enemy);
 
     const touchingEnemy =
       playerRect.left < enemyRect.right &&
