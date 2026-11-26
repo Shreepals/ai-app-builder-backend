@@ -7513,6 +7513,152 @@ document.getElementById("resetSpriteTint2d").onclick = function() {
 
   document.getElementById("spriteStatus2d").textContent =
     "Sprite का Tint Reset हो गया!";
+};
+  
+// ===== SPRITE HITBOX SYSTEM =====
+
+function renderSpriteHitbox2d(obj) {
+  if (!obj) return;
+
+  let overlay = obj.querySelector("[data-hitbox-overlay2d]");
+
+  if (!overlay) {
+    overlay = document.createElement("div");
+    overlay.dataset.hitboxOverlay2d = "true";
+
+    overlay.style.position = "absolute";
+    overlay.style.border = "2px dashed #ffd54f";
+    overlay.style.background = "rgba(255,213,79,0.08)";
+    overlay.style.boxSizing = "border-box";
+    overlay.style.pointerEvents = "none";
+    overlay.style.zIndex = "9999";
+
+    obj.appendChild(overlay);
+  }
+
+  const width = Math.max(
+    1,
+    Number(obj.dataset.hitboxWidth2d) || obj.offsetWidth
+  );
+
+  const height = Math.max(
+    1,
+    Number(obj.dataset.hitboxHeight2d) || obj.offsetHeight
+  );
+
+  const offsetX =
+    Number(obj.dataset.hitboxOffsetX2d) || 0;
+
+  const offsetY =
+    Number(obj.dataset.hitboxOffsetY2d) || 0;
+
+  const shape =
+    obj.dataset.hitboxShape2d || "rectangle";
+
+  overlay.style.width = width + "px";
+  overlay.style.height = height + "px";
+
+  overlay.style.left =
+    ((obj.offsetWidth - width) / 2 + offsetX) + "px";
+
+  overlay.style.top =
+    ((obj.offsetHeight - height) / 2 + offsetY) + "px";
+
+  overlay.style.borderRadius =
+    shape === "circle" ? "50%" : "0";
+}
+
+
+// ===== APPLY HITBOX =====
+
+document.getElementById("applySpriteHitbox2d").onclick = function() {
+
+  if (
+    !selectedSprite2d ||
+    !scene2d.contains(selectedSprite2d)
+  ) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  const obj = selectedSprite2d;
+
+  const shape =
+    document.getElementById("spriteHitboxShape2d").value;
+
+  const width = Math.max(
+    1,
+    Number(document.getElementById("spriteHitboxWidth2d").value)
+      || obj.offsetWidth
+  );
+
+  const height = Math.max(
+    1,
+    Number(document.getElementById("spriteHitboxHeight2d").value)
+      || obj.offsetHeight
+  );
+
+  const offsetX =
+    Number(document.getElementById("spriteHitboxOffsetX2d").value)
+    || 0;
+
+  const offsetY =
+    Number(document.getElementById("spriteHitboxOffsetY2d").value)
+    || 0;
+
+  obj.dataset.hitboxShape2d = shape;
+  obj.dataset.hitboxWidth2d = width;
+  obj.dataset.hitboxHeight2d = height;
+  obj.dataset.hitboxOffsetX2d = offsetX;
+  obj.dataset.hitboxOffsetY2d = offsetY;
+
+  renderSpriteHitbox2d(obj);
+
+  saveCurrentLevel2d();
+
+  document.getElementById("spriteHitboxStatus2d").textContent =
+    "Hitbox Sprite पर लागू हो गया!";
+};
+
+
+// ===== RESET HITBOX =====
+
+document.getElementById("resetSpriteHitbox2d").onclick = function() {
+
+  if (
+    !selectedSprite2d ||
+    !scene2d.contains(selectedSprite2d)
+  ) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  const obj = selectedSprite2d;
+
+  obj.dataset.hitboxShape2d = "rectangle";
+  obj.dataset.hitboxWidth2d = obj.offsetWidth;
+  obj.dataset.hitboxHeight2d = obj.offsetHeight;
+  obj.dataset.hitboxOffsetX2d = 0;
+  obj.dataset.hitboxOffsetY2d = 0;
+
+  document.getElementById("spriteHitboxShape2d").value =
+    "rectangle";
+
+  document.getElementById("spriteHitboxWidth2d").value =
+    obj.offsetWidth;
+
+  document.getElementById("spriteHitboxHeight2d").value =
+    obj.offsetHeight;
+
+  document.getElementById("spriteHitboxOffsetX2d").value = 0;
+  document.getElementById("spriteHitboxOffsetY2d").value = 0;
+
+  renderSpriteHitbox2d(obj);
+
+  saveCurrentLevel2d();
+
+  document.getElementById("spriteHitboxStatus2d").textContent =
+    "Hitbox Reset हो गया!";
 };  
 
 // ===== LEFT / RIGHT FLIP =====
