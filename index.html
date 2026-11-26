@@ -9305,10 +9305,7 @@ enemyHealthDisplay2d.textContent =
       const coinRect = getSpriteHitboxRect2d(coin);
 
       const touching =
-        playerRect.left < coinRect.right &&
-        playerRect.right > coinRect.left &&
-        playerRect.top < coinRect.bottom &&
-        playerRect.bottom > coinRect.top;
+        areSpriteHitboxesColliding2d(player, coin);
 
       if (touching) {
         coin.remove();
