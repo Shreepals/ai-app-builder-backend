@@ -9234,7 +9234,7 @@ enemyHealthDisplay2d.textContent =
      
   eventRunner2d = setInterval(() => {
 
-    const playerRect = player.getBoundingClientRect();
+    const playerRect = getSpriteHitboxRect2d(player);
 
     objects2d.filter(obj =>
       obj.dataset.type === "Coin"
