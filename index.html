@@ -9333,10 +9333,7 @@ if (hasEnemyEvent && !enemyHitCooldown2d && health2d > 0) {
     const enemyRect = getSpriteHitboxRect2d(enemy);
 
     const touchingEnemy =
-      playerRect.left < enemyRect.right &&
-      playerRect.right > enemyRect.left &&
-      playerRect.top < enemyRect.bottom &&
-      playerRect.bottom > enemyRect.top;
+      areSpriteHitboxesColliding2d(player, enemy);
 
     if (touchingEnemy) {
       
