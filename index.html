@@ -9186,6 +9186,25 @@ obj.style.clipPath =
 obj.dataset.locked =
   item.locked || "false";
   });
+  
+ // Reload के बाद पहली Sprite की Animation List वापस दिखाएँ
+ const firstSprite2d = objects2d.find(
+  obj => obj.dataset.type === "Sprite"
+);
+
+if (firstSprite2d) {
+  selectedSprite2d = firstSprite2d;
+
+  spriteAnimationFrames2d =
+    Array.isArray(firstSprite2d._animationFrames2d)
+      ? firstSprite2d._animationFrames2d
+      : [];
+} else {
+  selectedSprite2d = null;
+  spriteAnimationFrames2d = [];
+}
+
+renderAnimationFramesList2d(); 
 
   // वर्तमान Scene का नाम सेट करें
   activeSceneName2d = name;
