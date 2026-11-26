@@ -7394,6 +7394,74 @@ document.getElementById("applySpriteSize2d").onclick = function() {
   document.getElementById("spriteStatus2d").textContent =
     "Sprite का Size बदल दिया गया!";
 };
+  
+// ===== SPRITE TINT SYSTEM =====
+
+function applySpriteTint2d(obj, color) {
+
+  if (!obj) return;
+
+  // White Tint का मतलब Original Color
+  const tint =
+    color && color.toLowerCase() !== "#ffffff"
+      ? color
+      : "";
+
+  obj.dataset.tintColor = tint;
+
+  obj.style.backgroundColor = tint || "";
+
+  obj.style.backgroundBlendMode =
+    tint ? "multiply" : "normal";
+}
+
+  
+// ===== APPLY TINT =====
+
+document.getElementById("applySpriteTint2d").onclick = function() {
+
+  if (
+    !selectedSprite2d ||
+    !scene2d.contains(selectedSprite2d)
+  ) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  const color =
+    document.getElementById("spriteTintColor2d").value;
+
+  applySpriteTint2d(selectedSprite2d, color);
+
+  saveCurrentLevel2d();
+
+  document.getElementById("spriteStatus2d").textContent =
+    "Sprite Tint लागू हो गया!";
+};
+
+  
+// ===== RESET TINT =====
+
+document.getElementById("resetSpriteTint2d").onclick = function() {
+
+  if (
+    !selectedSprite2d ||
+    !scene2d.contains(selectedSprite2d)
+  ) {
+    alert("पहले Scene में Sprite चुनें।");
+    return;
+  }
+
+  document.getElementById("spriteTintColor2d").value =
+    "#ffffff";
+
+  applySpriteTint2d(selectedSprite2d, "");
+
+  saveCurrentLevel2d();
+
+  document.getElementById("spriteStatus2d").textContent =
+    "Sprite का Tint Reset हो गया!";
+};  
 
 // ===== LEFT / RIGHT FLIP =====
 
