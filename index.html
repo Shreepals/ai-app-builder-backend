@@ -7591,7 +7591,56 @@ function renderSpriteHitbox2d(obj) {
   overlay.style.borderRadius =
     shape === "circle" ? "50%" : "0";
 }
+  
+// ===== GET CUSTOM SPRITE HITBOX =====
 
+function getSpriteHitboxRect2d(obj) {
+  if (!obj) return null;
+
+  const rect = obj.getBoundingClientRect();
+
+  const scaleX = rect.width / (obj.offsetWidth || 1);
+  const scaleY = rect.height / (obj.offsetHeight || 1);
+
+  const width = Math.max(
+    1,
+    Number(obj.dataset.hitboxWidth2d) || obj.offsetWidth
+  );
+
+  const height = Math.max(
+    1,
+    Number(obj.dataset.hitboxHeight2d) || obj.offsetHeight
+  );
+
+  const offsetX =
+    Number(obj.dataset.hitboxOffsetX2d) || 0;
+
+  const offsetY =
+    Number(obj.dataset.hitboxOffsetY2d) || 0;
+
+  return {
+    left:
+      rect.left +
+      ((obj.offsetWidth - width) / 2 + offsetX) * scaleX,
+
+    top:
+      rect.top +
+      ((obj.offsetHeight - height) / 2 + offsetY) * scaleY,
+
+    width: width * scaleX,
+    height: height * scaleY,
+
+    right:
+      rect.left +
+      ((obj.offsetWidth - width) / 2 + offsetX + width) * scaleX,
+
+    bottom:
+      rect.top +
+      ((obj.offsetHeight - height) / 2 + offsetY + height) * scaleY,
+
+    shape: obj.dataset.hitboxShape2d || "rectangle"
+  };
+  }
 
 // ===== APPLY HITBOX =====
 
