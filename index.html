@@ -7207,6 +7207,10 @@ renderAnimationFramesList2d();
 
     document.getElementById("spriteHeight2d").value =
       obj.offsetHeight;
+  
+    document.getElementById("spriteTintColor2d").value =
+  obj.dataset.tintColor || "#ffffff";
+  
   }
 }); 
   
@@ -9176,6 +9180,7 @@ spriteRotate: obj.style.rotate || "",
 flipped: obj.dataset.flipped || "false",
 verticalFlipped: obj.dataset.verticalFlipped || "false",
 spriteRotateAngle: obj.dataset.rotate || "0",
+spriteTintColor: obj.dataset.tintColor || "",      
 
       locked: obj.dataset.locked || "false"
     })),
