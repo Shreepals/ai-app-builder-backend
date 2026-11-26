@@ -609,6 +609,54 @@ style="background:#10192c;padding:12px;border-radius:10px;margin:10px 0;">
   </p>
 
 </div>
+  
+<!-- ===== SPRITE COLLISION HITBOX ===== -->
+
+<div style="margin-top:12px;padding:10px;background:#10192c;border-radius:8px;">
+
+  <h4>🎯 Sprite Collision Shape</h4>
+
+  <label>Hitbox Shape</label>
+  <select id="spriteHitboxShape2d"
+    style="width:100%;padding:8px;margin:6px 0;">
+    <option value="rectangle">Rectangle</option>
+    <option value="circle">Circle</option>
+  </select>
+
+  <label>Hitbox Width (px)</label>
+  <input type="number" id="spriteHitboxWidth2d"
+    value="55" min="1"
+    style="width:100%;padding:8px;margin:6px 0;">
+
+  <label>Hitbox Height (px)</label>
+  <input type="number" id="spriteHitboxHeight2d"
+    value="55" min="1"
+    style="width:100%;padding:8px;margin:6px 0;">
+
+  <label>Hitbox Offset X (px)</label>
+  <input type="number" id="spriteHitboxOffsetX2d"
+    value="0"
+    style="width:100%;padding:8px;margin:6px 0;">
+
+  <label>Hitbox Offset Y (px)</label>
+  <input type="number" id="spriteHitboxOffsetY2d"
+    value="0"
+    style="width:100%;padding:8px;margin:6px 0;">
+
+  <button class="btn" id="applySpriteHitbox2d">
+    🎯 Apply Hitbox
+  </button>
+
+  <button class="btn secondary" id="resetSpriteHitbox2d">
+    ↩️ Reset Hitbox
+  </button>
+
+  <p id="spriteHitboxStatus2d"
+    style="color:#9eacc5;font-size:12px;">
+    पहले Scene में Sprite चुनें।
+  </p>
+
+</div>  
 
   <button class="btn" id="flipSprite2d">
     ↔️ Left / Right Flip
