@@ -9444,6 +9444,8 @@ function openLevel2d(name) {
   ).forEach(tile => tile.remove());
 
   document.getElementById("sceneName2d").value = name;
+  
+  let firstSprite2d = null;
 
   // Objects Load करें
   (data.objects || []).forEach(item => {
@@ -9477,6 +9479,20 @@ obj.style.backgroundSize =
 
 obj.style.backgroundPosition =
   item.backgroundPosition || "";
+    
+// Scene Load के समय पहला Sprite चुनें
+if (
+  !firstSprite2d &&
+  (
+    item.spriteData ||
+    (
+      Array.isArray(item.animationFrames2d) &&
+      item.animationFrames2d.length > 0
+    )
+  )
+) {
+  firstSprite2d = obj;
+  }    
     
 // Sprite Tint Restore करें
 applySpriteTint2d(
