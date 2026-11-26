@@ -7641,6 +7641,68 @@ function getSpriteHitboxRect2d(obj) {
     shape: obj.dataset.hitboxShape2d || "rectangle"
   };
   }
+  
+// ===== CUSTOM HITBOX COLLISION CHECK =====
+
+function areSpriteHitboxesColliding2d(objA, objB) {
+  const a = getSpriteHitboxRect2d(objA);
+  const b = getSpriteHitboxRect2d(objB);
+
+  if (!a || !b) return false;
+
+  const aCircle = a.shape === "circle";
+  const bCircle = b.shape === "circle";
+
+  // Circle और Circle
+  if (aCircle && bCircle) {
+    const ax = a.left + a.width / 2;
+    const ay = a.top + a.height / 2;
+
+    const bx = b.left + b.width / 2;
+    const by = b.top + b.height / 2;
+
+    const ar = Math.min(a.width, a.height) / 2;
+    const br = Math.min(b.width, b.height) / 2;
+
+    const dx = ax - bx;
+    const dy = ay - by;
+
+    return dx * dx + dy * dy <= (ar + br) * (ar + br);
+  }
+
+  // Circle और Rectangle
+  if (aCircle || bCircle) {
+    const circle = aCircle ? a : b;
+    const rect = aCircle ? b : a;
+
+    const cx = circle.left + circle.width / 2;
+    const cy = circle.top + circle.height / 2;
+    const radius = Math.min(circle.width, circle.height) / 2;
+
+    const closestX = Math.max(
+      rect.left,
+      Math.min(cx, rect.right)
+    );
+
+    const closestY = Math.max(
+      rect.top,
+      Math.min(cy, rect.bottom)
+    );
+
+    const dx = cx - closestX;
+    const dy = cy - closestY;
+
+    return dx * dx + dy * dy <= radius * radius;
+  }
+
+  // Rectangle और Rectangle
+  return (
+    a.left < b.right &&
+    a.right > b.left &&
+    a.top < b.bottom &&
+    a.bottom > b.top
+  );
+  }  
 
 // ===== APPLY HITBOX =====
 
