@@ -9255,6 +9255,12 @@ obj.style.backgroundSize =
 obj.style.backgroundPosition =
   item.backgroundPosition || "";
     
+// Sprite Tint Restore करें
+applySpriteTint2d(
+  obj,
+  item.spriteTintColor || ""
+);    
+    
 // Sprite Editor Settings Restore करें
 obj.style.scale = item.spriteScale || "";
 obj.style.rotate = item.spriteRotate || "";
