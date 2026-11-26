@@ -7259,6 +7259,24 @@ renderAnimationFramesList2d();
     document.getElementById("spriteTintColor2d").value =
   obj.dataset.tintColor || "#ffffff";
   
+  // चुने गए Sprite की Hitbox Settings दिखाएँ
+document.getElementById("spriteHitboxShape2d").value =
+  obj.dataset.hitboxShape2d || "rectangle";
+
+document.getElementById("spriteHitboxWidth2d").value =
+  obj.dataset.hitboxWidth2d || obj.offsetWidth;
+
+document.getElementById("spriteHitboxHeight2d").value =
+  obj.dataset.hitboxHeight2d || obj.offsetHeight;
+
+document.getElementById("spriteHitboxOffsetX2d").value =
+  obj.dataset.hitboxOffsetX2d || 0;
+
+document.getElementById("spriteHitboxOffsetY2d").value =
+  obj.dataset.hitboxOffsetY2d || 0;
+
+renderSpriteHitbox2d(obj);  
+  
   }
 }); 
   
@@ -9374,7 +9392,14 @@ spriteRotate: obj.style.rotate || "",
 flipped: obj.dataset.flipped || "false",
 verticalFlipped: obj.dataset.verticalFlipped || "false",
 spriteRotateAngle: obj.dataset.rotate || "0",
-spriteTintColor: obj.dataset.tintColor || "",      
+spriteTintColor: obj.dataset.tintColor || "", 
+  
+// Sprite Hitbox Settings Save करें
+hitboxShape2d: obj.dataset.hitboxShape2d || "rectangle",
+hitboxWidth2d: obj.dataset.hitboxWidth2d || "",
+hitboxHeight2d: obj.dataset.hitboxHeight2d || "",
+hitboxOffsetX2d: obj.dataset.hitboxOffsetX2d || "0",
+hitboxOffsetY2d: obj.dataset.hitboxOffsetY2d || "0",      
 
       locked: obj.dataset.locked || "false"
     })),
@@ -9489,7 +9514,27 @@ obj.style.clipPath =
 
 obj.dataset.locked =
   item.locked || "false";
-  });
+    
+// Sprite Hitbox Settings Restore करें
+obj.dataset.hitboxShape2d =
+  item.hitboxShape2d || "rectangle";
+
+obj.dataset.hitboxWidth2d =
+  item.hitboxWidth2d || obj.offsetWidth;
+
+obj.dataset.hitboxHeight2d =
+  item.hitboxHeight2d || obj.offsetHeight;
+
+obj.dataset.hitboxOffsetX2d =
+  item.hitboxOffsetX2d || "0";
+
+obj.dataset.hitboxOffsetY2d =
+  item.hitboxOffsetY2d || "0";
+
+// Reload के बाद Hitbox दिखाएँ
+renderSpriteHitbox2d(obj);  
+    
+});
   
  // Reload के बाद पहली Sprite की Animation List वापस दिखाएँ
  const firstSprite2d = objects2d.find(
