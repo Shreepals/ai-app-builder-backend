@@ -9531,9 +9531,9 @@ obj.dataset.hitboxOffsetX2d =
 obj.dataset.hitboxOffsetY2d =
   item.hitboxOffsetY2d || "0";
 
-// Reload के बाद Hitbox दिखाएँ
-renderSpriteHitbox2d(obj);  
-    
+// Sprite Load होने के बाद Hitbox सही जगह Refresh करें
+requestAnimationFrame(() => {
+  renderSpriteHitbox2d(obj);
 });
   
  // Reload के बाद पहली Sprite की Animation List वापस दिखाएँ
