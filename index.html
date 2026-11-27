@@ -9660,6 +9660,71 @@ function openLevel2d(name) {
 
   if (!data) return;
   
+    // ===== SAVED LAYERS RESTORE =====
+
+  const layerSelect = document.getElementById("layerSelect2d");
+
+  const savedLayerNames2d =
+    Array.isArray(data.layers) && data.layers.length
+      ? data.layers
+      : ["Background", "Gameplay", "Foreground", "UI"];
+
+  // Layer के पुराने नाम हटाकर Saved नाम वापस बनाएँ
+  layerSelect.innerHTML = "";
+
+  savedLayerNames2d.forEach(layerName => {
+    const option = document.createElement("option");
+
+    option.value = layerName;
+    option.textContent = layerName;
+
+    layerSelect.appendChild(option);
+  });
+
+  // Current Layer वापस लाएँ
+  currentLayer2d = savedLayerNames2d.includes(data.currentLayer)
+    ? data.currentLayer
+    : savedLayerNames2d[0];
+
+  layerSelect.value = currentLayer2d;
+
+  // Hidden, Opacity और Locked Layer वापस लाएँ
+  hiddenLayers2d = Array.isArray(data.hiddenLayers)
+    ? data.hiddenLayers
+    : [];
+
+  layerOpacities2d =
+    data.layerOpacities &&
+    typeof data.layerOpacities === "object"
+      ? data.layerOpacities
+      : {};
+
+  lockedLayers2d = Array.isArray(data.lockedLayers)
+    ? data.lockedLayers
+    : [];
+
+  // Layer Controls अपडेट करें
+  const savedOpacity =
+    layerOpacities2d[currentLayer2d] ?? 1;
+
+  layerOpacity2d.value = savedOpacity * 100;
+
+  layerOpacityValue2d.textContent =
+    Math.round(savedOpacity * 100) + "%";
+
+  document.getElementById("toggleLayerVisibility2d").textContent =
+    hiddenLayers2d.includes(currentLayer2d)
+      ? "👁️ Show Layer"
+      : "🙈 Hide Layer";
+
+  document.getElementById("toggleLayerLock2d").textContent =
+    lockedLayers2d.includes(currentLayer2d)
+      ? "🔓 Unlock Layer"
+      : "🔒 Lock Layer";
+
+  document.getElementById("layerStatus2d").textContent =
+    "Current Layer: " + currentLayer2d;
+  
   // Visual Events Rules Restore करें
 events2d = Array.isArray(data.events)
   ? data.events
