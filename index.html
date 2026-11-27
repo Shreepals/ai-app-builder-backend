@@ -7200,22 +7200,6 @@ document.getElementById("spriteFileInput2d").onchange = function() {
 
   reader.readAsDataURL(file);
 };
-
-  const preview = document.getElementById("spritePreview2d");
-  preview.innerHTML = "";
-
-  const img = document.createElement("img");
-  img.src = spriteImageUrl2d;
-  img.style.cssText =
-    "max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;";
-
-  preview.appendChild(img);
-
-  document.getElementById("addSpriteToScene2d").disabled = false;
-
-  document.getElementById("spriteStatus2d").textContent =
-    "Image Import सफल! अब Preview देख सकते हैं।";
-}; 
   
 document.getElementById("addSpriteToScene2d").onclick = function() {
 
