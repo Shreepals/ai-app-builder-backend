@@ -9395,7 +9395,25 @@ if (typeof enemy.animate === "function") {
       }
     }
   });
-}   
+} 
+  
+  // ===== PLAYER EXIT EVENT =====
+
+if (hasExitEvent) {
+  const exit = objects2d.find(obj =>
+    obj.dataset.type === "Exit"
+  );
+
+  if (
+    exit &&
+    areSpriteHitboxesColliding2d(player, exit)
+  ) {
+    document.getElementById("eventStatus2d").textContent =
+      "🎉 Level Complete! Player ने Exit छू लिया।";
+
+    clearInterval(eventRunner2d);
+  }
+  }
 
   }, 100);
 
