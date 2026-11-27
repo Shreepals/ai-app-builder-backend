@@ -9207,6 +9207,16 @@ document.getElementById("runEvents2d").onclick = () => {
   event.object === "Player" &&
   event.action === "touchEnemy"
 );
+  
+  const hasMoveRightEvent = events2d.some(event =>
+  event.object === "Player" &&
+  event.action === "moveRight"
+);
+
+const hasMoveLeftEvent = events2d.some(event =>
+  event.object === "Player" &&
+  event.action === "moveLeft"
+);
 
 const hasExit2d = objects2d.some(obj =>
   obj.dataset.type === "Exit"
