@@ -9210,6 +9210,11 @@ document.getElementById("runEvents2d").onclick = () => {
   event.action === "touchEnemy"
 );
   
+  const hasExitEvent = events2d.some(event =>
+  event.object === "Player" &&
+  event.action === "touchExit"
+);
+  
   const hasMoveRightEvent = events2d.some(event =>
   event.object === "Player" &&
   event.action === "moveRight"
