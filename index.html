@@ -7159,30 +7159,47 @@ document.getElementById("spriteFileInput2d").onchange = function() {
     return;
   }
 
-  if (spriteImageUrl2d) {
-    URL.revokeObjectURL(spriteImageUrl2d);
-  }
+  spriteImageData2d = "";
+  spriteImageUrl2d = "";
 
-  spriteImageUrl2d = URL.createObjectURL(file);
-  
-  // Image को Save करने योग्य Data में बदलें
-
-const reader = new FileReader();
-
-reader.onload = function(e) {
-  spriteImageData2d = e.target.result;
-  
-  spriteImageUrl2d = spriteImageData2d;
+  const addButton = document.getElementById("addSpriteToScene2d");
+  addButton.disabled = true;
 
   document.getElementById("spriteStatus2d").textContent =
-    "Image Library में Save करने के लिए तैयार है!";
-};
+    "Image पढ़ी जा रही है...";
 
-reader.onerror = function() {
-  alert("Image पढ़ने में समस्या हुई।");
-};
+  const reader = new FileReader();
 
-reader.readAsDataURL(file);
+  reader.onload = function(e) {
+    spriteImageData2d = e.target.result;
+    spriteImageUrl2d = spriteImageData2d;
+
+    const preview = document.getElementById("spritePreview2d");
+    preview.innerHTML = "";
+
+    const img = document.createElement("img");
+    img.src = spriteImageData2d;
+    img.style.cssText =
+      "max-width:100%;max-height:180px;object-fit:contain;border-radius:8px;";
+
+    preview.appendChild(img);
+
+    addButton.disabled = false;
+
+    document.getElementById("spriteStatus2d").textContent =
+      "Image पूरी पढ़ ली गई। अब Sprite जोड़ सकते हैं।";
+  };
+
+  reader.onerror = function() {
+    spriteImageData2d = "";
+    spriteImageUrl2d = "";
+    addButton.disabled = true;
+
+    alert("Image पढ़ने में समस्या हुई।");
+  };
+
+  reader.readAsDataURL(file);
+};
 
   const preview = document.getElementById("spritePreview2d");
   preview.innerHTML = "";
