@@ -9286,24 +9286,26 @@ enemyHealthDisplay2d.textContent =
 
     const playerRect = getSpriteHitboxRect2d(player);
 
-    objects2d.filter(obj =>
-      obj.dataset.type === "Coin"
-    ).forEach(coin => {
+   if (hasCoinEvent) {
 
-      const coinRect = getSpriteHitboxRect2d(coin);
+  objects2d.filter(obj =>
+    obj.dataset.type === "Coin"
+  ).forEach(coin => {
 
-      const touching =
-        areSpriteHitboxesColliding2d(player, coin);
+    const touching =
+      areSpriteHitboxesColliding2d(player, coin);
 
-      if (touching) {
-        coin.remove();
+    if (touching) {
+      coin.remove();
 
-        objects2d = objects2d.filter(obj => obj !== coin);
+      objects2d = objects2d.filter(obj => obj !== coin);
 
-        score2d += 10;
-        scoreDisplay.textContent = "Score: " + score2d;
-      }
-    });
+      score2d += 10;
+      scoreDisplay.textContent = "Score: " + score2d;
+    }
+  });
+
+  } 
        
  // ===== ENEMY COLLISION + HEALTH =====
 
