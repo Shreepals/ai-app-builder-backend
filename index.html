@@ -9810,9 +9810,11 @@ if (scenes[levelName]) {
 }
 
   scenes[levelName] = {
-    name: levelName,
-    objects: []
-  };
+  name: levelName,
+  objects: [],
+  tiles: [],
+  events: []
+};
 
   localStorage.setItem(
     "aiAppBuilderScenes2d",
