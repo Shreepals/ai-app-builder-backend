@@ -9063,13 +9063,40 @@ function renderEventsList2d() {
   }
   }  
 
+function renderEventsList2d() {
+  const list = document.getElementById("eventList2d");
+
+  if (events2d.length === 0) {
+    list.innerHTML = "अभी कोई Event नहीं है।";
+    return;
+  }
+
+  list.innerHTML = events2d.map((event, index) =>
+    `<div style="background:#17243b;padding:10px;margin:8px 0;border-radius:8px;display:flex;justify-content:space-between;align-items:center;gap:8px;">
+      <span>${index + 1}. ${event.name}</span>
+      <button class="btn secondary" data-delete-event2d="${index}">🗑️ Delete</button>
+    </div>`
+  ).join("");
+
+  list.querySelectorAll("[data-delete-event2d]").forEach(button => {
+    button.onclick = () => {
+      const index = Number(button.dataset.deleteEvent2d);
+
+      events2d.splice(index, 1);
+
+      renderEventsList2d();
+
+      saveCurrentLevel2d();
+
+      document.getElementById("eventStatus2d").textContent =
+        "Event Rule Delete और Save हो गया।";
+    };
+  });
+}
+
 document.getElementById("addEvent2d").onclick = () => {
-
-  const object =
-    document.getElementById("eventObject2d").value;
-
-  const action =
-    document.getElementById("eventAction2d").value;
+  const object = document.getElementById("eventObject2d").value;
+  const action = document.getElementById("eventAction2d").value;
 
   const actionNames = {
     touchCoin: "Coin को छूने पर",
@@ -9085,17 +9112,14 @@ document.getElementById("addEvent2d").onclick = () => {
     name: object + " → " + actionNames[action]
   });
 
-  document.getElementById("eventList2d").innerHTML =
-    events2d.map((event, index) =>
-      `<div style="background:#17243b;padding:10px;margin:8px 0;border-radius:8px;">
-        ${index + 1}. ${event.name}
-      </div>`
-    ).join("");
+  renderEventsList2d();
+
+  saveCurrentLevel2d();
 
   document.getElementById("eventStatus2d").textContent =
-    "नया Game Rule जोड़ दिया गया।";
-}; 
-    
+    "नया Game Rule जोड़कर Save कर दिया गया।";
+};
+          
 // ===== 2D PLAYER COIN COLLISION =====
 
 let score2d = 0;
