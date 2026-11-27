@@ -9552,7 +9552,17 @@ hitboxOffsetY2d: obj.dataset.hitboxOffsetY2d || "0",
     })),
 
     tiles: tiles
-  };
+      
+// इस Scene के Visual Events Rules भी Save करें
+events: events2d.map(event => ({
+  object: String(event.object || "Player"),
+  action: String(event.action || ""),
+  name: String(
+    event.name || (event.object + " → " + event.action)
+  )
+})) 
+  
+};
 
   localStorage.setItem(
     "aiAppBuilderScenes2d",
@@ -9570,6 +9580,30 @@ function openLevel2d(name) {
   const data = scenes[name];
 
   if (!data) return;
+  
+  // Visual Events Rules Restore करें
+events2d = Array.isArray(data.events)
+  ? data.events
+      .filter(event =>
+        event &&
+        typeof event.object === "string" &&
+        typeof event.action === "string"
+      )
+      .map(event => ({
+        object: event.object,
+        action: event.action,
+        name: String(
+          event.name || (event.object + " → " + event.action)
+        )
+      }))
+  : [];
+
+renderEventsList2d();
+
+document.getElementById("eventStatus2d").textContent =
+  events2d.length
+    ? events2d.length + " Visual Event Rule Load हो गए।"
+    : "इस Scene में कोई Visual Event Rule Save नहीं है।";
   
   // पुराने Sprite का Selection और Animation साफ़ करें
   selectedSprite2d = null;
