@@ -9467,10 +9467,37 @@ document.getElementById("saveScene2d").onclick = () => {
     document.getElementById("sceneName2d").value.trim() || "Main Scene";
 
   activeSceneName2d = sceneName;
-  saveCurrentLevel2d();
-  updateSceneList2d();
 
-  alert("Scene और Tilemap सफलतापूर्वक Save हो गए!");
+  try {
+    saveCurrentLevel2d();
+
+    const savedScenes = getAllScenes2d();
+
+    if (!savedScenes[sceneName]) {
+      throw new Error("Scene localStorage में नहीं मिला।");
+    }
+
+    updateSceneList2d();
+
+    document.getElementById("sceneList2d").value = sceneName;
+
+    document.getElementById("sceneManagerStatus2d").textContent =
+      sceneName + " सफलतापूर्वक Save हुआ।";
+
+    alert(
+      "Scene Save हो गया!\n" +
+      "Layers: " + (savedScenes[sceneName].layers || []).length
+    );
+
+  } catch (error) {
+    console.error("Scene Save Error:", error);
+
+    alert(
+      "Scene Save नहीं हुआ!\n\n" +
+      error.message +
+      "\n\nसंभव है Browser Storage भर गया हो।"
+    );
+  }
 };
 
 document.getElementById("loadScene2d").onclick = () => {
