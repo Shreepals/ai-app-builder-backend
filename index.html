@@ -9048,6 +9048,20 @@ setInterval(moveEnemies2d, 30);
 // ===== 2D VISUAL EVENTS EDITOR =====
 
 let events2d = [];
+  
+function renderEventsList2d() {
+  const list = document.getElementById("eventList2d");
+
+  list.innerHTML = events2d.map((event, index) =>
+    `<div style="background:#17243b;padding:10px;margin:8px 0;border-radius:8px;">
+      ${index + 1}. ${event.name}
+    </div>`
+  ).join("");
+
+  if (events2d.length === 0) {
+    list.innerHTML = "अभी कोई Event नहीं है।";
+  }
+  }  
 
 document.getElementById("addEvent2d").onclick = () => {
 
