@@ -9222,7 +9222,13 @@ const hasExit2d = objects2d.some(obj =>
   obj.dataset.type === "Exit"
 );
 
-if (!hasCoinEvent && !hasEnemyEvent && !hasExit2d) {
+if (
+  !hasCoinEvent &&
+  !hasEnemyEvent &&
+  !hasExit2d &&
+  !hasMoveRightEvent &&
+  !hasMoveLeftEvent
+) {
   document.getElementById("eventStatus2d").textContent =
     "पहले Scene में Exit / Goal जोड़ें।";
   return;
