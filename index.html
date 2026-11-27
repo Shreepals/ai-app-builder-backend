@@ -9299,6 +9299,11 @@ enemyHealthDisplay2d.textContent =
   clearInterval(eventRunner2d);
      
   eventRunner2d = setInterval(() => {
+    
+ // ===== EVENT PLAYER MOVEMENT =====
+
+movement2d.right = hasMoveRightEvent;
+movement2d.left = hasMoveLeftEvent;   
 
     const playerRect = getSpriteHitboxRect2d(player);
 
