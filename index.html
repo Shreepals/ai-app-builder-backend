@@ -9539,6 +9539,19 @@ function saveCurrentLevel2d() {
 
   scenes[name] = {
     name: name,
+    
+    // Layer की पूरी जानकारी Save करें
+    layers: Array.from(
+      document.getElementById("layerSelect2d").options
+    ).map(option => option.value),
+
+    currentLayer: currentLayer2d,
+
+    hiddenLayers: hiddenLayers2d.slice(),
+
+    layerOpacities: { ...layerOpacities2d },
+
+    lockedLayers: lockedLayers2d.slice(),    
 
     objects: objects2d.map(obj => ({
       type: obj.dataset.type,
