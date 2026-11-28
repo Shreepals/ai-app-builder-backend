@@ -9567,6 +9567,10 @@ function saveCurrentLevel2d() {
   scenes[name] = {
     name: name,
     
+   // Tile Collision Settings Save करें
+    stoneCollisionMode2d: stoneCollisionMode2d,
+    waterCollisionMode2d: waterCollisionMode2d,
+    
     // Layer की पूरी जानकारी Save करें
     layers: Array.from(
       document.getElementById("layerSelect2d").options
@@ -9659,6 +9663,29 @@ function openLevel2d(name) {
   const data = scenes[name];
 
   if (!data) return;
+  
+  // ===== TILE COLLISION SETTINGS RESTORE =====
+
+  stoneCollisionMode2d =
+    ["solid", "none"].includes(data.stoneCollisionMode2d)
+      ? data.stoneCollisionMode2d
+      : "solid";
+
+  waterCollisionMode2d =
+    ["slow", "solid", "none"].includes(data.waterCollisionMode2d)
+      ? data.waterCollisionMode2d
+      : "slow";
+
+  // Collision Dropdown वापस सेट करें
+  document.getElementById("stoneCollision2d").value =
+    stoneCollisionMode2d;
+
+  document.getElementById("waterCollision2d").value =
+    waterCollisionMode2d;
+
+  document.getElementById("tileCollisionStatus2d").textContent =
+    "Stone: " + stoneCollisionMode2d +
+    " | Water: " + waterCollisionMode2d;  
   
     // ===== SAVED LAYERS RESTORE =====
 
