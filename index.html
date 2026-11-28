@@ -9130,6 +9130,26 @@ let enemyHealth2d = 100;
 let enemyDead2d = false;
 let enemyHealthDisplay2d = null;  
   
+// ===== SEPARATE ENEMY HEALTH SYSTEM =====
+
+const enemyHealthStates2d = new WeakMap();
+
+function getEnemyHealthState2d(enemy) {
+  let state = enemyHealthStates2d.get(enemy);
+
+  if (!state) {
+    state = {
+      health: 100,
+      dead: false,
+      display: null
+    };
+
+    enemyHealthStates2d.set(enemy, state);
+  }
+
+  return state;
+  }  
+  
 // ===== 2D PLAYER FIRE BUTTON =====
 
 let playerBullets2d = [];
