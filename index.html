@@ -9193,7 +9193,9 @@ objects2d.filter(obj =>
   obj.dataset.type === "Enemy"
 ).forEach(enemy => {
 
-  if (enemyDead2d || enemyHealth2d <= 0) return;
+  const state = getEnemyHealthState2d(enemy);
+
+  if (state.dead || state.health <= 0) return;
 
   const enemyRect = enemy.getBoundingClientRect();
 
@@ -9203,45 +9205,63 @@ objects2d.filter(obj =>
     bulletRect.top < enemyRect.bottom &&
     bulletRect.bottom > enemyRect.top;
 
-  if (hit) {
-    enemyHealth2d = Math.max(0, enemyHealth2d - 20);
+  if (!hit) return;
 
-    enemyHealthDisplay2d.textContent =
-      "Enemy Health: " + enemyHealth2d;
+  // केवल इसी Enemy की Health कम होगी
+  state.health = Math.max(0, state.health - 20);
 
-    bullet2d.remove();
-    clearInterval(bulletMove2d);
+  // इस Enemy का अपना Health Display
+  if (!state.display) {
+    state.display = document.createElement("div");
 
-  if (enemyHealth2d === 0) {
-  enemyDead2d = true;
+    state.display.style.cssText =
+      "position:absolute;color:red;font-size:16px;font-weight:bold;z-index:1002;pointer-events:none;";
 
-  enemy.animate([
-    { opacity: 1, transform: "scale(1) rotate(0deg)" },
-    { opacity: 0.7, transform: "scale(0.8) rotate(20deg)" },
-    { opacity: 0, transform: "scale(0.2) rotate(90deg)" }
-  ], {
-    duration: 700,
-    easing: "ease-in"
-  });
+    scene2d.appendChild(state.display);
+  }
 
-  setTimeout(() => {
-    enemy.remove();
-    objects2d = objects2d.filter(obj => obj !== enemy);
-  }, 700);
+  state.display.textContent =
+    "Enemy Health: " + state.health;
 
-  setTimeout(() => {
-    addObject2d("Enemy", "👾", "#a52d45");
+  state.display.style.left =
+    enemy.offsetLeft + "px";
 
-    enemyHealth2d = 100;
-    enemyDead2d = false;
+  state.display.style.top =
+    Math.max(0, enemy.offsetTop - 22) + "px";
 
-    if (enemyHealthDisplay2d) {
-      enemyHealthDisplay2d.textContent =
-        "Enemy Health: " + enemyHealth2d;
+  bullet2d.remove();
+  clearInterval(bulletMove2d);
+
+  // Enemy की Health खत्म होने पर
+  if (state.health === 0) {
+
+    state.dead = true;
+
+    if (typeof enemy.animate === "function") {
+      enemy.animate([
+        { opacity: 1, transform: "scale(1) rotate(0deg)" },
+        { opacity: 0.7, transform: "scale(0.8) rotate(20deg)" },
+        { opacity: 0, transform: "scale(0.2) rotate(90deg)" }
+      ], {
+        duration: 700,
+        easing: "ease-in"
+      });
     }
-  }, 2000);
-}
-}
+
+    setTimeout(() => {
+      enemy.remove();
+      state.display?.remove();
+
+      objects2d = objects2d.filter(obj =>
+        obj !== enemy
+      );
+    }, 700);
+
+    // नया Enemy बनेगा, उसकी Health अलग 100 होगी
+    setTimeout(() => {
+      addObject2d("Enemy", "👾", "#a52d45");
+    }, 2000);
+  }
 });
 
   let x = bullet2d.offsetLeft;
