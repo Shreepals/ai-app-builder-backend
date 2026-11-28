@@ -880,7 +880,37 @@ style="height:420px;background:#17243b;border:2px dashed #527cff;border-radius:1
   </div>
 
 </div>
-    
+
+<!-- ===== 2D KEYBOARD KEY MAPPING ===== -->
+<div id="keyboardControls2d"
+style="background:#10192c;padding:12px;border-radius:10px;margin:12px 0;">
+
+  <h3>⌨️ Player Keyboard Controls</h3>
+  <p style="color:#9eacc5;">
+    Key बदलने के लिए Change दबाएँ, फिर अपनी Keyboard की कोई Key दबाएँ।
+  </p>
+
+  <div style="display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;">
+
+    <span>⬅️ Left</span>
+    <button class="btn secondary" id="mapLeftKey2d" data-keybind2d="left">ArrowLeft</button>
+
+    <span>➡️ Right</span>
+    <button class="btn secondary" id="mapRightKey2d" data-keybind2d="right">ArrowRight</button>
+
+    <span>⬆️ Jump</span>
+    <button class="btn secondary" id="mapJumpKey2d" data-keybind2d="up">ArrowUp</button>
+
+    <span>⬇️ Down</span>
+    <button class="btn secondary" id="mapDownKey2d" data-keybind2d="down">ArrowDown</button>
+
+  </div>
+
+  <p id="keyboardStatus2d" style="color:#9eacc5;margin-top:10px;">
+    Keyboard Mapping तैयार है।
+  </p>
+</div>
+        
 <div id="properties2d"
 style="background:#10192c;padding:15px;border-radius:10px;margin-top:15px;">
 
