@@ -9032,6 +9032,136 @@ setupMoveButton2d("moveRight2d", "right");
 setupMoveButton2d("jump2d", "up");
 setupMoveButton2d("moveDown2d", "down");
 
+/* ===== 2D KEYBOARD KEY MAPPING ===== */
+
+let keyMap2d = {
+  left: "ArrowLeft",
+  right: "ArrowRight",
+  up: "ArrowUp",
+  down: "ArrowDown"
+};
+
+const keyMapStorage2d = "aiAppBuilderKeyMap2d";
+let waitingForKey2d = null;
+
+try {
+  const savedKeyMap2d = JSON.parse(
+    localStorage.getItem(keyMapStorage2d) || "null"
+  );
+
+  if (savedKeyMap2d) {
+    Object.keys(keyMap2d).forEach(direction => {
+      if (typeof savedKeyMap2d[direction] === "string") {
+        keyMap2d[direction] = savedKeyMap2d[direction];
+      }
+    });
+  }
+} catch (error) {
+  console.log("Keyboard Mapping Load Error:", error);
+}
+
+function keyLabel2d(code) {
+  const labels = {
+    ArrowLeft: "←",
+    ArrowRight: "→",
+    ArrowUp: "↑",
+    ArrowDown: "↓",
+    Space: "Space"
+  };
+
+  if (labels[code]) return labels[code];
+
+  return code
+    .replace("Key", "")
+    .replace("Digit", "");
+}
+
+function updateKeyButtons2d() {
+  document.querySelectorAll("[data-keybind2d]").forEach(button => {
+    const direction = button.dataset.keybind2d;
+    button.textContent = keyLabel2d(keyMap2d[direction]);
+  });
+}
+
+document.querySelectorAll("[data-keybind2d]").forEach(button => {
+  button.addEventListener("click", () => {
+    waitingForKey2d = button.dataset.keybind2d;
+
+    document.getElementById("keyboardStatus2d").textContent =
+      "अब " + button.textContent + " के लिए Keyboard की नई Key दबाएँ।";
+
+    button.textContent = "Key दबाएँ...";
+  });
+});
+
+document.addEventListener("keydown", event => {
+  if (waitingForKey2d) {
+    event.preventDefault();
+
+    keyMap2d[waitingForKey2d] = event.code;
+
+    try {
+      localStorage.setItem(
+        keyMapStorage2d,
+        JSON.stringify(keyMap2d)
+      );
+    } catch (error) {
+      console.log("Keyboard Mapping Save Error:", error);
+    }
+
+    waitingForKey2d = null;
+    updateKeyButtons2d();
+
+    document.getElementById("keyboardStatus2d").textContent =
+      "Keyboard Key सफलतापूर्वक बदल गई और Save हो गई।";
+
+    return;
+  }
+
+  const target = event.target;
+
+  if (
+    target &&
+    (
+      target.tagName === "INPUT" ||
+      target.tagName === "TEXTAREA" ||
+      target.tagName === "SELECT" ||
+      target.isContentEditable
+    )
+  ) {
+    return;
+  }
+
+  const direction = Object.keys(keyMap2d).find(
+    dir => keyMap2d[dir] === event.code
+  );
+
+  if (direction) {
+    event.preventDefault();
+    physicsEnabled2d = true;
+    movement2d[direction] = true;
+  }
+});
+
+document.addEventListener("keyup", event => {
+  Object.keys(keyMap2d).forEach(direction => {
+    if (keyMap2d[direction] === event.code) {
+      movement2d[direction] = false;
+    }
+  });
+});
+
+window.addEventListener("blur", () => {
+  Object.keys(movement2d).forEach(direction => {
+    movement2d[direction] = false;
+  });
+});
+
+updateKeyButtons2d();
+
+/* ===== KEYBOARD MAPPING END ===== */
+  
+
 setInterval(movePlayer2d, 30);
   
 // ===== 2D ENEMY CHASE AI =====
