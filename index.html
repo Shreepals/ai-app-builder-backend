@@ -9365,22 +9365,9 @@ if (!healthDisplay) {
 healthDisplay.textContent = "Health: " + health2d;
   
 // ===== ENEMY HEALTH DISPLAY =====
+// हर Enemy का Health Display गोली लगने पर अलग बनेगा।
 
-enemyHealthDisplay2d =
-  document.getElementById("enemyHealthDisplay2d");
-
-if (!enemyHealthDisplay2d) {
-  enemyHealthDisplay2d = document.createElement("div");
-  enemyHealthDisplay2d.id = "enemyHealthDisplay2d";
-
-  enemyHealthDisplay2d.style.cssText =
-    "position:absolute;left:12px;top:40px;color:red;font-size:18px;font-weight:bold;";
-
-  scene2d.appendChild(enemyHealthDisplay2d);
-}
-
-enemyHealthDisplay2d.textContent =
-  "Enemy Health: " + enemyHealth2d;
+enemyHealthDisplay2d = null;
 
   clearInterval(eventRunner2d);
      
